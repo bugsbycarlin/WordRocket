@@ -391,6 +391,66 @@ class Game {
   }
 
 
+  makeRocketTile(parent, letter, letter_number, shift, player, inner_size, outer_size) {
+    let rocket_tile = new PIXI.Container();
+    parent.addChild(rocket_tile);
+    let gap = outer_size - inner_size;
+    let start_y = inner_size / 2 - outer_size;
+    let start_x = gap / 2 + outer_size * (letter_number + shift) + inner_size / 2;
+
+    rocket_tile.position.set(start_x, start_y);
+    rocket_tile.vy = 0;
+
+    let fire_sprite = this.makeFire(rocket_tile, 0, 48, 0.2, -0.2);
+    fire_sprite.visible = false;
+
+    let parachute_sprite = this.makeParachute(rocket_tile, 0, -50, 0.3, 0.3);
+    parachute_sprite.visible = false;
+
+    var tile = this.makeTile(rocket_tile, 0, 0, letter, inner_size, inner_size, inner_size, 0xFFFFFF, letter_values[letter], function() {});
+    rocket_tile.fire_sprite = fire_sprite;
+    rocket_tile.parachute_sprite = parachute_sprite;
+    rocket_tile.start_time = Date.now() - Math.floor(Math.random() * 300);
+
+    rocket_tile.status = "load";
+
+    new TWEEN.Tween(rocket_tile.position)
+      .to({y: start_y - inner_size})
+      .duration(400)
+      .onComplete(function() {fire_sprite.visible = true; rocket_tile.status = "rocket"})
+      .start()
+
+    rocket_tile.column = letter_number + shift;
+    rocket_tile.player = player;
+    rocket_tile.letter = letter;
+
+    return rocket_tile;
+  }
+
+
+  makeFire(parent, x, y, xScale, yScale) {
+    var sheet = PIXI.Loader.shared.resources["Art/fire.json"].spritesheet;
+    let fire_sprite = new PIXI.AnimatedSprite(sheet.animations["fire"]);
+    fire_sprite.anchor.set(0.5,0.5);
+    fire_sprite.position.set(x, y);
+    parent.addChild(fire_sprite);
+    fire_sprite.animationSpeed = 0.5; 
+    fire_sprite.scale.set(xScale, yScale);
+    fire_sprite.play();
+    return fire_sprite;
+  }
+
+
+  makeParachute(parent, x, y, xScale, yScale) {
+    let parachute_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/parachute_v1.png"));
+    parachute_sprite.anchor.set(0.5, 0.5);
+    parachute_sprite.scale.set(xScale, yScale);
+    parachute_sprite.position.set(x, y);
+    parent.addChild(parachute_sprite);
+    return parachute_sprite;
+  }
+
+
   makeTile(parent, x, y, text, text_size, backing_width, backing_height, backing_color, value, action) {
     var button = this.makeButton(parent, x, y, text, text_size, 6, 0x000000, backing_width, backing_height, backing_color, action);
     button.value_text = new PIXI.Text(value.toString(), {fontFamily: "Bebas Neue", fontSize: text_size / 3, fill: 0xAAAAAA, letterSpacing: 6, align: "center"});
@@ -685,28 +745,31 @@ class Game {
     if (this.current_scene == "solo") {
 
       // if the launchpad isn't full, we can keep adding letters
-      if (this.launchpad.length + this.launchpad_shift < 10) {
+      if (!this.launchpad.full()) {
         for (i in lower_array) {
           if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
-            this.pushLaunchpad(letter_array[i]);
+
+            if (this.player_palette.letters[letter_array[i]].interactive == true) {
+              this.launchpad.push(this.player_palette, letter_array[i]);
+            }
           }
         }
       }
 
       if (ev.key === "Backspace" || ev.key === "Delete") {
-        this.popLaunchpad();
+        this.launchpad.pop();
       }
 
       if (ev.key === "ArrowRight") {
-        this.shiftLaunchpadRight();
+        this.launchpad.shiftRight();
       }
 
       if (ev.key === "ArrowLeft") {
-        this.shiftLaunchpadLeft();
+        this.launchpad.shiftLeft();
       }
 
       if (ev.key === "Enter") {
-        this.launchLaunchLaunch();
+        this.launchpad.launch(this.player_area);
       }
 
     }

@@ -91,69 +91,90 @@ Game.prototype.initializeTitleScreen = function() {
   var self = this;
 
   // Sign in button
-  this.sign_in_button = this.makeButton(
-    this.scenes["title"],
-    this.width - 90, this.height - 50,
-    "SIGN IN", 24, 6, 0xFFFFFF,
-    120, 40, 0x3cb0f3,
-    function() {
-      self.multiplayer.googleSignIn();
-    }
-  );
+  // this.sign_in_button = this.makeButton(
+  //   this.scenes["title"],
+  //   this.width - 90, this.height - 50,
+  //   "SIGN IN", 24, 6, 0xFFFFFF,
+  //   120, 40, 0x3cb0f3,
+  //   function() {
+  //     self.multiplayer.googleSignIn();
+  //   }
+  // );
 
-  this.sign_out_button = this.makeButton(
-    this.scenes["title"],
-    this.width - 90, this.height - 50,
-    "SIGN OUT", 24, 6, 0xFFFFFF,
-    120, 40, 0x3cb0f3,
-    function() {
-      self.multiplayer.signOut();
-    }
-  );
-  this.sign_out_button.disable();
-  this.sign_out_button.visible = false;
+  // this.sign_out_button = this.makeButton(
+  //   this.scenes["title"],
+  //   this.width - 90, this.height - 50,
+  //   "SIGN OUT", 24, 6, 0xFFFFFF,
+  //   120, 40, 0x3cb0f3,
+  //   function() {
+  //     self.multiplayer.signOut();
+  //   }
+  // );
+  // this.sign_out_button.disable();
+  // this.sign_out_button.visible = false;
 
-  // STACK LAYOUT
-  var title_text = new PIXI.Text("WORD ROCKETS", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 25, align: "center"});
-  title_text.position.set(this.width * 1/2, this.height * 4/16);
-  title_text.anchor.set(0.5,0.5);
-  this.scenes["title"].addChild(title_text);
 
-  this.makeButton(
-    this.scenes["title"],
-    this.width * 1/2, this.height * 4/8,
-    "QUICKPLAY", 44, 6, 0x000000,
-    224, 80, 0x71d07d,
-    function() {
-      if (self.auth_user == null) {
-        self.multiplayer.anonymousSignIn(function() {self.quickPlayGame()});
-      } else {
-        self.quickPlayGame();
-      }
-    }
-  );
+  // var title_text = new PIXI.Text("WORD ROCKETS", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 25, align: "center"});
+  // title_text.position.set(this.width * 1/2, this.height * 4/16);
+  // title_text.anchor.set(0.5,0.5);
+  // this.scenes["title"].addChild(title_text);
 
-  this.makeButton(
-    this.scenes["title"],
-    this.width * 1/2, this.height * 5/8,
-    "CREATE", 44, 6, 0xFFFFFF,
-    224, 80, 0x3cb0f3,
-    function() {
-      self.initializeSetupCreate();
-      self.animateSceneSwitch("title", "setup_create")
+  let size = 80;
+  for (var i = 0; i < "WORD ROCKETS".length; i++) {
+    let letter = "WORD ROCKETS"[i];
+    if (i < 4) {
+      let x = this.width * 1/2 - 8 * size/2 + i * size;
+      let y = this.height * 1/4 - 1.5*size + size/4 * i;
+      this.makeParachute(this.scenes["title"], x, y - size, 0.5, 0.5);
+      this.makeTile(this.scenes["title"], x, y, letter, size, size, size, 0xEFEFEF, "", function(){});
+    } else if (i > 4) {
+      let x = this.width * 1/2 - 14 * size/2 + i * size;
+      let y = this.height * 1/4 - 0.5*size + size/4 * i;
+      let fire = this.makeFire(this.scenes["title"], x, y + size * 0.8, 0.4, -0.3);
+      this.makeTile(this.scenes["title"], x, y, letter, size, size, size, 0xEFEFEF, "", function(){});
     }
-  );
+  }
 
-  this.makeButton(
-    this.scenes["title"],
-    this.width * 1/2, this.height * 6/8,
-    "JOIN", 44, 6, 0x000000,
-    224, 80, 0xf3db3c,
-    function() {
-      self.initializeSetupJoin();
-      self.animateSceneSwitch("title", "setup_join")
-    }
-  );
+  var solo_test = new PIXI.Text("[SINGLE PLAYER TEST]", {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 10, align: "center"});
+  solo_test.position.set(this.width * 1/2, this.height * 5/8);
+  solo_test.anchor.set(0.5,0.5);
+  this.scenes["title"].addChild(solo_test);
+
+  // this.makeButton(
+  //   this.scenes["title"],
+  //   this.width * 1/2, this.height * 4/8,
+  //   "QUICKPLAY", 44, 6, 0x000000,
+  //   224, 80, 0x71d07d,
+  //   function() {
+  //     if (self.auth_user == null) {
+  //       self.multiplayer.anonymousSignIn(function() {self.quickPlayGame()});
+  //     } else {
+  //       self.quickPlayGame();
+  //     }
+  //   }
+  // );
+
+  // this.makeButton(
+  //   this.scenes["title"],
+  //   this.width * 1/2, this.height * 5/8,
+  //   "CREATE", 44, 6, 0xFFFFFF,
+  //   224, 80, 0x3cb0f3,
+  //   function() {
+  //     self.initializeSetupCreate();
+  //     self.animateSceneSwitch("title", "setup_create")
+  //   }
+  // );
+
+  // this.makeButton(
+  //   this.scenes["title"],
+  //   this.width * 1/2, this.height * 6/8,
+  //   "JOIN", 44, 6, 0x000000,
+  //   224, 80, 0xf3db3c,
+  //   function() {
+  //     self.initializeSetupJoin();
+  //     self.animateSceneSwitch("title", "setup_join")
+  //   }
+  // );
 
   // this.makeButton(
   //   this.scenes["title"],
@@ -168,8 +189,8 @@ Game.prototype.initializeTitleScreen = function() {
 
   this.makeButton(
     this.scenes["title"],
-    this.width * 1/2, this.height * 7/8,
-    "SOLO", 44, 6, 0xFFFFFF,
+    this.width * 1/2, this.height * 13/16,
+    "PLAY", 44, 6, 0xFFFFFF,
     224, 80, 0xdb5858,
     function() {
       // self.initializeSetupWatch();

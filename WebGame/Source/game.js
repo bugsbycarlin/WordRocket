@@ -51,6 +51,19 @@ const lower_array = [];
 for (i in letter_array) {
   lower_array.push(letter_array[i].toLowerCase());
 }
+const shuffle_letters = [];
+for (i in letter_array) {
+  shuffle_letters.push(letter_array[i]);
+}
+
+function shuffleArray(array) {
+  for (var i = array.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+}
 
 class Game {
   constructor() {
@@ -74,12 +87,6 @@ class Game {
     document.addEventListener("keydown", function(ev) {self.handleKeyDown(ev)}, false);
 
     this.loadWords();
-
-    if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
-      PIXI.Loader.shared.add("Art/fire.json").load(function() {
-        console.log("Loaded fire");
-      });
-    }
 
     // Create the pixi application
     pixi = new PIXI.Application(this.width, this.height, {antialias: true});
@@ -106,6 +113,7 @@ class Game {
 
 
   initialize() {
+    var self = this;
     this.scenes = [];
     this.scenes["title"] = new PIXI.Container();
     this.scenes["setup_create"] = new PIXI.Container();
@@ -139,7 +147,17 @@ class Game {
     this.conclusionMask = new PIXI.Container();
     pixi.stage.addChild(this.conclusionMask);
 
-    this.initializeTitleScreen();
+    if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
+      PIXI.Loader.shared.add("Art/fire.json").load(function() {
+        self.initializeTitleScreen();
+
+        if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
+          PIXI.Loader.shared.add("Art/explosion.json").load(function() {
+          });
+        }
+      });
+    }
+    
     this.initializeAlertBox();
   }
 
@@ -392,6 +410,7 @@ class Game {
 
 
   makeRocketTile(parent, letter, letter_number, shift, player, inner_size, outer_size) {
+    var self = this;
     let rocket_tile = new PIXI.Container();
     parent.addChild(rocket_tile);
     let gap = outer_size - inner_size;
@@ -411,18 +430,21 @@ class Game {
     rocket_tile.fire_sprite = fire_sprite;
     rocket_tile.parachute_sprite = parachute_sprite;
     rocket_tile.start_time = Date.now() - Math.floor(Math.random() * 300);
+    rocket_tile.parent = parent;
+    rocket_tile.value_text = tile.value_text;
 
     rocket_tile.status = "load";
 
     new TWEEN.Tween(rocket_tile.position)
       .to({y: start_y - inner_size})
       .duration(400)
-      .onComplete(function() {fire_sprite.visible = true; rocket_tile.status = "rocket"})
+      .onComplete(function() {fire_sprite.visible = true; rocket_tile.status = "rocket"; self.soundEffect("rocket");})
       .start()
 
     rocket_tile.column = letter_number + shift;
     rocket_tile.player = player;
     rocket_tile.letter = letter;
+    rocket_tile.value = letter_values[letter];
 
     return rocket_tile;
   }
@@ -448,6 +470,23 @@ class Game {
     parachute_sprite.position.set(x, y);
     parent.addChild(parachute_sprite);
     return parachute_sprite;
+  }
+
+
+  makeExplosion(parent, x, y, xScale, yScale, action) {
+    var sheet = PIXI.Loader.shared.resources["Art/explosion.json"].spritesheet;
+    let explosion_sprite = new PIXI.AnimatedSprite(sheet.animations["explosion"]);
+    explosion_sprite.anchor.set(0.5,0.5);
+    explosion_sprite.position.set(x, y);
+    parent.addChild(explosion_sprite);
+    explosion_sprite.animationSpeed = 0.5; 
+    explosion_sprite.scale.set(xScale, yScale);
+    explosion_sprite.play();
+    explosion_sprite.loop = false;
+    explosion_sprite.onComplete = function() {
+      action();
+    }
+    return explosion_sprite;
   }
 
 
@@ -742,7 +781,7 @@ class Game {
   handleKeyDown(ev) {
     // ev.preventDefault();
 
-    if (this.current_scene == "solo") {
+    if (this.current_scene == "solo" && this.game_phase == "active") {
 
       // if the launchpad isn't full, we can keep adding letters
       if (!this.launchpad.full()) {
@@ -751,6 +790,10 @@ class Game {
 
             if (this.player_palette.letters[letter_array[i]].interactive == true) {
               this.launchpad.push(this.player_palette, letter_array[i]);
+            } else {
+              this.soundEffect("negative");
+              this.launchpad.flashError();
+              this.player_palette.letters[letter_array[i]].error = 5;
             }
           }
         }
@@ -772,6 +815,35 @@ class Game {
         this.launchpad.launch(this.player_area);
       }
 
+    }
+  }
+
+
+  soundEffect(effect_name) {
+    var sound_effect = document.getElementById(effect_name);
+    sound_effect.volume = 0.6;
+    sound_effect.play();
+  }
+
+
+  setMusic(music_name) {
+    var self = this;
+    this.music = document.getElementById(music_name);
+    this.music.loop = true;
+    this.music.volume = 0.7;
+    this.music.play();
+
+    // this.music.unbind("ended");
+    // this.music.bind("ended", function(){
+    //   self.music.trigger("play");
+    // });
+  }
+
+
+  fadeMusic(delay) {
+    var self = this;
+    for (let i = 0; i < 14; i++) {
+      setTimeout(function() {self.music.volume = (13 - i) / 20;}, delay + 50 * i);
     }
   }
 }

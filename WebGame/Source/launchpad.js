@@ -98,6 +98,7 @@ class Launchpad {
     var start_y = palette.letters[letter].position.y + palette.position.y;
 
     var tile = game.makeTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, letter_values[letter], function() {});
+    tile.parent = this.parent;
     this.tiles.push(tile);
     this.cursor += 1;
 
@@ -254,6 +255,10 @@ class Launchpad {
     }
   }
 
+
+  flashError = function() {
+    this.error = 5;
+  }
 
 
   launch = function(area) {

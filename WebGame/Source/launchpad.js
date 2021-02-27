@@ -97,7 +97,7 @@ class Launchpad {
     var start_x = palette.letters[letter].position.x + palette.position.x;
     var start_y = palette.letters[letter].position.y + palette.position.y;
 
-    var tile = game.makeTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, letter_values[letter], function() {});
+    var tile = game.makeTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
     tile.parent = this.parent;
     this.tiles.push(tile);
     this.cursor += 1;
@@ -270,7 +270,7 @@ class Launchpad {
         var pad_item = this.tiles[i];
         var letter = pad_item.text.text;
 
-        let rocket_tile = game.makeRocketTile(area, letter, i, this.shift, this.player, this.inner_size, this.outer_size)
+        let rocket_tile = game.makeRocketTile(area, letter, word.length, i, this.shift, this.player, this.inner_size, this.outer_size)
 
         game.rocket_letters.push(rocket_tile);
 

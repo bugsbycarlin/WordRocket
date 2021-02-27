@@ -1,6 +1,7 @@
 
-annoying = true;
+annoying = false;
 use_scores = false;
+
 
 Game.prototype.initializeSoloScreen = function() {
   this.level = 1;
@@ -9,9 +10,11 @@ Game.prototype.initializeSoloScreen = function() {
   this.resetBoard();
 }
 
+
 Game.prototype.resetBoard = function() {
   var self = this;
-  this.clearScene(this.scenes["solo"]);
+  var scene = this.scenes["solo"];
+  this.clearScene(scene);
 
   this.freefalling = [];
   this.pickers = [];
@@ -22,7 +25,7 @@ Game.prototype.resetBoard = function() {
   this.pickDefense(6, 10);
 
   // the qwerty palette
-  this.player_palette = this.makeQwertyPalette(this.scenes["solo"], 72, this.width * 1/2, this.height - 118, function(letter) {
+  this.player_palette = this.makeQwertyPalette(scene, 72, this.width * 1/2, this.height - 118, function(letter) {
     console.log(letter);
   });
 
@@ -32,7 +35,7 @@ Game.prototype.resetBoard = function() {
 
 
   // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette(this.scenes["solo"], 24, 636, 426, function(letter) {
+  this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, function(letter) {
   });
 
   for (var i = 0; i < this.enemy_defense.length; i++) {
@@ -42,7 +45,7 @@ Game.prototype.resetBoard = function() {
 
   // the player's board
   this.player_area = new PIXI.Container();
-  this.scenes["solo"].addChild(this.player_area);
+  scene.addChild(this.player_area);
   this.player_area.position.set(6,756);
   // this.player_area.scale.set(0.5,0.5);
 
@@ -63,11 +66,11 @@ Game.prototype.resetBoard = function() {
   this.player_area.addChild(pad_mat);
 
   // the player's launchpad
-  this.launchpad = new Launchpad(this, this.scenes["solo"], 1, this.player_area, 6, 756, 50, 48);
+  this.launchpad = new Launchpad(this, scene, 1, this.player_area, 6, 756, 50, 48);
 
   // the enemy board
   this.enemy_area = new PIXI.Container();
-  this.scenes["solo"].addChild(this.enemy_area);
+  scene.addChild(this.enemy_area);
   this.enemy_area.position.set(512,381);
   this.enemy_area.scale.set(0.5,0.5);
   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -85,19 +88,46 @@ Game.prototype.resetBoard = function() {
   enemy_pad_math.tint = 0xCCCCCC;
   this.enemy_area.addChild(enemy_pad_math);
 
-  this.enemy_wpm = 20;
+  // level and score
+  this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.level_label.anchor.set(0.5,0.5);
+  this.level_label.position.set(640, 512);
+  scene.addChild(this.level_label);
+
+  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.level_text_box.anchor.set(0.5,0.5);
+  this.level_text_box.position.set(640, 542);
+  scene.addChild(this.level_text_box);
+
+  this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.opponent_label.anchor.set(0.5,0.5);
+  this.opponent_label.position.set(640, 592);
+  scene.addChild(this.opponent_label);
+
+  this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.opponent_text_box.anchor.set(0.5,0.5);
+  this.opponent_text_box.position.set(640, 622);
+  scene.addChild(this.opponent_text_box);
+
+  this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.score_label.anchor.set(0.5,0.5);
+  this.score_label.position.set(640, 672);
+  scene.addChild(this.score_label);
+
+  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.score_text_box.anchor.set(0.5,0.5);
+  this.score_text_box.position.set(640, 702);
+  scene.addChild(this.score_text_box);
+
+  this.setEnemyDifficulty(this.level);
+
   this.enemy_last_action = Date.now();
-  this.enemy_rerolls = 6;
-  this.enemy_short_word = 4;
-  this.enemy_long_word = 6;
 
   this.gravity = 6;
   this.boost = 0.25;
   this.gentle_drop = 0.1;
   this.gentle_limit = 12.5;
   this.boost_limit = -40;
-
-  this.game_phase = "pre_game";
 
   for (var i = 0; i < 10; i++) {
     this.launchpad.cursors[i].visible = false;
@@ -106,13 +136,78 @@ Game.prototype.resetBoard = function() {
   this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.countdown_text.anchor.set(0.5,0.5);
   this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
-  this.scenes["solo"].addChild(this.countdown_text);
+  scene.addChild(this.countdown_text);
+
+  if (this.tutorial) {
+    this.tutorial1();
+  } else {
+    this.game_phase = "pre_game";
+
+    setTimeout(function() {
+      self.start_time = Date.now();
+      self.game_phase = "countdown";
+      if (annoying) self.soundEffect("countdown");
+    }, 1200);
+  }
+}
+
+
+Game.prototype.tutorial1 = function() {
+  var self = this;
+  var scene = this.scenes["solo"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 1;
+
+  this.tutorial_screen = this.makeTutorialScreen(scene, 2000, 20, this.player_palette.position.y - 108, 748, this.player_palette.position.y + 108, "HERE IS A KEYBOARD. PLEASE START TYPING.", this.width / 2, 660);
+
+  this.tutorial_1_snide_clicks = 0;
+  this.tutorial_1_snide_click_responses = [
+    "NO, USE YOUR REAL KEYBOARD, JERK.",
+    "OOF, STUBBORN.",
+    "HEY, START TYPING ON KEYS.",
+    "ACTUAL KEYS.",
+    "HEY! LOOK DOWN. LOOK. DOWN.",
+    "PRESS K. JUST DO IT.",
+    "FINE, I GIVE UP.",
+  ]
+
+  for (var i = 0; i < 26; i++) {
+    console.log(this.player_palette.letters[letter_array[i]]);
+    this.player_palette.letters[letter_array[i]].inner_action = function(letter) {
+      if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
+        self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
+        self.tutorial_1_snide_clicks += 1
+      }
+    }
+  }
+
+  for (var i = 0; i < 10; i++) {
+    this.launchpad.cursors[i].visible = true;
+  }
+}
+
+
+Game.prototype.tutorial2 = function() {
+  var self = this;
+  var scene = this.scenes["solo"];
+  
+  this.tutorial_number = 1.5;
+  this.tutorial_screen.tutorial_text.text = "Good.";
 
   setTimeout(function() {
-    self.start_time = Date.now();
-    self.game_phase = "countdown";
-    if (annoying) self.soundEffect("countdown");
-  }, 1200);
+    self.tutorial_screen.fade();
+    self.tutorial_number = 2;
+    self.tutorial_screen = self.makeTutorialScreen(scene, 500, 0, 700, 511, 830, "THIS IS THE LAUNCHPAD.", self.width / 2, 560);
+  }, 2000);
+
+}
+
+
+Game.prototype.setEnemyDifficulty = function(level) {
+  this.enemy_wpm = 18 + 3 * level;
+  this.enemy_rerolls = 4 + 2 * level;
+  this.enemy_short_word = Math.min(6,4 + Math.floor(level / 3.5));
+  this.enemy_long_word = Math.min(4,5 + Math.floor(level / 2.5));
 }
 
 
@@ -133,39 +228,70 @@ Game.prototype.pickDefense = function(number, retries) {
     this.player_defense = player_picks;
     this.enemy_defense = enemy_picks;
   }
+}
 
+
+Game.prototype.disabledTime = function(letter) {
+  if (["A", "E", "I", "O", "U"].includes(letter)) {
+    return 1000;
+  } else {
+    return 2000;
+  }
 }
 
 
 Game.prototype.enemyAction = function(rerolls) {
-  var word_size = this.enemy_short_word + Math.floor(Math.random() * (1 + this.enemy_long_word - this.enemy_short_word));
-  var word_list = Object.keys(this.enemy_words[word_size]);
-  var new_word = word_list[Math.floor(Math.random() * word_list.length)];
 
-  var legal_keys = true;
-  for (var i = 0; i < new_word.length; i++) {
-    if (this.enemy_palette.letters[new_word[i]].interactive == false) legal_keys = false;
-  }
-  if (legal_keys == false) {
-    console.log("Tried to use the word " + new_word + " but it was using disabled keys");
+  var best_word = null;
+  var best_shift = null;
+
+  for (var i = 0; i < rerolls; i++) {
+    var word_size = this.enemy_short_word + Math.floor(Math.random() * (1 + this.enemy_long_word - this.enemy_short_word));
+    var word_list = this.enemy_words[word_size];
+    var candidate_word = word_list[Math.floor(Math.random() * word_list.length)];
+    var candidate_shift = Math.floor(Math.random() *(11 - candidate_word.length));
+
+    var legal_keys = true;
+    for (var i = 0; i < candidate_word.length; i++) {
+      if (this.enemy_palette.letters[candidate_word[i]].interactive == false) legal_keys = false;
+    }
+
+    var legit = (legal_keys && !(candidate_word in this.played_words));
+
+    if (legit) {
+      if (best_word == null) {
+        best_word = candidate_word;
+        best_shift = candidate_shift;
+      }
+
+      var targeted = false;
+      for (var j = 0; j < this.player_defense.length; j++) {
+        if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].interactive == true) {
+          console.log("TARGETING " + this.player_defense[j])
+          targeted = true;
+        }
+      }
+
+      if (targeted) {
+        best_word = candidate_word;
+        best_shift = candidate_shift;
+        break;
+      }
+    }
   }
 
-  if ((legal_keys == false || new_word in this.played_words) && rerolls > 0) {
-    this.enemyAction(rerolls - 1);
-  } else if (!(new_word in this.played_words) && legal_keys == true) {
-    var shift = Math.floor(Math.random() *(11 - new_word.length));
-    this.addEnemyWord(new_word, shift);
+  if (best_word != null) {
+    this.addEnemyWord(best_word, best_shift);
   }
 }
 
 
 Game.prototype.addEnemyWord = function(word, shift) {
   this.played_words[word] = 1;
-  console.log("Shift " + shift);
   for (var i = 0; i < word.length; i++) {
     var letter = word[i];
 
-    let rocket_tile = this.makeRocketTile(this.enemy_area, letter, i, shift, 2, 48, 50);
+    let rocket_tile = this.makeRocketTile(this.enemy_area, letter, word.length, i, shift, 2, 48, 50);
 
     this.rocket_letters.push(rocket_tile);
   }
@@ -178,13 +304,11 @@ Game.prototype.checkEndCondition = function() {
     console.log("checking end condition");
     let player_dead = true;
     for (var i = 0; i < this.player_defense.length; i++) {
-      console.log(this.player_defense[i]);
-      console.log(this.player_palette.letters[this.player_defense[i]]);
-      console.log(this.player_palette.letters[this.player_defense[i]].interactive);
       if (this.player_palette.letters[this.player_defense[i]].interactive === true) {
         player_dead = false;
       }
     }
+    if (this.player_defense.length == 0) player_dead = false;
 
     let enemy_dead = true;
     for (var i = 0; i < this.enemy_defense.length; i++) {
@@ -192,15 +316,16 @@ Game.prototype.checkEndCondition = function() {
         enemy_dead = false;
       }
     }
+    if (this.enemy_defense.length == 0) enemy_dead = false;
 
 
     if (enemy_dead === true || player_dead === true) {
-      if (enemy_dead == true && player_dead == true) {
-        this.countdown_text.text = "DRAW!";
-      } else if (player_dead == true) {
+      if (player_dead == true) { //regardless of whether enemy is dead
         this.countdown_text.text = "GAME OVER";
       } else if (enemy_dead == true) {
         this.countdown_text.text = "VICTORY!";
+        this.level += 1;
+        setTimeout(function() {self.reset()}, 4000);
       }
 
       this.game_phase = "gameover";
@@ -219,15 +344,17 @@ Game.prototype.checkEndCondition = function() {
       }
       
       this.fadeMusic(1500);
-      setTimeout(function() {self.reset()}, 4000);
+      
     }
   }
 }
 
 
 Game.prototype.reset = function() {
-  this.music.pause();
-  this.music.currentTime = 0;
+  if (this.music != null) {
+    this.music.pause();
+    this.music.currentTime = 0;
+  }
   this.resetBoard();
 }
 
@@ -236,9 +363,13 @@ Game.prototype.soloUpdate = function() {
   var self = this;
   var scene = this.scenes["solo"];
 
+
+  if (this.game_phase == "tutorial") {
+    this.tutorial_screen.tutorial_text.hover();
+  }
+
   if (this.game_phase == "countdown") {
     let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
-    console.log(Math.ceil(time_remaining).toString());
     this.countdown_text.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
       this.countdown_text.text = "GO";
@@ -338,7 +469,6 @@ Game.prototype.soloUpdate = function() {
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
     if (rocket.status === "rocket" && rocket.position.y < -780) {
-      console.log("switching");
       let y = rocket.position.y;
       let x = rocket.position.x;
       rocket.fire_sprite.visible = false;
@@ -464,18 +594,22 @@ Game.prototype.soloUpdate = function() {
                     0.1, 0.25/3);
                   fire.visible = false;
 
-                  explosion = self.makeExplosion(self.scenes["solo"], 
+                  let explosion = self.makeExplosion(self.scenes["solo"], 
                     self.enemy_palette.letters[disabled_letter].x + self.enemy_palette.position.x,
                     self.enemy_palette.letters[disabled_letter].y + self.enemy_palette.position.y,
                   0.3, 0.3, function() {fire.visible = true; self.scenes["solo"].removeChild(explosion)});
 
 
                   if (!self.enemy_defense.includes(disabled_letter)) {
+                    self.score += rocket.score_value;
+                    self.score_text_box.text = self.score;
                     setTimeout(function() {
                       self.scenes["solo"].removeChild(fire);
                       self.enemy_palette.letters[disabled_letter].enable()
-                    }, 5000);
+                    }, self.disabledTime(disabled_letter));
                   } else {
+                    self.score += Math.floor(Math.pow(rocket.score_value, 1.5));
+                    self.score_text_box.text = self.score;
                     self.checkEndCondition();
                   }
                 }
@@ -500,7 +634,7 @@ Game.prototype.soloUpdate = function() {
                       setTimeout(function() {
                       self.scenes["solo"].removeChild(fire);
                       self.player_palette.letters[disabled_letter].enable()
-                    }, 5000);
+                    }, self.disabledTime(disabled_letter));
                   } else {
                     self.checkEndCondition();
                   }   

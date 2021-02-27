@@ -165,9 +165,9 @@ class Game {
   loadWords() {
     var self = this;
     this.legal_words = {};
-    this.enemy_words = {};
+    let enemy_word_dict = {};
     for (var i = 0; i <= 10; i++) {
-      this.enemy_words[i] = {};
+      enemy_word_dict[i] = {};
     }
 
     var request = new XMLHttpRequest();
@@ -189,9 +189,15 @@ class Game {
           self.legal_words[word.toUpperCase()] = 1;
         }
         if (word != null && word.length <= 10) {
-          self.enemy_words[word.length][word.toUpperCase()] = 1;
+          enemy_word_dict[word.length][word.toUpperCase()] = 1;
         }
       }
+
+      self.enemy_words = {};
+      for (var i = 0; i <= 10; i++) {
+        self.enemy_words[i] = Object.keys(enemy_word_dict[i]);
+      }
+
     };
     request.send();
   }
@@ -409,7 +415,95 @@ class Game {
   }
 
 
-  makeRocketTile(parent, letter, letter_number, shift, player, inner_size, outer_size) {
+  makeTutorialScreen(parent, fade_time, box_left, box_top, box_right, box_bottom, text, text_x, text_y) {
+
+    let tutorial_screen = new PIXI.Container();
+    parent.addChild(tutorial_screen);
+
+    let right_mask = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    right_mask.anchor.set(0, 0.5);
+    right_mask.height = this.height;
+    right_mask.width = this.width - box_right;
+    right_mask.position.set(box_right, this.height / 2)
+    right_mask.alpha = 0.0;
+    right_mask.tint = 0x000000;
+    tutorial_screen.addChild(right_mask);
+    new TWEEN.Tween(right_mask)
+      .to({alpha: 0.6})
+      .duration(fade_time)
+      .start()
+
+    let left_mask = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    left_mask.anchor.set(1, 0.5);
+    left_mask.height = this.height;
+    left_mask.width = box_left;
+    left_mask.position.set(box_left, this.height / 2)
+    left_mask.alpha = 0.0;
+    left_mask.tint = 0x000000;
+    tutorial_screen.addChild(left_mask);
+    new TWEEN.Tween(left_mask)
+      .to({alpha: 0.6})
+      .duration(fade_time)
+      .start()
+
+    let bottom_mask = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    bottom_mask.anchor.set(0, 0);
+    bottom_mask.height = this.height - box_bottom;
+    bottom_mask.width = box_right - box_left;
+    bottom_mask.position.set(box_left, box_bottom)
+    bottom_mask.alpha = 0.0;
+    bottom_mask.tint = 0x000000;
+    tutorial_screen.addChild(bottom_mask);
+    new TWEEN.Tween(bottom_mask)
+      .to({alpha: 0.6})
+      .duration(fade_time)
+      .start()
+
+    let top_mask = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    top_mask.anchor.set(0, 1);
+    top_mask.height = box_top;
+    top_mask.width = box_right - box_left;
+    top_mask.position.set(box_left, box_top)
+    top_mask.alpha = 0.0;
+    top_mask.tint = 0x000000;
+    tutorial_screen.addChild(top_mask);
+    new TWEEN.Tween(top_mask)
+      .to({alpha: 0.6})
+      .duration(fade_time)
+      .start()
+
+    let tutorial_text = new PIXI.Text(text, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+    tutorial_text.anchor.set(0.5,0.5);
+    tutorial_text.position.set(text_x, text_y);
+    tutorial_screen.addChild(tutorial_text);
+    tutorial_text.permanent_x = text_x;
+    tutorial_text.permanent_y = text_y;
+    tutorial_text.start_time = Date.now();
+    tutorial_text.alpha = 0
+    tutorial_text.hover = function() {
+      tutorial_text.position.set(tutorial_text.permanent_x, tutorial_text.permanent_y + 20 * Math.sin((Date.now() - tutorial_text.start_time) / 400))
+    }
+    tutorial_screen.tutorial_text = tutorial_text;
+    new TWEEN.Tween(tutorial_text)
+      .to({alpha: 1})
+      .duration(fade_time)
+      .start()
+
+    tutorial_screen.fade = function() {
+      new TWEEN.Tween(tutorial_screen)
+        .to({alpha: 0.0})
+        .duration(500)
+        .onComplete(function() {
+          parent.removeChild(tutorial_screen);
+        })
+        .start()
+    }
+
+    return tutorial_screen;
+  }
+
+
+  makeRocketTile(parent, letter, word_length, letter_number, shift, player, inner_size, outer_size) {
     var self = this;
     let rocket_tile = new PIXI.Container();
     parent.addChild(rocket_tile);
@@ -426,7 +520,7 @@ class Game {
     let parachute_sprite = this.makeParachute(rocket_tile, 0, -50, 0.3, 0.3);
     parachute_sprite.visible = false;
 
-    var tile = this.makeTile(rocket_tile, 0, 0, letter, inner_size, inner_size, inner_size, 0xFFFFFF, letter_values[letter], function() {});
+    var tile = this.makeTile(rocket_tile, 0, 0, letter, inner_size, inner_size, inner_size, 0xFFFFFF, "", function() {});
     rocket_tile.fire_sprite = fire_sprite;
     rocket_tile.parachute_sprite = parachute_sprite;
     rocket_tile.start_time = Date.now() - Math.floor(Math.random() * 300);
@@ -445,6 +539,7 @@ class Game {
     rocket_tile.player = player;
     rocket_tile.letter = letter;
     rocket_tile.value = letter_values[letter];
+    rocket_tile.score_value = Math.floor(Math.pow(word_length, 1.5));
 
     return rocket_tile;
   }
@@ -527,6 +622,7 @@ class Game {
     button.interactive = true;
     button.buttonMode = true;
     button.hitArea = button.backing.hitArea;
+    // button.action = action;
     button.on("pointertap", action);
 
     button.disable = function() {
@@ -631,10 +727,10 @@ class Game {
           palette,
           -nominal_width/2*size + (i+0.5)*size + (h/2 * size), -1/2 * (letters.length * size) + ((h+0.5) * size),
           letter, size,
-          size, size, ((i+h) % 2 == 0 ? 0xF0F0F0 : 0xFFFFFF), letter_values[letter],
+          size, size, ((i+h) % 2 == 0 ? 0xF0F0F0 : 0xFFFFFF), "",
           //((i+h) % 2 == 0 ? 0xf1e594 : 0xFFFFFF)
           function() {
-            if (action != null) {
+            if (this.inner_action != null) {
               new TWEEN.Tween(this)
                 .to({rotation: Math.PI / 20.0})
                 .duration(70)
@@ -650,10 +746,12 @@ class Game {
                   .repeat(1)
                   )
                 .start()
-              action(letter);
+              this.inner_action(letter);
             }
           }
         );
+        button.inner_action = action;
+
         palette.letters[letter] = button;
       }
     }
@@ -781,7 +879,7 @@ class Game {
   handleKeyDown(ev) {
     // ev.preventDefault();
 
-    if (this.current_scene == "solo" && this.game_phase == "active") {
+    if (this.current_scene == "solo" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
 
       // if the launchpad isn't full, we can keep adding letters
       if (!this.launchpad.full()) {
@@ -794,6 +892,10 @@ class Game {
               this.soundEffect("negative");
               this.launchpad.flashError();
               this.player_palette.letters[letter_array[i]].error = 5;
+            }
+
+            if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
+              this.tutorial2();
             }
           }
         }
@@ -841,9 +943,11 @@ class Game {
 
 
   fadeMusic(delay) {
-    var self = this;
-    for (let i = 0; i < 14; i++) {
-      setTimeout(function() {self.music.volume = (13 - i) / 20;}, delay + 50 * i);
+    if (this.music != null) {
+      var self = this;
+      for (let i = 0; i < 14; i++) {
+        setTimeout(function() {self.music.volume = (13 - i) / 20;}, delay + 50 * i);
+      }
     }
   }
 }

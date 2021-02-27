@@ -189,12 +189,26 @@ Game.prototype.initializeTitleScreen = function() {
 
   this.makeButton(
     this.scenes["title"],
-    this.width * 1/2, this.height * 13/16,
+    this.width * 1/2, this.height * 12/16,
+    "TUTORIAL", 44, 6, 0x000000,
+    224, 80, 0x71d07d,
+    function() {
+      // self.initializeSetupWatch();
+      // self.animateSceneSwitch("title", "setup_watch")
+      self.tutorial = true;
+      self.soloGame();
+    }
+  );
+
+  this.makeButton(
+    this.scenes["title"],
+    this.width * 1/2, this.height * 14/16,
     "PLAY", 44, 6, 0xFFFFFF,
     224, 80, 0xdb5858,
     function() {
       // self.initializeSetupWatch();
       // self.animateSceneSwitch("title", "setup_watch")
+      self.tutorial = false;
       self.soloGame();
     }
   );
@@ -229,6 +243,8 @@ Game.prototype.initializeSetupCreate = function() {
   this.options_text_box.anchor.set(0,0.5);
   this.options_text_box.position.set(this.width * 9/48, this.height * 31/48);
   this.scenes["setup_create"].addChild(this.options_text_box);
+
+
 
   this.backArrow("setup_create", "title", function() {self.resetTitle();})
 }

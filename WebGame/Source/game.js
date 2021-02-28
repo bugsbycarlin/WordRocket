@@ -415,7 +415,7 @@ class Game {
   }
 
 
-  makeTutorialScreen(parent, fade_time, box_left, box_top, box_right, box_bottom, text, text_x, text_y) {
+  makeTutorialScreen(parent, fade_in_time, box_left, box_top, box_right, box_bottom, text, text_x, text_y) {
 
     let tutorial_screen = new PIXI.Container();
     parent.addChild(tutorial_screen);
@@ -430,7 +430,7 @@ class Game {
     tutorial_screen.addChild(right_mask);
     new TWEEN.Tween(right_mask)
       .to({alpha: 0.6})
-      .duration(fade_time)
+      .duration(fade_in_time)
       .start()
 
     let left_mask = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -443,7 +443,7 @@ class Game {
     tutorial_screen.addChild(left_mask);
     new TWEEN.Tween(left_mask)
       .to({alpha: 0.6})
-      .duration(fade_time)
+      .duration(fade_in_time)
       .start()
 
     let bottom_mask = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -456,7 +456,7 @@ class Game {
     tutorial_screen.addChild(bottom_mask);
     new TWEEN.Tween(bottom_mask)
       .to({alpha: 0.6})
-      .duration(fade_time)
+      .duration(fade_in_time)
       .start()
 
     let top_mask = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -469,10 +469,10 @@ class Game {
     tutorial_screen.addChild(top_mask);
     new TWEEN.Tween(top_mask)
       .to({alpha: 0.6})
-      .duration(fade_time)
+      .duration(fade_in_time)
       .start()
 
-    let tutorial_text = new PIXI.Text(text, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+    let tutorial_text = new PIXI.Text(text, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
     tutorial_text.anchor.set(0.5,0.5);
     tutorial_text.position.set(text_x, text_y);
     tutorial_screen.addChild(tutorial_text);
@@ -486,13 +486,13 @@ class Game {
     tutorial_screen.tutorial_text = tutorial_text;
     new TWEEN.Tween(tutorial_text)
       .to({alpha: 1})
-      .duration(fade_time)
+      .duration(fade_in_time)
       .start()
 
-    tutorial_screen.fade = function() {
+    tutorial_screen.fade = function(fade_out_time) {
       new TWEEN.Tween(tutorial_screen)
         .to({alpha: 0.0})
-        .duration(500)
+        .duration(fade_out_time)
         .onComplete(function() {
           parent.removeChild(tutorial_screen);
         })
@@ -903,18 +903,38 @@ class Game {
 
       if (ev.key === "Backspace" || ev.key === "Delete") {
         this.launchpad.pop();
+        if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
+          this.tutorial4();
+        }
       }
 
-      if (ev.key === "ArrowRight") {
+      if (ev.key === "ArrowRight" && (this.game_phase != "tutorial" || this.tutorial_number >= 2.5)) {
         this.launchpad.shiftRight();
+        if (this.game_phase == "tutorial") {
+          if (this.tutorial_number == 2.5) {
+            this.tutorial_number = 2.75
+          } else if (this.tutorial_number == 2.75) {
+            this.tutorial3();
+          }
+        }
       }
 
-      if (ev.key === "ArrowLeft") {
+      if (ev.key === "ArrowLeft" && (this.game_phase != "tutorial" || this.tutorial_number >= 2.5)) {
         this.launchpad.shiftLeft();
+        if (this.game_phase == "tutorial") {
+          if (this.tutorial_number == 2.5) {
+            this.tutorial_number = 2.75
+          } else if (this.tutorial_number == 2.75) {
+            this.tutorial3();
+          }
+        }
       }
 
-      if (ev.key === "Enter") {
+      if (ev.key === "Enter" && (this.game_phase != "tutorial" || this.tutorial_number >= 5)) {
         this.launchpad.launch(this.player_area);
+        if (this.game_phase == "tutorial" && this.tutorial_number == 5) {
+          this.tutorial6();
+        }
       }
 
     }
@@ -939,6 +959,14 @@ class Game {
     // this.music.bind("ended", function(){
     //   self.music.trigger("play");
     // });
+  }
+
+
+  stopMusic() {
+    if (this.music != null) {
+      this.music.pause();
+      this.music.currentTime = 0;
+    }
   }
 
 

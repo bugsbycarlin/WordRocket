@@ -1,10 +1,10 @@
 
-annoying = false;
+annoying = true;
 use_scores = false;
 
 
 Game.prototype.initializeSoloScreen = function() {
-  this.level = 1;
+  this.level = 26;
   this.score = 0;
 
   this.resetBoard();
@@ -22,26 +22,14 @@ Game.prototype.resetBoard = function() {
 
   this.rocket_letters = [];
 
-  this.pickDefense(6, 10);
-
   // the qwerty palette
   this.player_palette = this.makeQwertyPalette(scene, 72, this.width * 1/2, this.height - 118, function(letter) {
     console.log(letter);
   });
 
-  for (var i = 0; i < this.player_defense.length; i++) {
-    this.player_palette.letters[this.player_defense[i]].backing.tint = 0x63bff5;
-  }
-
-
   // the enemy palette
   this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, function(letter) {
   });
-
-  for (var i = 0; i < this.enemy_defense.length; i++) {
-    this.enemy_palette.letters[this.enemy_defense[i]].backing.tint = 0x63bff5;
-  }
-
 
   // the player's board
   this.player_area = new PIXI.Container();
@@ -140,7 +128,12 @@ Game.prototype.resetBoard = function() {
 
   if (this.tutorial) {
     this.tutorial1();
+
+    console.log("Steve");
+    console.log(this.enemy_rerolls);
   } else {
+    this.pickDefense(6, 10);
+
     this.game_phase = "pre_game";
 
     setTimeout(function() {
@@ -152,62 +145,11 @@ Game.prototype.resetBoard = function() {
 }
 
 
-Game.prototype.tutorial1 = function() {
-  var self = this;
-  var scene = this.scenes["solo"];
-  this.game_phase = "tutorial";
-  this.tutorial_number = 1;
-
-  this.tutorial_screen = this.makeTutorialScreen(scene, 2000, 20, this.player_palette.position.y - 108, 748, this.player_palette.position.y + 108, "HERE IS A KEYBOARD. PLEASE START TYPING.", this.width / 2, 660);
-
-  this.tutorial_1_snide_clicks = 0;
-  this.tutorial_1_snide_click_responses = [
-    "NO, USE YOUR REAL KEYBOARD, JERK.",
-    "OOF, STUBBORN.",
-    "HEY, START TYPING ON KEYS.",
-    "ACTUAL KEYS.",
-    "HEY! LOOK DOWN. LOOK. DOWN.",
-    "PRESS K. JUST DO IT.",
-    "FINE, I GIVE UP.",
-  ]
-
-  for (var i = 0; i < 26; i++) {
-    console.log(this.player_palette.letters[letter_array[i]]);
-    this.player_palette.letters[letter_array[i]].inner_action = function(letter) {
-      if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
-        self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
-        self.tutorial_1_snide_clicks += 1
-      }
-    }
-  }
-
-  for (var i = 0; i < 10; i++) {
-    this.launchpad.cursors[i].visible = true;
-  }
-}
-
-
-Game.prototype.tutorial2 = function() {
-  var self = this;
-  var scene = this.scenes["solo"];
-  
-  this.tutorial_number = 1.5;
-  this.tutorial_screen.tutorial_text.text = "Good.";
-
-  setTimeout(function() {
-    self.tutorial_screen.fade();
-    self.tutorial_number = 2;
-    self.tutorial_screen = self.makeTutorialScreen(scene, 500, 0, 700, 511, 830, "THIS IS THE LAUNCHPAD.", self.width / 2, 560);
-  }, 2000);
-
-}
-
-
 Game.prototype.setEnemyDifficulty = function(level) {
-  this.enemy_wpm = 18 + 3 * level;
+  this.enemy_wpm = 10 + 2.5 * level;
   this.enemy_rerolls = 4 + 2 * level;
-  this.enemy_short_word = Math.min(6,4 + Math.floor(level / 3.5));
-  this.enemy_long_word = Math.min(4,5 + Math.floor(level / 2.5));
+  this.enemy_short_word = Math.min(6,4 + Math.floor(level / 4));
+  this.enemy_long_word = Math.min(4,5 + Math.floor(level / 3));
 }
 
 
@@ -215,6 +157,19 @@ Game.prototype.pickDefense = function(number, retries) {
   shuffleArray(shuffle_letters);
   let player_picks = shuffle_letters.slice(0, number/2);
   let enemy_picks = shuffle_letters.slice(number/2 + 1, number + 1);
+
+  if (number < 4) {
+    this.player_defense = player_picks;
+    this.enemy_defense = enemy_picks;
+
+    for (var i = 0; i < this.enemy_defense.length; i++) {
+      this.enemy_palette.letters[this.enemy_defense[i]].backing.tint = 0x63bff5;
+    }
+    for (var i = 0; i < this.player_defense.length; i++) {
+      this.player_palette.letters[this.player_defense[i]].backing.tint = 0x63bff5;
+    }
+    return;
+  }
 
   let score_1 = 0;
   let score_2 = 0;
@@ -227,6 +182,13 @@ Game.prototype.pickDefense = function(number, retries) {
   } else {
     this.player_defense = player_picks;
     this.enemy_defense = enemy_picks;
+
+    for (var i = 0; i < this.enemy_defense.length; i++) {
+      this.enemy_palette.letters[this.enemy_defense[i]].backing.tint = 0x63bff5;
+    }
+    for (var i = 0; i < this.player_defense.length; i++) {
+      this.player_palette.letters[this.player_defense[i]].backing.tint = 0x63bff5;
+    }
   }
 }
 
@@ -240,8 +202,8 @@ Game.prototype.disabledTime = function(letter) {
 }
 
 
-Game.prototype.enemyAction = function(rerolls) {
-
+Game.prototype.enemyAction = function(rerolls, targeting = true) {
+  console.log(rerolls);
   var best_word = null;
   var best_shift = null;
 
@@ -252,8 +214,8 @@ Game.prototype.enemyAction = function(rerolls) {
     var candidate_shift = Math.floor(Math.random() *(11 - candidate_word.length));
 
     var legal_keys = true;
-    for (var i = 0; i < candidate_word.length; i++) {
-      if (this.enemy_palette.letters[candidate_word[i]].interactive == false) legal_keys = false;
+    for (var j = 0; j < candidate_word.length; j++) {
+      if (this.enemy_palette.letters[candidate_word[j]].interactive == false) legal_keys = false;
     }
 
     var legit = (legal_keys && !(candidate_word in this.played_words));
@@ -267,12 +229,11 @@ Game.prototype.enemyAction = function(rerolls) {
       var targeted = false;
       for (var j = 0; j < this.player_defense.length; j++) {
         if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].interactive == true) {
-          console.log("TARGETING " + this.player_defense[j])
           targeted = true;
         }
       }
 
-      if (targeted) {
+      if (targeting && targeted) {
         best_word = candidate_word;
         best_shift = candidate_shift;
         break;
@@ -282,6 +243,9 @@ Game.prototype.enemyAction = function(rerolls) {
 
   if (best_word != null) {
     this.addEnemyWord(best_word, best_shift);
+    if (this.game_phase == "tutorial" && this.tutorial_number == 8) {
+      this.tutorial9();
+    }
   }
 }
 
@@ -322,6 +286,8 @@ Game.prototype.checkEndCondition = function() {
     if (enemy_dead === true || player_dead === true) {
       if (player_dead == true) { //regardless of whether enemy is dead
         this.countdown_text.text = "GAME OVER";
+        this.stopMusic();
+        this.soundEffect("game_over");
       } else if (enemy_dead == true) {
         this.countdown_text.text = "VICTORY!";
         this.level += 1;
@@ -343,7 +309,7 @@ Game.prototype.checkEndCondition = function() {
         this.freefalling.push(rocket);
       }
       
-      this.fadeMusic(1500);
+      //this.fadeMusic(1500);
       
     }
   }
@@ -351,10 +317,6 @@ Game.prototype.checkEndCondition = function() {
 
 
 Game.prototype.reset = function() {
-  if (this.music != null) {
-    this.music.pause();
-    this.music.currentTime = 0;
-  }
   this.resetBoard();
 }
 
@@ -442,13 +404,16 @@ Game.prototype.soloUpdate = function() {
   }
   this.freefalling = new_freefalling;
 
-  if (this.game_phase != "active") {
+
+  if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
     return;
   }
 
-  if (Date.now() - this.enemy_last_action > 60000/this.enemy_wpm) {
-    this.enemyAction(this.enemy_rerolls);
-    this.enemy_last_action = Date.now() - 0.2 * (60000/this.enemy_wpm) + 0.4 * Math.random() * 60000/this.enemy_wpm;
+  if (this.game_phase != "tutorial" || this.tutorial_number >= 8) {
+    if (Date.now() - this.enemy_last_action > 60000/this.enemy_wpm) {
+      this.enemyAction(this.enemy_rerolls, this.game_phase != "tutorial");
+      this.enemy_last_action = Date.now() - 0.2 * (60000/this.enemy_wpm) + 0.4 * Math.random() * 60000/this.enemy_wpm;
+    }
   }
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
@@ -478,10 +443,12 @@ Game.prototype.soloUpdate = function() {
         this.player_area.removeChild(rocket);
         this.enemy_area.addChild(rocket);
         rocket.parent = this.enemy_area;
+        if (this.game_phase == "tutorial" && this.tutorial_number == 6) this.tutorial7();
       } else if (rocket.player == 2) {
         this.enemy_area.removeChild(rocket);
         this.player_area.addChild(rocket);
         rocket.parent = this.player_area;
+        if (this.game_phase == "tutorial" && this.tutorial_number == 9) this.tutorial10();
       }
       rocket.position.set(x, y);
       rocket.status = "descent";
@@ -562,9 +529,11 @@ Game.prototype.soloUpdate = function() {
       if (rocket.player == 1) {
         target_x = (this.enemy_palette.letters[disabled_letter].x + this.enemy_palette.position.x - this.enemy_area.position.x) / this.enemy_area.scale.x;
         target_y = (this.enemy_palette.letters[disabled_letter].y + this.enemy_palette.position.y - this.enemy_area.position.y) / this.enemy_area.scale.y;
+        if (this.game_phase == "tutorial" && this.tutorial_number == 7) this.tutorial8();
       } else if (rocket.player == 2) {
         target_x = (this.player_palette.letters[disabled_letter].x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
         target_y = (this.player_palette.letters[disabled_letter].y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
+        if (this.game_phase == "tutorial" && this.tutorial_number == 10) this.tutorial11();
       }
       let angle = Math.atan2(target_y - rocket.y, target_x - rocket.x) + Math.PI / 2;
       rocket.parachute_sprite.visible = false;

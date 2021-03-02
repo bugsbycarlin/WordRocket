@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+      <!--
+      Customize this policy to fit your own app's needs. For more guidance, see:
+          https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+      Some notes:
+          * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+          * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+          * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+              * Enable inline JS: add 'unsafe-inline' to default-src
+      -->
+      <meta http-equiv="Content-Security-Policy" content="default-src * gap://ready file:; style-src * 'unsafe-inline'; script-src * 'self' 'unsafe-inline' 'unsafe-eval'; img-src * data: 'unsafe-inline'; connect-src * 'unsafe-inline';"> 
+      <meta name="format-detection" content="telephone=no">
+      <meta name="msapplication-tap-highlight" content="no">
+      <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+      <link rel="stylesheet" type="text/css" href="css/index.css">
+      <title>Word Rockets</title>
+    </head>
+    <body>
+      <audio preload="auto" id="negative" >
+        <source src="Sound/negative.wav" type="audio/wav">
+      </audio>
+
+      <audio preload="auto" id="rocket" >
+        <source src="Sound/rocket.wav" type="audio/wav">
+      </audio>
+
+      <audio preload="auto" id="explosion_1" >
+        <source src="Sound/explosion_1.wav" type="audio/wav">
+      </audio>
+
+      <audio preload="auto" id="explosion_2" >
+        <source src="Sound/explosion_2.wav" type="audio/wav">
+      </audio>
+
+      <audio preload="auto" id="explosion_3" >
+        <source src="Sound/explosion_3.wav" type="audio/wav">
+      </audio>
+
+      <audio preload="auto" id="game_over" >
+        <source src="Sound/game_over.wav" type="audio/wav">
+      </audio>
+
+      <audio preload="auto" id="countdown" >
+        <source src="Sound/countdown.mp3" type="audio/mpeg">
+      </audio>
+
+      <audio preload="auto" id="action_song" >
+        <source src="Sound/2019-12-11_-_Retro_Platforming_-_David_Fesliyan.mp3" type="audio/mpeg">
+      </audio>
+
+      <div id="mainDiv">
+      </div>
+      <!-- <script type="text/javascript">
+          window.onerror = function(message, url, lineNumber) {
+              console.log("Error: "+message+" in "+url+" at line "+lineNumber);
+          }
+      </script> -->
+      <script type="text/javascript" charset="utf-8">
+        window.onerror = function(msg, url, line) {
+          var idx = url.lastIndexOf("/");
+          if(idx > -1) {url = url.substring(idx+1);}
+          alert("ERROR in " + url + " (line #" + line + "): " + msg);
+          return false; //suppress Error Alert;
+        };
+      </script>
+      <script type="text/javascript" src="cordova.js"></script>
+      <script type="text/javascript" src="Source/webfont.js"></script>
+      <script type="text/javascript" src="Source/firebase-app.js"></script>
+      <script type="text/javascript" src="Source/firebase-analytics.js"></script>
+      <script type="text/javascript" src="Source/firebase-auth.js"></script>
+      <script type="text/javascript" src="Source/firebase-database.js"></script>
+      <script type="text/javascript" src="Source/gunzip.min.js"></script>
+      <script type="text/javascript" src="Source/pixi.min.js"></script>
+      <script type="text/javascript" src="Source/pixi-spine.js"></script>
+      <script type="text/javascript" src="Source/tween.umd.min.js"></script>
+      <script type="text/javascript" src="Source/multiplayer.js"></script>
+      <script type="text/javascript" src="Source/launchpad.js"></script>
+      <script type="text/javascript" src="Source/game.js"></script>
+      <script type="text/javascript" src="Source/game_updates.js"></script>
+      <script type="text/javascript" src="Source/setup_scenes.js"></script>
+      <script type="text/javascript" src="Source/game_scene.js"></script>
+      <script type="text/javascript" src="Source/solo_scene.js"></script>
+      <script type="text/javascript" src="Source/tutorial.js"></script>
+    </body>
+</html>

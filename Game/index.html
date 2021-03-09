@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Word Rockets</title>
+    <style type="text/css">
+      canvas { 
+        border: 0px; 
+      }
+      body {
+        margin:0;
+        padding:0;
+        height:100%;
+        overflow: hidden;
+      }
+      #mainDiv {
+        position: absolute;
+        background-color: #FFFFFF;
+        width: 1024px;
+        left:50%;
+        margin-left:-512px;
+        height: 768px;
+        top:50%;
+        margin-top:-384px;
+      }
+    </style>
+  </head>
+  <body bgcolor = #D9D9D9 onload="initialize();">
+    <audio preload="auto" id="negative" >
+      <source src="Sound/negative.wav" type="audio/wav">
+    </audio>
+
+    <audio preload="auto" id="rocket" >
+      <source src="Sound/rocket.wav" type="audio/wav">
+    </audio>
+
+    <audio preload="auto" id="explosion_1" >
+      <source src="Sound/explosion_1.wav" type="audio/wav">
+    </audio>
+
+    <audio preload="auto" id="explosion_2" >
+      <source src="Sound/explosion_2.wav" type="audio/wav">
+    </audio>
+
+    <audio preload="auto" id="explosion_3" >
+      <source src="Sound/explosion_3.wav" type="audio/wav">
+    </audio>
+
+    <audio preload="auto" id="game_over" >
+      <source src="Sound/game_over.wav" type="audio/wav">
+    </audio>
+
+    <audio preload="auto" id="countdown" >
+      <source src="Sound/countdown.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio preload="auto" id="action_song" >
+      <source src="Sound/2019-12-11_-_Retro_Platforming_-_David_Fesliyan.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="mainDiv">
+    </div>
+    <script type="text/javascript" charset="utf-8">
+      var device = null;
+    </script>
+    <script type="text/javascript" src="Source/Libraries/webfont.js"></script>
+    <script type="text/javascript" src="Source/Libraries/firebase-app.js"></script>
+    <script type="text/javascript" src="Source/Libraries/firebase-analytics.js"></script>
+    <script type="text/javascript" src="Source/Libraries/firebase-auth.js"></script>
+    <script type="text/javascript" src="Source/Libraries/firebase-database.js"></script>
+    <script type="text/javascript" src="Source/Libraries/gunzip.min.js"></script>
+    <script type="text/javascript" src="Source/Libraries/pixi.min.js"></script>
+    <script type="text/javascript" src="Source/Libraries/pixi-spine.js"></script>
+    <script type="text/javascript" src="Source/Libraries/tween.umd.min.js"></script>
+
+    <script type="text/javascript" src="Source/utilities.js"></script>
+    <script type="text/javascript" src="Source/game.js"></script>
+    <script type="text/javascript" src="Source/ui_tools.js"></script>
+    <script type="text/javascript" src="Source/control.js"></script>
+    <script type="text/javascript" src="Source/update.js"></script>
+    <script type="text/javascript" src="Source/title.js"></script>
+    <script type="text/javascript" src="Source/multiplayer.js"></script>
+    <script type="text/javascript" src="Source/launchpad.js"></script>
+    <script type="text/javascript" src="Source/game_scene.js"></script>
+    <script type="text/javascript" src="Source/tutorial.js"></script>
+  </body>
+</html>

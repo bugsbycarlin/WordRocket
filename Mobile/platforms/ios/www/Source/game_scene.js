@@ -21,7 +21,7 @@ Game.prototype.reset = function() {
   if (this.device_type == "browser") {
     this.resetBoardBrowser();
   } else if (this.device_type == "iPad") {
-    this.resetBoardTestiPad();
+    this.resetBoardiPad();
   } else if (this.device_type == "iPhone") {
     this.resetBoardiPhone();
   }
@@ -29,7 +29,7 @@ Game.prototype.reset = function() {
   if (this.tutorial) {
     this.tutorial1();
   } else {
-    //this.pickDefense(6, 10);
+    this.pickDefense(6, 10);
 
     this.game_phase = "pre_game";
 
@@ -154,21 +154,116 @@ Game.prototype.resetBoardBrowser = function() {
 }
 
 
-Game.prototype.resetBoardTestiPad = function() {
-  var self = this;
-  var scene = this.scenes["game"];
+// Game.prototype.resetBoardTestiPad = function() {
+//   var self = this;
+//   var scene = this.scenes["game"];
 
-  var add_special_keys = false;
-  this.player_palette = this.makeQwertyPalette(scene, 64, this.width * 1/2, this.height - 118, add_special_keys, function(letter) {
-    if (add_special_keys && !self.launchpad.full()) {
-      self.keyAction(letter);
-    }
-  });
+//   var add_special_keys = true;
+//   this.player_palette = this.makeQwertyPalette(scene, 64, this.width * 1/2, this.height - 118, add_special_keys, function(letter) {
+//     if (add_special_keys && !self.launchpad.full()) {
+//       self.keyAction(letter);
+//     }
+//   });
 
-  // // the enemy palette
-  // this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, function(letter) {
-  // });
-}
+//   // the enemy palette
+//   this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, function(letter) {
+//   });
+  
+//   // the player's board
+//   this.player_area = new PIXI.Container();
+//   scene.addChild(this.player_area);
+//   this.player_area.position.set(6,756);
+//   // this.player_area.scale.set(0.5,0.5);
+
+//   var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   play_mat.width = 500;
+//   play_mat.height = 700;
+//   play_mat.anchor.set(0, 1);
+//   play_mat.position.set(0, -50);
+//   play_mat.tint = 0x4D4D4D;
+//   this.player_area.addChild(play_mat);
+
+//   var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   pad_mat.width = 500;
+//   pad_mat.height = 50;
+//   pad_mat.anchor.set(0, 1);
+//   pad_mat.position.set(0, 0);
+//   pad_mat.tint = 0xCCCCCC;
+//   this.player_area.addChild(pad_mat);
+
+//   // the player's launchpad
+//   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
+
+//   // the enemy board
+//   this.enemy_area = new PIXI.Container();
+//   scene.addChild(this.enemy_area);
+//   this.enemy_area.position.set(512,381);
+//   this.enemy_area.scale.set(0.5,0.5);
+//   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   enemy_mat.width = 500;
+//   enemy_mat.height = 700;
+//   enemy_mat.anchor.set(0, 1);
+//   enemy_mat.position.set(0, -50);
+//   enemy_mat.tint = 0x4D4D4D;
+//   this.enemy_area.addChild(enemy_mat);
+//   var enemy_pad_math = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   enemy_pad_math.width = 500;
+//   enemy_pad_math.height = 50;
+//   enemy_pad_math.anchor.set(0, 1);
+//   enemy_pad_math.position.set(0, 0);
+//   enemy_pad_math.tint = 0xCCCCCC;
+//   this.enemy_area.addChild(enemy_pad_math);
+
+//   // level and score
+//   this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.level_label.anchor.set(0.5,0.5);
+//   this.level_label.position.set(640, 512);
+//   scene.addChild(this.level_label);
+
+//   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.level_text_box.anchor.set(0.5,0.5);
+//   this.level_text_box.position.set(640, 542);
+//   scene.addChild(this.level_text_box);
+
+//   this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.opponent_label.anchor.set(0.5,0.5);
+//   this.opponent_label.position.set(640, 592);
+//   scene.addChild(this.opponent_label);
+
+//   this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.opponent_text_box.anchor.set(0.5,0.5);
+//   this.opponent_text_box.position.set(640, 622);
+//   scene.addChild(this.opponent_text_box);
+
+//   this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.score_label.anchor.set(0.5,0.5);
+//   this.score_label.position.set(640, 672);
+//   scene.addChild(this.score_label);
+
+//   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.score_text_box.anchor.set(0.5,0.5);
+//   this.score_text_box.position.set(640, 702);
+//   scene.addChild(this.score_text_box);
+
+//   this.setEnemyDifficulty(this.level);
+
+//   this.enemy_last_action = Date.now();
+
+//   this.gravity = 6;
+//   this.boost = 0.25;
+//   this.gentle_drop = 0.1;
+//   this.gentle_limit = 12.5;
+//   this.boost_limit = -40;
+
+//   for (var i = 0; i < 10; i++) {
+//     this.launchpad.cursors[i].visible = false;
+//   }
+
+//   this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.countdown_text.anchor.set(0.5,0.5);
+//   this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
+//   scene.addChild(this.countdown_text);
+// }
 
 
 Game.prototype.resetBoardiPad = function() {
@@ -185,6 +280,7 @@ Game.prototype.resetBoardiPad = function() {
   // the enemy palette
   this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, function(letter) {
   });
+  this.enemy_palette.cacheAsBitmap = true;
 
   // the player's board
   this.player_area = new PIXI.Container();
@@ -571,19 +667,20 @@ Game.prototype.testSinglePlayerUpdate = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  // if (this.game_phase == "countdown") {
-  //   let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
-  //   this.countdown_text.text = Math.ceil(time_remaining).toString();
-  //   if (time_remaining <= 0) {
-  //     this.countdown_text.text = "GO";
-  //     this.game_phase = "active";
-  //     setTimeout(function() {self.countdown_text.text = "";}, 1600);
-  //     for (var i = 0; i < 10; i++) {
-  //       this.launchpad.cursors[i].visible = true;
-  //     }
-  //     if (annoying) this.setMusic("action_song");
-  //   }
-  // }
+  if (this.game_phase == "countdown") {
+    let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
+    this.countdown_text.text = Math.ceil(time_remaining).toString();
+    if (time_remaining <= 0) {
+      this.enemy_palette.cacheAsBitmap = true;
+      this.countdown_text.text = "GO";
+      this.game_phase = "active";
+      setTimeout(function() {self.countdown_text.text = "";}, 1600);
+      for (var i = 0; i < 10; i++) {
+        this.launchpad.cursors[i].visible = true;
+      }
+      if (annoying) this.setMusic("action_song");
+    }
+  }
 }
 
 
@@ -600,6 +697,7 @@ Game.prototype.singlePlayerUpdate = function() {
     let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
     this.countdown_text.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
+      this.enemy_palette.cacheAsBitmap = true;
       this.countdown_text.text = "GO";
       this.game_phase = "active";
       setTimeout(function() {self.countdown_text.text = "";}, 1600);
@@ -637,11 +735,11 @@ Game.prototype.singlePlayerUpdate = function() {
   for (var i = 0; i < letter_array.length; i++) {
     var letter = letter_array[i];
     if (this.player_palette.letters[letter].error > 0) {
-      this.player_palette.letters[letter].fronting.tint = 0xdb5858;
+      // this.player_palette.letters[letter].fronting.tint = 0xdb5858;
       this.player_palette.letters[letter].error -= 1;
-      if (this.player_palette.letters[letter].error <= 0) {
-        this.player_palette.letters[letter].fronting.tint = 0xFFFFFF;
-      }
+      // if (this.player_palette.letters[letter].error <= 0) {
+      //   this.player_palette.letters[letter].fronting.tint = 0xFFFFFF;
+      // }
     }
   }
 

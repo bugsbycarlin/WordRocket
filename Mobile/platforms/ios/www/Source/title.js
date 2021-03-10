@@ -14,7 +14,7 @@ Game.prototype.initializeTitleScreen = function() {
     } else if (i > 4) {
       let x = this.width * 1/2 - 14 * size/2 + i * size;
       let y = this.height * 1/4 - 0.5*size + size/4 * i;
-      let fire = this.makeFire(this.scenes["title"], x, y + size * 0.8, 0.4, -0.3);
+      // let fire = this.makeFire(this.scenes["title"], x, y + size * 0.8, 0.4, -0.3);
       this.makeTile(this.scenes["title"], x, y, letter, size, size, size, 0xEFEFEF, "", function(){});
     }
   }

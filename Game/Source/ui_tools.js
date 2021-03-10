@@ -171,23 +171,8 @@ Game.prototype.makeExplosion = function(parent, x, y, xScale, yScale, action) {
 
 Game.prototype.makeTile = function(parent, x, y, text, text_size, backing_width, backing_height, backing_color, value, action) {
   var button = this.makeButton(parent, x, y, text, text_size, 6, 0x000000, backing_width, backing_height, backing_color, action);
-  // button.value_text = new PIXI.Text(value.toString(), {fontFamily: "Bebas Neue", fontSize: text_size / 3, fill: 0xAAAAAA, letterSpacing: 6, align: "center"});
-  // button.value_text.anchor.set(1,1);
-  // button.value_text.position.set(backing_width / 2 - 2, backing_height / 2 - 2);
-  // button.addChild(button.value_text);
-
   return button;
 }
-
-
-// Game.prototype.makeFixedTile = function(parent, x, y, text, text_size, backing_width, backing_height, backing_color, value, action) {
-//   var fixed_tile = new PIXI.Sprite(PIXI.Texture.from("Art/test_q.png"));
-//   fixed_tile.parent = parent;
-//   fixed_tile.scale.set(backing_width / 72);
-//   fixed_tile.anchor.set(0.5, 0.5);
-//   parent.addChild(fixed_tile);
-//   return fixed_tile;
-// }
 
 
 Game.prototype.makeButton = function(parent, x, y, text, text_size, text_spacing, text_color, backing_width, backing_height, backing_color, action) {
@@ -201,17 +186,21 @@ Game.prototype.makeButton = function(parent, x, y, text, text_size, text_spacing
   button.backing.height = backing_height;
   button.backing.anchor.set(0.5, 0.5);
   button.backing.tint = backing_color;
+
   button.text = new PIXI.Text(text, {fontFamily: "Bebas Neue", fontSize: text_size, fill: text_color, letterSpacing: text_spacing, align: "center"});
   button.text.anchor.set(0.5,0.42);
-  button.fronting = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  button.fronting.width = backing_width;
-  button.fronting.height = backing_height;
-  button.fronting.anchor.set(0.5, 0.5);
-  button.fronting.alpha = 0.7;
+  // button.text = new PIXI.Sprite(PIXI.Texture.from("Art/test_q.png"));
+  // button.text.anchor.set(0.5, 0.5);
+
+  // button.fronting = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  // button.fronting.width = backing_width;
+  // button.fronting.height = backing_height;
+  // button.fronting.anchor.set(0.5, 0.5);
+  // button.fronting.alpha = 0.7;
   button.addChild(button.backing);
   button.addChild(button.text);
-  button.addChild(button.fronting)
-  button.fronting.visible = false;
+  // button.addChild(button.fronting)
+  // button.fronting.visible = false;
 
   button.interactive = true;
   button.buttonMode = true;
@@ -220,12 +209,12 @@ Game.prototype.makeButton = function(parent, x, y, text, text_size, text_spacing
   button.on("pointerdown", action);
 
   button.disable = function() {
-    this.fronting.visible = true;
+    // this.fronting.visible = true;
     this.interactive = false;
   }
 
   button.enable = function() {
-    this.fronting.visible = false;
+    // this.fronting.visible = false;
     this.interactive = true;
   }
 

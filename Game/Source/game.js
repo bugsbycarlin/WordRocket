@@ -1,8 +1,11 @@
+'use strict';
 
-
-var annoying = false;
+var annoying = true;
 var use_scores = false;
-var silence = true;
+var silence = false;
+var log_performance = true;
+
+var performance_result = null;
 
 var pixi = null;
 var game = null;
@@ -73,7 +76,7 @@ class Game {
       this.width = 1024;
       this.height = 768;
       this.device_type = "browser";
-      this.fps = 60;
+      this.fps = 30;
       //  document.getElementById("mainDiv").style.width = 1024;
       // document.getElementById("mainDiv").style.marginLeft = -512;
     } else if (device != null && (device.platform == "iOS" || device.platform == "browser")) {
@@ -132,8 +135,14 @@ class Game {
     ticker.autoStart = false;
     ticker.stop();
     function animate(time) {
-      if (Date.now() - animation_last > 1000/self.fps) {
+      
+      if (Math.abs(time - animation_last) > 10000) {
+        animation_last = time;
+        track_last = time;
+      }
+      if (time - animation_last >= 1000 / self.fps) {
         track_fps += 1;
+        animation_last = time;
 
         self.trackStart("update");
         self.update();
@@ -143,19 +152,34 @@ class Game {
         TWEEN.update(time);
         self.trackStop("tween");
 
-
         self.trackStart("animate");
         ticker.update(time);
         pixi.renderer.render(pixi.stage);
         self.trackStop("animate");
 
-        animation_last = Date.now();
-        if (Date.now() - track_last > 3000) {
+        if (time - track_last > 6000 && log_performance) {
           console.log("FPS: " + track_fps / 3);
           console.log("Renderer: " + PIXI.RENDERER_TYPE[pixi.renderer.type]);
           track_fps = 0;
-          track_last = Date.now();
+          track_last = time;
           self.trackPrint(["update", "tween", "animate"]);
+
+          if (performance.measureUserAgentSpecificMemory != null) {
+            performance.measureUserAgentSpecificMemory().then(function(result){performance_result = result});
+          }
+
+          if (performance_result != null) {
+            console.log("Mem total: " + (performance_result.bytes / 1000000).toFixed(2) + "mb");
+            var breakdown = "";
+            for (var i = 0; i < performance_result.breakdown.length; i++) {
+              if (performance_result.breakdown[i].types.length > 0) {
+                breakdown += performance_result.breakdown[i].types[0] + ":" + (performance_result.breakdown[i].bytes / 1000000).toFixed(2) + ",";
+              } else if (performance_result.breakdown[i].bytes > 10) {
+                breakdown += "N/A:" + (performance_result.breakdown[i].bytes / 1000000).toFixed(2) + ",";
+              }
+            }
+            console.log(breakdown);
+          }
         }
       }
       requestAnimationFrame(animate);
@@ -296,7 +320,11 @@ class Game {
 
 
   clearScene(scene) {
-    while(scene.children[0]) { scene.removeChild(scene.children[0]); }
+    console.log("here i am cleaning");
+    while(scene.children[0]) {
+      let x = scene.removeChild(scene.children[0]);
+      x.destroy();
+    }
   }
 
 
@@ -307,7 +335,7 @@ class Game {
 
   update() {
     if (this.current_scene == "game") {
-      this.testSinglePlayerUpdate();
+      this.singlePlayerUpdate();
     }
   }
 

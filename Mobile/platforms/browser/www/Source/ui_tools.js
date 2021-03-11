@@ -270,7 +270,33 @@ Game.prototype.makeLetterPalette = function(parent, x, y, action) {
 }
 
 
-Game.prototype.makeQwertyPalette = function(parent, size, x, y, add_special_keys, action) {
+Game.prototype.makeKey = function(parent, x, y, size, letter, color, action) {
+  var key_button = new PIXI.Sprite(PIXI.Texture.from("Art/Keys/" + color + "_key_" + letter + ".png"));
+  key_button.anchor.set(0.5, 0.5);
+  key_button.position.set(x, y);
+  key_button.tint = 0xFFFFFF;
+  if (size != 60) key_button.scale.set(size / 60, size / 60);
+  parent.addChild(key_button);
+
+  key_button.interactive = true;
+  key_button.buttonMode = true;
+  key_button.on("pointerdown", action);
+
+  key_button.action = action;
+
+  key_button.disable = function() {
+    this.interactive = false;
+  }
+
+  key_button.enable = function() {
+    this.interactive = true;
+  }
+
+  return key_button;
+}
+
+
+Game.prototype.makeQwertyPalette = function(parent, size, key_margin, x, y, add_special_keys, action) {
   var self = this;
   var palette = new PIXI.Container();
   parent.addChild(palette);
@@ -278,170 +304,76 @@ Game.prototype.makeQwertyPalette = function(parent, size, x, y, add_special_keys
 
   palette.letters = {};
 
+  palette.error = 0;
+
   // var size = 72;
-  var nominal_width = 10;
+  var nominal_width = 11;
 
   var letters = [];
   letters[0] = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
   letters[1] = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
   letters[2] = ["Z", "X", "C", "V", "B", "N", "M"];
 
+  // console.log(key_margin);
   var mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  mat.width = nominal_width * size;
-  mat.height = size * letters.length;
-  mat.anchor.set(0.5, 0.5);
+  mat.width = (11 * (size + key_margin)) + key_margin;
+  if (add_special_keys == false) mat.width = (10 * (size + key_margin)) + key_margin;
+  mat.height = (3 * (size + key_margin)) + key_margin;
+  console.log(mat.width);
+  console.log(mat.height);
+  console.log("wogs");
+  mat.anchor.set(0.0, 0.0);
   mat.position.set(0, 0);
-  mat.tint = 0xFFFFFF;
+  mat.tint = 0xDDDDDD;
   palette.addChild(mat);
-
-  let special_shift = 0;
-  if (add_special_keys) special_shift = size / 4;
+  palette.mat = mat;
 
   for (var h = 0; h < letters.length; h++) {
     for (var i = 0; i < letters[h].length; i++) {
       let letter = letters[h][i];
-      //makeButton(parent, x, y, text, text_size, text_spacing, text_color, backing_width, backing_height, backing_color, action)
-      let button = this.makeTile(
+      let button = this.makeKey(
         palette,
-        -nominal_width/2*size + (i+0.5)*size + (h/2 * size) - h * special_shift, -1/2 * (letters.length * size) + ((h+0.5) * size),
-        letter, size,
-        size, size, ((i+h) % 2 == 0 ? 0xF0F0F0 : 0xFFFFFF), "",
-        //((i+h) % 2 == 0 ? 0xf1e594 : 0xFFFFFF)
-        function() {
-          if (this.inner_action != null) {
-            new TWEEN.Tween(this)
-              .to({rotation: Math.PI / 20.0}).duration(70).yoyo(true).repeat(1)
-              .onComplete(function() {button.rotation = 0})
-              .chain(new TWEEN.Tween(this)
-                .to({rotation: Math.PI / -20.0}).duration(70).yoyo(true).repeat(1)
-                .onComplete(function() {button.rotation = 0})
-                )
-              .start()
-            this.inner_action(letter);
-          }
-        }
+        key_margin + size / 2 + i * (size + key_margin) + (h/2 * size), key_margin + size / 2 + h * (size + key_margin),
+        size, letter, "white", function() { action(letter); },
       );
-      button.inner_action = action;
-      button.cacheAsBitmap = true;
-      button.crashAsBootpimp = true;
 
       palette.letters[letter] = button;
     }
   }
 
 
-  // for (var h = 0; h < letters.length; h++) {
-  //   for (var i = 0; i < letters[h].length; i++) {
-  //     let letter = letters[h][i];
-  //     var button = new PIXI.Sprite(PIXI.Texture.from("Art/test_q.png"));
-  //     button.anchor.set(0.5, 0.5);
-  //     button.position.set(-nominal_width/2*size + (i+0.5)*size + (h/2 * size) - h * special_shift, -1/2 * (letters.length * size) + ((h+0.5) * size));
-  //     palette.addChild(button);
-
-  //     palette.letters[letter] = button;
-  //   }
-  // }
+  palette.flashError = function(){
+    palette.error = 5;
+    palette.mat.tint = 0xdb5858;
+  }
 
   // Special keys
   if (add_special_keys) {
-    palette.enter_button = this.makeTile(
-      palette,
-      -nominal_width/2*size + (9+0.5)*size + (1/2 * size) - 1 * special_shift, -1/2 * (letters.length * size) + ((1+0.5) * size),
-      "", size,
-      size, size, 0xaeffb1, "",
-      function() {
-        if (this.inner_action != null) {
-          new TWEEN.Tween(this)
-            .to({rotation: Math.PI / 20.0}).duration(70).yoyo(true).repeat(1)
-            .chain(new TWEEN.Tween(this)
-              .to({rotation: Math.PI / -20.0}).duration(70).yoyo(true).repeat(1)
-              )
-            .start()
-          this.inner_action("Enter");
-        }
-      }
-    );
-    palette.enter_button.inner_action = function() {self.enterAction();}
-    palette.enter_button.glyph = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_temp.png"));
-    palette.enter_button.glyph.anchor.set(0.5, 0.5);
-    palette.enter_button.glyph.angle = 20;
-    palette.enter_button.glyph.scale.set(size / 148, size / 148);
-    palette.enter_button.addChild(palette.enter_button.glyph);
-    palette.enter_button.cacheAsBitmap = true;
-    palette.enter_button.crashAsBootpimp = true;
 
-    palette.left_button = this.makeTile(
+    palette.del = this.makeKey(
       palette,
-      -nominal_width/2*size + (7+0.5)*size + (2/2 * size) - 2 * special_shift, -1/2 * (letters.length * size) + ((2+0.5) * size),
-      "", size,
-      size, size, 0xFFFFFF, "",
-      function() {
-        if (this.inner_action != null) {
-          new TWEEN.Tween(this)
-            .to({rotation: Math.PI / 20.0}).duration(70).yoyo(true).repeat(1)
-            .chain(new TWEEN.Tween(this)
-              .to({rotation: Math.PI / -20.0}).duration(70).yoyo(true).repeat(1)
-              )
-            .start()
-          this.inner_action("Left");
-        }
-      }
+      key_margin + size / 2 + 10 * (size + key_margin), key_margin + size / 2,
+      size, "del", "white", function() {self.deleteAction();}
     );
-    palette.left_button.inner_action = function() {self.leftArrowAction();}
-    palette.left_button.glyph = new PIXI.Sprite(PIXI.Texture.from("Art/left_arrow.png"));
-    palette.left_button.glyph.anchor.set(0.5, 0.5);
-    palette.left_button.glyph.scale.set(size / 200, size / 200);
-    palette.left_button.addChild(palette.left_button.glyph);
-    palette.left_button.cacheAsBitmap = true;
-    palette.left_button.crashAsBootpimp = true;
 
-    palette.right_button = this.makeTile(
+    palette.enter_button = this.makeKey(
       palette,
-      -nominal_width/2*size + (8+0.5)*size + (2/2 * size) - 2 * special_shift, -1/2 * (letters.length * size) + ((2+0.5) * size),
-      "", size,
-      size, size, 0xF0F0F0, "",
-      function() {
-        if (this.inner_action != null) {
-          new TWEEN.Tween(this)
-            .to({rotation: Math.PI / 20.0}).duration(70).yoyo(true).repeat(1)
-            .chain(new TWEEN.Tween(this)
-              .to({rotation: Math.PI / -20.0}).duration(70).yoyo(true).repeat(1)
-              )
-            .start()
-          this.inner_action("Right");
-        }
-      }
+      key_margin + size / 2 + 9 * (size + key_margin) + (1/2 * size) + size / 2 - 10, key_margin + size / 2 + (size + key_margin),
+      size, "enter", "green", function() {self.enterAction();}
     );
-    palette.right_button.inner_action = function() {self.rightArrowAction();}
-    palette.right_button.glyph = new PIXI.Sprite(PIXI.Texture.from("Art/right_arrow.png"));
-    palette.right_button.glyph.anchor.set(0.5, 0.5);
-    palette.right_button.glyph.scale.set(size / 200, size / 200);
-    palette.right_button.addChild(palette.right_button.glyph);
-    palette.right_button.cacheAsBitmap = true;
-    palette.right_button.crashAsBootpimp = true;
 
-    palette.del = this.makeTile(
+    palette.left_button = this.makeKey(
       palette,
-      -nominal_width/2*size + (9+0.5)*size + (2/2 * size) - 2 * special_shift, -1/2 * (letters.length * size) + ((2+0.5) * size),
-      "Del", size/2,
-      size, size, 0xFFFFFF, "",
-      function() {
-        if (this.inner_action != null) {
-          new TWEEN.Tween(this)
-            .to({rotation: Math.PI / 20.0}).duration(70).yoyo(true).repeat(1)
-            .chain(new TWEEN.Tween(this)
-              .to({rotation: Math.PI / -20.0}).duration(70).yoyo(true).repeat(1)
-              )
-            .start()
-          this.inner_action("Delete");
-        }
-      }
+      key_margin + size / 2 + 8 * (size + key_margin) + (2/2 * size), key_margin + size / 2 + 2 * (size + key_margin),
+      size, "left", "white", function() {self.leftArrowAction();}
     );
-    palette.del.cacheAsBitmap = true;
-    palette.del.crashAsBootpimp = true;
-    palette.del.inner_action = function() {self.deleteAction();}
+
+    palette.right_button = this.makeKey(
+      palette,
+      key_margin + size / 2 + 9 * (size + key_margin) + (2/2 * size), key_margin + size / 2 + 2 * (size + key_margin),
+      size, "right", "white", function() {self.rightArrowAction();}
+    );
   }
-
 
   return palette;
 }

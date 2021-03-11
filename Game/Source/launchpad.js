@@ -266,10 +266,6 @@ class Launchpad {
   }
 
 
-  flashError(){
-    this.error = 5;
-  }
-
 
   launch(area) {
     this.checkWord();

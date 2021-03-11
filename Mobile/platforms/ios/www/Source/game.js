@@ -76,6 +76,7 @@ class Game {
       this.width = 1024;
       this.height = 768;
       this.device_type = "browser";
+      this.keyboard_sounds = false;
       this.fps = 30;
       //  document.getElementById("mainDiv").style.width = 1024;
       // document.getElementById("mainDiv").style.marginLeft = -512;
@@ -84,6 +85,7 @@ class Game {
       if (device.platform != "browser") {
         screen.orientation.lock("portrait-primary");
       }
+      this.fps = 45;
       if (navigator.userAgent.indexOf("iPhone") > 0) {
         var physicalScreenWidth = window.screen.width * window.devicePixelRatio;
         var physicalScreenHeight = window.screen.height * window.devicePixelRatio;
@@ -92,17 +94,17 @@ class Game {
         this.width = physicalScreenWidth;
         this.height = physicalScreenHeight;
         this.device_type = "iPhone";
-        this.fps = 30;
+        this.keyboard_sounds = true;
       } else if (navigator.userAgent.indexOf("iPad") > 0) {
         this.width = 768;
         this.height = 1024;
         this.device_type = "iPad";
-        this.fps = 30;
+        this.keyboard_sounds = true;
       } else {
         this.width = 768;
         this.height = 1024;
         this.device_type = "iPad";
-        this.fps = 30;
+        this.keyboard_sounds = true;
       }
       
       
@@ -113,8 +115,6 @@ class Game {
       this.width = 768;
       this.height = 1024;
       this.device_type = "mobile_browser";
-      // document.getElementById("mainDiv").style.width = 1024;
-      // document.getElementById("mainDiv").style.marginLeft = -512;
     }
 
     // Create the pixi application
@@ -122,68 +122,87 @@ class Game {
     document.getElementById("mainDiv").appendChild(pixi.view);
     pixi.renderer.backgroundColor = 0xFFFFFF;
     pixi.renderer.resize(this.width,this.height);
+    console.log("Renderer: " + PIXI.RENDERER_TYPE[pixi.renderer.type]);
 
     if (this.device_type == "iPhone") {
       pixi.stage.scale.set(1/window.devicePixelRatio, 1/window.devicePixelRatio);
     }
 
+    // setTimeout(function() {
+    //   // Game loop
+    //   while(true) {
+    //     let now = Date.now();
+    //     let time = now - game_loop_start;
+    //     if (now - last_frame >= 1000 / self.fps) {
+    //       fps_counter += 1;
+    //       last_frame = now;
+
+    //       self.trackStart("update");
+    //       self.update();
+    //       self.trackStop("update");
+
+    //       self.trackStart("tween");
+    //       TWEEN.update(time);
+    //       self.trackStop("tween");
+
+    //       self.trackStart("animate");
+    //       ticker.update(time);
+    //       pixi.renderer.render(pixi.stage);
+    //       self.trackStop("animate");
+
+    //       if (now - last_performance_update > 6000 && log_performance) {
+    //         // There were 6000 milliseconds, so divide FPS by 6
+    //         console.log("FPS: " + fps_counter / 6);
+    //         fps_counter = 0;
+    //         last_performance_update = now;
+    //         self.trackPrint(["update", "tween", "animate"]);
+    //       }
+    //     }
+    //   }
+    // }, 5000);
+
+
     // Set up rendering and tweening loop
-    var animation_last = Date.now();
-    var track_fps = 0;
-    var track_last = Date.now();
+    
     let ticker = PIXI.Ticker.shared;
     ticker.autoStart = false;
     ticker.stop();
-    function animate(time) {
-      
-      if (Math.abs(time - animation_last) > 10000) {
-        animation_last = time;
-        track_last = time;
-      }
-      if (time - animation_last >= 1000 / self.fps) {
-        track_fps += 1;
-        animation_last = time;
+
+    let fps_counter = 0;
+    // let game_loop_start = 0;
+    let last_frame = 0;
+    let last_performance_update = 0;
+
+    function animate(now) {
+      self.trackStart("tween");
+      TWEEN.update(now);
+      self.trackStop("tween");
+
+      if (now - last_frame >= 1000 / self.fps) {
+        fps_counter += 1;
+        last_frame = now;
 
         self.trackStart("update");
         self.update();
         self.trackStop("update");
 
-        self.trackStart("tween");
-        TWEEN.update(time);
-        self.trackStop("tween");
-
-
         self.trackStart("animate");
-        ticker.update(time);
+        ticker.update(now);
         pixi.renderer.render(pixi.stage);
         self.trackStop("animate");
 
-        if (time - track_last > 6000 && log_performance) {
-          console.log("FPS: " + track_fps / 3);
-          console.log("Renderer: " + PIXI.RENDERER_TYPE[pixi.renderer.type]);
-          track_fps = 0;
-          track_last = time;
+        if (now - last_performance_update > 3000 && log_performance) {
+          // There were 3000 milliseconds, so divide fps_counter by 3
+          console.log("FPS: " + fps_counter / 3);
+          fps_counter = 0;
+          last_performance_update = now;
           self.trackPrint(["update", "tween", "animate"]);
-
-          performance.measureUserAgentSpecificMemory().then(function(result){performance_result = result});
-
-          if (performance_result != null) {
-            console.log("Mem total: " + (performance_result.bytes / 1000000).toFixed(2) + "mb");
-            var breakdown = "";
-            for (var i = 0; i < performance_result.breakdown.length; i++) {
-              if (performance_result.breakdown[i].types.length > 0) {
-                breakdown += performance_result.breakdown[i].types[0] + ":" + (performance_result.breakdown[i].bytes / 1000000).toFixed(2) + ",";
-              } else if (performance_result.breakdown[i].bytes > 10) {
-                breakdown += "N/A:" + (performance_result.breakdown[i].bytes / 1000000).toFixed(2) + ",";
-              }
-            }
-            console.log(breakdown);
-          }
         }
       }
       requestAnimationFrame(animate);
     }
-    animate(Date.now())
+    animate(0);
+
   }
 
   trackStart(label) {
@@ -321,8 +340,7 @@ class Game {
   clearScene(scene) {
     console.log("here i am cleaning");
     while(scene.children[0]) {
-      let x = scene.children[0];
-      scene.removeChild(scene.children[0]);
+      let x = scene.removeChild(scene.children[0]);
       x.destroy();
     }
   }
@@ -340,10 +358,10 @@ class Game {
   }
 
 
-  soundEffect(effect_name) {
+  soundEffect(effect_name, volume = 0.6) {
     if (!silence) {
       var sound_effect = document.getElementById(effect_name);
-      sound_effect.volume = 0.6;
+      sound_effect.volume = volume;
       sound_effect.play();
     }
   }
@@ -354,7 +372,7 @@ class Game {
       var self = this;
       this.music = document.getElementById(music_name);
       this.music.loop = true;
-      this.music.volume = 0.7;
+      this.music.volume = 0.6;
       this.music.play();
     }
   }

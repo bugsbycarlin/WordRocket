@@ -54,7 +54,7 @@ Game.prototype.resetBoardBrowser = function() {
   });
 
   // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette(scene, 24, this.width * 1/2 + 180, 426, false, function(letter) {
+  this.enemy_palette = this.makeQwertyPalette(scene, 20, this.width * 1/2 + 180, 426, false, function(letter) {
   });
 
   // the player's board
@@ -63,13 +63,13 @@ Game.prototype.resetBoardBrowser = function() {
   this.player_area.position.set(this.width * 1/2 - 300,530);
   this.player_area.scale.set(0.7,0.7);
 
-  // var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // play_mat.width = 500;
-  // play_mat.height = 700;
-  // play_mat.anchor.set(0, 1);
-  // play_mat.position.set(0, -50);
-  // play_mat.tint = 0x4D4D4D;
-  // this.player_area.addChild(play_mat);
+  var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  play_mat.width = 500;
+  play_mat.height = 700;
+  play_mat.anchor.set(0, 1);
+  play_mat.position.set(0, -50);
+  play_mat.tint = 0x4D4D4D;
+  this.player_area.addChild(play_mat);
 
   var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   pad_mat.width = 500;
@@ -87,13 +87,13 @@ Game.prototype.resetBoardBrowser = function() {
   scene.addChild(this.enemy_area);
   this.enemy_area.position.set(this.width * 1/2 + 60,380);
   this.enemy_area.scale.set(0.5,0.5);
-  // var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // enemy_mat.width = 500;
-  // enemy_mat.height = 700;
-  // enemy_mat.anchor.set(0, 1);
-  // enemy_mat.position.set(0, -50);
-  // enemy_mat.tint = 0x4D4D4D;
-  // this.enemy_area.addChild(enemy_mat);
+  var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  enemy_mat.width = 500;
+  enemy_mat.height = 700;
+  enemy_mat.anchor.set(0, 1);
+  enemy_mat.position.set(0, -50);
+  enemy_mat.tint = 0x4D4D4D;
+  this.enemy_area.addChild(enemy_mat);
   var enemy_pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   enemy_pad_mat.width = 500;
   enemy_pad_mat.height = 50;
@@ -154,133 +154,13 @@ Game.prototype.resetBoardBrowser = function() {
 }
 
 
-// Game.prototype.resetBoardTestiPad = function() {
-//   var self = this;
-//   var scene = this.scenes["game"];
-
-//   var add_special_keys = true;
-//   this.player_palette = this.makeQwertyPalette(scene, 64, this.width * 1/2, this.height - 118, add_special_keys, function(letter) {
-//     if (add_special_keys && !self.launchpad.full()) {
-//       self.keyAction(letter);
-//     }
-//   });
-
-//   // the enemy palette
-//   this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, function(letter) {
-//   });
-  
-//   // the player's board
-//   this.player_area = new PIXI.Container();
-//   scene.addChild(this.player_area);
-//   this.player_area.position.set(6,756);
-//   // this.player_area.scale.set(0.5,0.5);
-
-//   var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-//   play_mat.width = 500;
-//   play_mat.height = 700;
-//   play_mat.anchor.set(0, 1);
-//   play_mat.position.set(0, -50);
-//   play_mat.tint = 0x4D4D4D;
-//   this.player_area.addChild(play_mat);
-
-//   var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-//   pad_mat.width = 500;
-//   pad_mat.height = 50;
-//   pad_mat.anchor.set(0, 1);
-//   pad_mat.position.set(0, 0);
-//   pad_mat.tint = 0xCCCCCC;
-//   this.player_area.addChild(pad_mat);
-
-//   // the player's launchpad
-//   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
-
-//   // the enemy board
-//   this.enemy_area = new PIXI.Container();
-//   scene.addChild(this.enemy_area);
-//   this.enemy_area.position.set(512,381);
-//   this.enemy_area.scale.set(0.5,0.5);
-//   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-//   enemy_mat.width = 500;
-//   enemy_mat.height = 700;
-//   enemy_mat.anchor.set(0, 1);
-//   enemy_mat.position.set(0, -50);
-//   enemy_mat.tint = 0x4D4D4D;
-//   this.enemy_area.addChild(enemy_mat);
-//   var enemy_pad_math = PIXI.Sprite.from(PIXI.Texture.WHITE);
-//   enemy_pad_math.width = 500;
-//   enemy_pad_math.height = 50;
-//   enemy_pad_math.anchor.set(0, 1);
-//   enemy_pad_math.position.set(0, 0);
-//   enemy_pad_math.tint = 0xCCCCCC;
-//   this.enemy_area.addChild(enemy_pad_math);
-
-//   // level and score
-//   this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-//   this.level_label.anchor.set(0.5,0.5);
-//   this.level_label.position.set(640, 512);
-//   scene.addChild(this.level_label);
-
-//   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-//   this.level_text_box.anchor.set(0.5,0.5);
-//   this.level_text_box.position.set(640, 542);
-//   scene.addChild(this.level_text_box);
-
-//   this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-//   this.opponent_label.anchor.set(0.5,0.5);
-//   this.opponent_label.position.set(640, 592);
-//   scene.addChild(this.opponent_label);
-
-//   this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-//   this.opponent_text_box.anchor.set(0.5,0.5);
-//   this.opponent_text_box.position.set(640, 622);
-//   scene.addChild(this.opponent_text_box);
-
-//   this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-//   this.score_label.anchor.set(0.5,0.5);
-//   this.score_label.position.set(640, 672);
-//   scene.addChild(this.score_label);
-
-//   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-//   this.score_text_box.anchor.set(0.5,0.5);
-//   this.score_text_box.position.set(640, 702);
-//   scene.addChild(this.score_text_box);
-
-//   this.setEnemyDifficulty(this.level);
-
-//   this.enemy_last_action = Date.now();
-
-//   this.gravity = 6;
-//   this.boost = 0.25;
-//   this.gentle_drop = 0.1;
-//   this.gentle_limit = 12.5;
-//   this.boost_limit = -40;
-
-//   for (var i = 0; i < 10; i++) {
-//     this.launchpad.cursors[i].visible = false;
-//   }
-
-//   this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
-//   this.countdown_text.anchor.set(0.5,0.5);
-//   this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
-//   scene.addChild(this.countdown_text);
-// }
-
-
 Game.prototype.resetBoardiPad = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  var add_special_keys = true;
-  this.player_palette = this.makeQwertyPalette(scene, 64, this.width * 1/2, this.height - 118, add_special_keys, function(letter) {
-    if (add_special_keys && !self.launchpad.full()) {
-      self.keyAction(letter);
-    }
+  this.player_palette = this.makeQwertyPalette(scene, 60, 9, 0, this.height - 216, true, function(letter) {
+    self.keyAction(letter);
   });
-
-  // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, function(letter) {
-  });
-  this.enemy_palette.cacheAsBitmap = true;
 
   // the player's board
   this.player_area = new PIXI.Container();
@@ -312,6 +192,11 @@ Game.prototype.resetBoardiPad = function() {
   scene.addChild(this.enemy_area);
   this.enemy_area.position.set(512,381);
   this.enemy_area.scale.set(0.5,0.5);
+
+  // the enemy palette
+  this.enemy_palette = this.makeQwertyPalette(this.enemy_area, 42, 7, 1, 24, false, function(letter) {
+  });
+
   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   enemy_mat.width = 500;
   enemy_mat.height = 700;
@@ -394,7 +279,7 @@ Game.prototype.resetBoardiPhone = function() {
   });
 
   // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, function(letter) {
+  this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, false, function(letter) {
   });
 
   // the player's board
@@ -513,10 +398,10 @@ Game.prototype.pickDefense = function(number, retries) {
     this.enemy_defense = enemy_picks;
 
     for (var i = 0; i < this.enemy_defense.length; i++) {
-      this.enemy_palette.letters[this.enemy_defense[i]].backing.tint = 0x63bff5;
+      this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
     }
     for (var i = 0; i < this.player_defense.length; i++) {
-      this.player_palette.letters[this.player_defense[i]].backing.tint = 0x63bff5;
+      this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
     }
     return;
   }
@@ -534,10 +419,10 @@ Game.prototype.pickDefense = function(number, retries) {
     this.enemy_defense = enemy_picks;
 
     for (var i = 0; i < this.enemy_defense.length; i++) {
-      this.enemy_palette.letters[this.enemy_defense[i]].backing.tint = 0x63bff5;
+      this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
     }
     for (var i = 0; i < this.player_defense.length; i++) {
-      this.player_palette.letters[this.player_defense[i]].backing.tint = 0x63bff5;
+      this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
     }
   }
 }
@@ -720,15 +605,10 @@ Game.prototype.singlePlayerUpdate = function() {
     }
   }
 
-  if (this.launchpad.error > 0) {
-    for (item of this.launchpad.tiles) {
-      item.backing.tint = 0xdb5858;
-    }
-    this.launchpad.error -= 1;
-    if (this.launchpad.error <= 0) {
-      for (item of this.launchpad.tiles) {
-        item.backing.tint = 0xFFFFFF;
-      }
+  if (this.player_palette.error > 0) {
+    this.player_palette.error -= 1;
+    if (this.player_palette.error <= 0) {
+      this.player_palette.mat.tint = 0x4D4D4D;
     }
   }
 
@@ -894,8 +774,8 @@ Game.prototype.singlePlayerUpdate = function() {
       let target_x = 0;
       let target_y = 0;
       if (rocket.player == 1) {
-        target_x = (this.enemy_palette.letters[disabled_letter].x + this.enemy_palette.position.x - this.enemy_area.position.x) / this.enemy_area.scale.x;
-        target_y = (this.enemy_palette.letters[disabled_letter].y + this.enemy_palette.position.y - this.enemy_area.position.y) / this.enemy_area.scale.y;
+        target_x = this.enemy_palette.letters[disabled_letter].x + this.enemy_palette.position.x;
+        target_y = this.enemy_palette.letters[disabled_letter].y + this.enemy_palette.position.y;
         if (this.game_phase == "tutorial" && this.tutorial_number == 7) this.tutorial8();
       } else if (rocket.player == 2) {
         target_x = (this.player_palette.letters[disabled_letter].x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
@@ -924,23 +804,23 @@ Game.prototype.singlePlayerUpdate = function() {
                   self.enemy_palette.letters[disabled_letter].disable();
                   self.soundEffect("explosion_3");
                   
-                  let fire = self.makeFire(self.scenes["game"], 
+                  let fire = self.makeFire(self.enemy_area, 
                     self.enemy_palette.letters[disabled_letter].x + self.enemy_palette.position.x,
-                    self.enemy_palette.letters[disabled_letter].y + self.enemy_palette.position.y - 8,
-                    0.1, 0.25/3);
+                    self.enemy_palette.letters[disabled_letter].y + self.enemy_palette.position.y - 24,
+                    0.3/2, 0.25/2);
                   fire.visible = false;
 
-                  let explosion = self.makeExplosion(self.scenes["game"], 
+                  let explosion = self.makeExplosion(self.enemy_area, 
                     self.enemy_palette.letters[disabled_letter].x + self.enemy_palette.position.x,
                     self.enemy_palette.letters[disabled_letter].y + self.enemy_palette.position.y,
-                  0.3, 0.3, function() {fire.visible = true; self.scenes["game"].removeChild(explosion)});
+                  1/2, 1/2, function() {fire.visible = true; self.enemy_area.removeChild(explosion)});
 
 
                   if (!self.enemy_defense.includes(disabled_letter)) {
                     self.score += rocket.score_value;
                     self.score_text_box.text = self.score;
                     setTimeout(function() {
-                      self.scenes["game"].removeChild(fire);
+                      self.enemy_area.removeChild(fire);
                       self.enemy_palette.letters[disabled_letter].enable()
                     }, self.disabledTime(disabled_letter));
                   } else {
@@ -955,20 +835,20 @@ Game.prototype.singlePlayerUpdate = function() {
                   scene.shake = 5;
                   self.soundEffect("explosion_3");
                   
-                  let fire = self.makeFire(self.scenes["game"], 
-                    self.player_palette.letters[disabled_letter].x + self.player_palette.position.x,
-                    self.player_palette.letters[disabled_letter].y + self.player_palette.position.y - 24,
+                  let fire = self.makeFire(self.player_palette.letters[disabled_letter], 
+                    0,
+                    -24,
                     0.3, 0.25);
                   fire.visible = false;
 
-                  let explosion = self.makeExplosion(self.scenes["game"], 
-                    self.player_palette.letters[disabled_letter].x + self.player_palette.position.x,
-                    self.player_palette.letters[disabled_letter].y + self.player_palette.position.y,
-                  1, 1, function() {fire.visible = true; self.scenes["game"].removeChild(explosion);});
+                  let explosion = self.makeExplosion(self.player_palette.letters[disabled_letter], 
+                    0,
+                    0,
+                  1, 1, function() {fire.visible = true; self.player_palette.letters[disabled_letter].removeChild(explosion);});
 
                   if (!self.player_defense.includes(disabled_letter)) {
                       setTimeout(function() {
-                      self.scenes["game"].removeChild(fire);
+                      self.player_palette.letters[disabled_letter].removeChild(fire);
                       self.player_palette.letters[disabled_letter].enable()
                     }, self.disabledTime(disabled_letter));
                   } else {

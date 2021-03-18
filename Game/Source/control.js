@@ -5,13 +5,13 @@ Game.prototype.keyAction = function(letter) {
   if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
     if (this.player_palette.letters[letter].interactive == true && !this.launchpad.full()) {
 
-      let previous_tint = this.player_palette.letters[letter].tint;
-      this.player_palette.letters[letter].tint = 0xBBBBBB;
-      setTimeout(function() { self.player_palette.letters[letter].tint = previous_tint; }, 100);
+      // let previous_tint = this.player_palette.letters[letter].tint;
+      // this.player_palette.letters[letter].tint = 0xBBBBBB;
+      // setTimeout(function() { self.player_palette.letters[letter].tint = previous_tint; }, 100);
 
-      let click_sound = "keyboard_click_" + ((letter.charCodeAt(0) % 5)+1).toString();
-      console.log(click_sound);
-      if (this.keyboard_sounds) this.soundEffect(click_sound, 1.0);
+      // let click_sound = "keyboard_click_" + ((letter.charCodeAt(0) % 5)+1).toString();
+      // console.log(click_sound);
+      // if (this.keyboard_sounds) this.soundEffect(click_sound, 1.0);
       this.launchpad.push(this.player_palette, letter);
     } else {
       this.soundEffect("negative");
@@ -81,9 +81,45 @@ Game.prototype.enterAction = function() {
 }
 
 
+Game.prototype.pressKey = function(key) {
+  if (key in this.player_palette.keys) {
+    let keyboard_key = this.player_palette.keys[key];
+    let click_sound = "keyboard_click_" + ((key.charCodeAt(0) % 5)+1).toString();
+    if (this.keyboard_sounds) this.soundEffect(click_sound, 1.0);
+    if (keyboard_key.key_pressed != true) {
+      keyboard_key.key_pressed = true;
+      // let old_y = keyboard_key.position.y;
+      keyboard_key.position.y += 3;
+      setTimeout(function() {
+        keyboard_key.key_pressed = false;
+        keyboard_key.position.y -= 3;
+      }, 50);
+    }
+  }
+  // let previous_tint = this.player_palette.letters[letter].tint;
+      // this.player_palette.letters[letter].tint = 0xBBBBBB;
+      // setTimeout(function() { self.player_palette.letters[letter].tint = previous_tint; }, 100);
+
+      // let click_sound = "keyboard_click_" + ((letter.charCodeAt(0) % 5)+1).toString();
+      // console.log(click_sound);
+      // if (this.keyboard_sounds) this.soundEffect(click_sound, 1.0);
+}
+
+
 
 Game.prototype.handleKeyDown = function(ev) {
+  // Don't always need to do this.
   // ev.preventDefault();
+
+  if (this.current_scene == "game") {
+    let key = ev.key;
+    if (key == "Shift") {
+      if (ev.code == "ShiftLeft") key = "LShift";
+      if (ev.code == "ShiftRight") key = "RShift";
+    }
+    this.pressKey(key);
+  }
+
   for (i in lower_array) {
     if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
       this.keyAction(letter_array[i]);

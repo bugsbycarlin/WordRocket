@@ -2,7 +2,7 @@
 
 var annoying = true;
 var use_scores = false;
-var silence = true;
+var silence = false;
 var log_performance = true;
 
 var performance_result = null;
@@ -76,7 +76,7 @@ class Game {
       this.width = 1024;
       this.height = 768;
       this.device_type = "browser";
-      this.keyboard_sounds = false;
+      this.keyboard_sounds = true;
       this.fps = 30;
       //  document.getElementById("mainDiv").style.width = 1024;
       // document.getElementById("mainDiv").style.marginLeft = -512;

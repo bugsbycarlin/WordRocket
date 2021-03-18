@@ -39,13 +39,13 @@ class Launchpad {
     }
 
     // cursor cover patch
-    var cover_patch = PIXI.Sprite.from(PIXI.Texture.WHITE);
-    cover_patch.width = this.outer_size * 10;
-    cover_patch.height = this.outer_size;
-    cover_patch.anchor.set(0, 0);
-    cover_patch.position.set(this.x + this.outer_size * 10, this.y - this.inner_size / 2);
-    cover_patch.tint = 0xFFFFFF;
-    this.parent.addChild(cover_patch);
+    // var cover_patch = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    // cover_patch.width = this.outer_size * 10;
+    // cover_patch.height = this.outer_size;
+    // cover_patch.anchor.set(0, 0);
+    // cover_patch.position.set(this.x + this.outer_size * 10, this.y - this.inner_size / 2);
+    // cover_patch.tint = 0xFFFFFF;
+    // this.parent.addChild(cover_patch);
 
     // red underline of course
     this.red_underlines = [];

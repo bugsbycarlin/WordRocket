@@ -18,6 +18,10 @@ Game.prototype.reset = function() {
 
   this.rocket_letters = [];
 
+  if (!this.tutorial) {
+    this.pickDefense(6, 10);
+  }
+
   if (this.device_type == "browser") {
     this.resetBoardBrowser();
   } else if (this.device_type == "iPad") {
@@ -29,8 +33,6 @@ Game.prototype.reset = function() {
   if (this.tutorial) {
     this.tutorial1();
   } else {
-    this.pickDefense(6, 10);
-
     this.game_phase = "pre_game";
 
     setTimeout(function() {
@@ -46,19 +48,27 @@ Game.prototype.resetBoardBrowser = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_4_3_rough_2.png"));
-  background.anchor.set(0, 0);
-  scene.addChild(background);
+  // var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_4_3_rough_2.png"));
+  // background.anchor.set(0, 0);
+  // scene.addChild(background);
 
-  this.player_palette = this.makeQwertyPalette({
-    parent: scene,
-    key_size: 35,
-    key_margin: 6,
-    x: this.width * 1/2 - 240, y: this.height - 158,
-    add_special_keys: false,
-    hide_mat: true,
-    action: function(letter) {}
-  });
+  this.player_palette = this.makeKeyboard({
+    parent: scene, x: this.width * 1/2, y: this.height - 125,
+    defense: this.player_defense, 
+    action: function(letter) {
+
+    }
+  })
+
+  // this.player_palette = this.makeQwertyPalette({
+  //   parent: scene,
+  //   key_size: 35,
+  //   key_margin: 6,
+  //   x: this.width * 1/2 - 240, y: this.height - 158,
+  //   add_special_keys: false,
+  //   hide_mat: true,
+  //   action: function(letter) {}
+  // });
 
   // the enemy palette
   this.enemy_palette = this.makeQwertyPalette({
@@ -437,12 +447,12 @@ Game.prototype.pickDefense = function(number, retries) {
     this.player_defense = player_picks;
     this.enemy_defense = enemy_picks;
 
-    for (var i = 0; i < this.enemy_defense.length; i++) {
-      this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
-    }
-    for (var i = 0; i < this.player_defense.length; i++) {
-      this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
-    }
+    // for (var i = 0; i < this.enemy_defense.length; i++) {
+    //   this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
+    // }
+    // for (var i = 0; i < this.player_defense.length; i++) {
+    //   this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
+    // }
     return;
   }
 
@@ -458,12 +468,12 @@ Game.prototype.pickDefense = function(number, retries) {
     this.player_defense = player_picks;
     this.enemy_defense = enemy_picks;
 
-    for (var i = 0; i < this.enemy_defense.length; i++) {
-      this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
-    }
-    for (var i = 0; i < this.player_defense.length; i++) {
-      this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
-    }
+    // for (var i = 0; i < this.enemy_defense.length; i++) {
+    //   this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
+    // }
+    // for (var i = 0; i < this.player_defense.length; i++) {
+    //   this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
+    // }
   }
 }
 

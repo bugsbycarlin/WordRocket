@@ -381,6 +381,105 @@ Game.prototype.makeTallQwertyPalette = function(options) {
 }
 
 
+
+Game.prototype.makeKeyboard = function(options) {
+  let self = this;
+
+  let parent = options.parent;
+  let x = options.x == null ? 0 : options.x;
+  let y = options.y == null ? 0 : options.y;
+  let defense = options.defense == null ? [] : options.defense;
+  let action = options.action == null ? function(){} : options.action;
+
+  let keyboard = new PIXI.Container();
+  parent.addChild(keyboard);
+  keyboard.position.set(x, y);
+  keyboard.letters = {};
+  keyboard.keys = {};
+  keyboard.error = 0;
+
+  let keys = [];
+  keys[0] = ["Escape_1_esc", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-_1_minus", "=_1_equals", "Backspace_2_backspace"];
+  keys[1] = ["Tab_1.5_tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[_1_leftbracket", "]_1_rightbracket", "\\_1.5_backslash"];
+  keys[2] = ["CapsLock_2_capslock", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";_1_semicolon", "'_1_quote", "Enter_2_enter"];
+  keys[3] = ["LShift_2.5_shift", "Z", "X", "C", "V", "B", "N", "M", ",_1_comma", "._1_period", "/_1_forwardslash", "RShift_2.5_shift"];
+  keys[4] = ["Control_1.5_ctrl", "Alt_1_alt", "Meta_1.5_cmd", " _6_spacebar", "Fn_1_fn", "ArrowLeft_1_left", "ArrowUp_1_up", "ArrowDown_1_down", "ArrowRight_1_right"];
+
+  let background = new PIXI.Sprite(PIXI.Texture.from("Art/keyboard_background.png"));
+  background.anchor.set(0.5, 0.5);
+  keyboard.addChild(background);
+  keyboard.background = background;
+
+  for (var h = 0; h < keys.length; h++) {
+    var k_x = -310 + 10;
+    var k_y = -115 + 25 + 42 * h;
+    for (var i = 0; i < keys[h].length; i++) {
+      let info = keys[h][i];
+      
+      let letter = info;
+      let size = 1;
+      let filename = "key_" + letter;
+      if (info.includes("_")) {
+        let s = info.split("_");
+        letter = s[0];
+        size = parseFloat(s[1]);
+        filename = "key_" + s[2];
+      }
+
+      if (defense.includes(letter)) filename = "blue_" + filename;
+
+      let button = this.makeNiceKey(
+        keyboard,
+        k_x + size * 20, k_y, filename, size, function() { 
+          self.pressKey(letter);
+          action(letter);
+        },
+      );
+
+      k_x += 40 * size;
+
+      keyboard.keys[letter] = button;
+      if (letter_array.includes(letter)) {
+        keyboard.keys[letter.toLowerCase()] = button;
+        keyboard.letters[letter] = button;
+      }
+    }
+  }
+
+  keyboard.flashError = function(){
+    keyboard.error = 5;
+    // if (keyboard.mat != null) {
+    //   keyboard.mat.tint = 0xdb5858;
+    // }
+  }
+
+  return keyboard;
+}
+
+Game.prototype.makeNiceKey = function(parent, x, y, filename, size, action) {
+  var key_button = new PIXI.Sprite(PIXI.Texture.from("Art/NiceKeys/" + filename + ".png"));
+  key_button.anchor.set(0.5, 0.5);
+  key_button.position.set(x, y);
+  parent.addChild(key_button);
+
+  key_button.interactive = true;
+  key_button.buttonMode = true;
+  key_button.on("pointerdown", action);
+
+  key_button.action = action;
+
+  key_button.disable = function() {
+    this.interactive = false;
+  }
+
+  key_button.enable = function() {
+    this.interactive = true;
+  }
+
+  return key_button;
+}
+
+
 Game.prototype.makeQwertyPalette = function(options) {
   let self = this;
 

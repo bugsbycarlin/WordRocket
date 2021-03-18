@@ -91,6 +91,7 @@ class Game {
         var physicalScreenHeight = window.screen.height * window.devicePixelRatio;
         //alert("Width: " + window.screen.width + "*" + window.devicePixelRatio + "=" + physicalScreenWidth);
         //alert("Height: " + window.screen.height + "*" + window.devicePixelRatio + "=" + physicalScreenHeight);
+        // this should work out to 1136x640 on my iphone 5s. I need to try one of mom's old devices though.
         this.width = physicalScreenWidth;
         this.height = physicalScreenHeight;
         this.device_type = "iPhone";
@@ -101,9 +102,12 @@ class Game {
         this.device_type = "iPad";
         this.keyboard_sounds = true;
       } else {
-        this.width = 768;
-        this.height = 1024;
-        this.device_type = "iPad";
+        // this.width = 768;
+        // this.height = 1024;
+        // this.device_type = "iPad";
+        this.width = 640;
+        this.height = 1136;
+        this.device_type = "iPhone";
         this.keyboard_sounds = true;
       }
       
@@ -127,6 +131,8 @@ class Game {
     if (this.device_type == "iPhone") {
       pixi.stage.scale.set(1/window.devicePixelRatio, 1/window.devicePixelRatio);
     }
+
+
 
     // setTimeout(function() {
     //   // Game loop

@@ -270,8 +270,8 @@ Game.prototype.makeLetterPalette = function(parent, x, y, action) {
 }
 
 
-Game.prototype.makeKey = function(parent, x, y, size, letter, color, action) {
-  var key_button = new PIXI.Sprite(PIXI.Texture.from("Art/Keys/" + color + "_key_" + letter + ".png"));
+Game.prototype.makeKey = function(parent, x, y, size, letter, type, action) {
+  var key_button = new PIXI.Sprite(PIXI.Texture.from("Art/Keys/" + type + "_" + letter + ".png"));
   key_button.anchor.set(0.5, 0.5);
   key_button.position.set(x, y);
   key_button.tint = 0xFFFFFF;
@@ -296,29 +296,117 @@ Game.prototype.makeKey = function(parent, x, y, size, letter, color, action) {
 }
 
 
-Game.prototype.makeQwertyPalette = function(parent, size, key_margin, x, y, add_special_keys, action) {
-  var self = this;
-  var palette = new PIXI.Container();
+Game.prototype.makeTallQwertyPalette = function(options) {
+  let self = this;
+
+  let parent = options.parent;
+  let key_size = options.key_size;
+  let key_margin = options.key_margin == null ? 10 : options.key_margin;
+  let side_margin = options.side_margin == null ? key_margin : options.side_margin;
+  let vertical_margin = options.vertical_margin == null ? key_margin : options.vertical_margin;
+  let add_special_keys = options.add_special_keys == null ? false : options.add_special_keys;
+  let x = options.x == null ? 0 : options.x;
+  let y = options.y == null ? 0 : options.y;
+  let action = options.action == null ? function(){} : options.action;
+
+  let palette = new PIXI.Container();
   parent.addChild(palette);
   palette.position.set(x, y);
-
   palette.letters = {};
-
   palette.error = 0;
 
-  // var size = 72;
-  var nominal_width = 11;
-
-  var letters = [];
+  let letters = [];
   letters[0] = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
   letters[1] = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
   letters[2] = ["Z", "X", "C", "V", "B", "N", "M"];
 
-  // console.log(key_margin);
-  var mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  mat.width = (11 * (size + key_margin)) + key_margin;
-  if (add_special_keys == false) mat.width = (10 * (size + key_margin)) + key_margin;
-  mat.height = (3 * (size + key_margin)) + key_margin;
+  let mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  mat.width = 10 * key_size + 9 * key_margin + 2 * side_margin;
+  mat.height = 4 * 1.5 * key_size + 3 * vertical_margin + 2 * side_margin;
+  if (!add_special_keys) mat.height -= (vertical_margin + 1.5 * key_size);
+  mat.anchor.set(0.0, 0.0);
+  mat.position.set(0, 0);
+  mat.tint = 0xDDDDDD;
+  palette.addChild(mat);
+  palette.mat = mat;
+
+  for (var h = 0; h < letters.length; h++) {
+    for (var i = 0; i < letters[h].length; i++) {
+      let letter = letters[h][i];
+      let v_align = h;
+      if (h == 2) v_align = 3;
+      let button = this.makeKey(
+        palette,
+        side_margin + key_size / 2 + i * (key_size + key_margin) + (v_align/2 * (key_size+key_margin)), side_margin + 1.5 * key_size / 2 + h * (1.5 * key_size + vertical_margin),
+        key_size, letter, "tall_key", function() { action(letter); },
+      );
+
+      palette.letters[letter] = button;
+    }
+  }
+
+  palette.flashError = function(){
+    palette.error = 5;
+    palette.mat.tint = 0xdb5858;
+  }
+
+  // Special keys
+  if (add_special_keys) {
+    palette.left_button = this.makeKey(
+      palette,
+      side_margin + key_size / 2 - (key_size + key_margin) + (3/2 * (key_size+key_margin)), side_margin + 1.5 * key_size / 2 + 2 * (1.5 * key_size + vertical_margin),
+      key_size, "left", "tall_key", function() {self.leftArrowAction();}
+    );
+
+    palette.right_button = this.makeKey(
+      palette,
+      side_margin + key_size / 2 + 7 * (key_size + key_margin) + (3/2 * (key_size+key_margin)), side_margin + 1.5 * key_size / 2 + 2 * (1.5 * key_size + vertical_margin),
+      key_size, "right", "tall_key", function() {self.rightArrowAction();}
+    );
+
+    palette.del = this.makeKey(
+      palette,
+      side_margin + key_size / 2 + (3/2 * (key_size+key_margin)), side_margin + 1.5 * key_size / 2 + 3 * (1.5 * key_size + vertical_margin),
+      key_size, "del", "tall_key", function() {self.deleteAction();}
+    );
+
+    palette.enter_button = this.makeKey(
+      palette,
+      side_margin + key_size / 2 + 6 * (key_size + key_margin) + (3/2 * (key_size+key_margin)), side_margin + 1.5 * key_size / 2 + 3 * (1.5 * key_size + vertical_margin),
+      key_size, "enter", "tall_key", function() {self.enterAction();}
+    );
+  }
+
+  return palette;
+}
+
+
+Game.prototype.makeQwertyPalette = function(options) {
+  let self = this;
+
+  let parent = options.parent;
+  let key_size = options.key_size;
+  let key_margin = options.key_margin == null ? 10 : options.key_margin;
+  let x = options.x == null ? 0 : options.x;
+  let y = options.y == null ? 0 : options.y;
+  let add_special_keys = options.add_special_keys == null ? false : options.add_special_keys;
+  let action = options.action == null ? function(){} : options.action;
+
+  let palette = new PIXI.Container();
+  parent.addChild(palette);
+  palette.position.set(x, y);
+  palette.letters = {};
+  palette.error = 0;
+
+  let letters = [];
+  letters[0] = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
+  letters[1] = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
+  letters[2] = ["Z", "X", "C", "V", "B", "N", "M"];
+
+  let mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  mat.width = (11 * (key_size + key_margin)) + key_margin;
+  if (add_special_keys == false) mat.width = (10 * (key_size + key_margin)) + key_margin;
+  mat.height = (3 * (key_size + key_margin)) + key_margin;
   console.log(mat.width);
   console.log(mat.height);
   console.log("wogs");
@@ -333,8 +421,8 @@ Game.prototype.makeQwertyPalette = function(parent, size, key_margin, x, y, add_
       let letter = letters[h][i];
       let button = this.makeKey(
         palette,
-        key_margin + size / 2 + i * (size + key_margin) + (h/2 * size), key_margin + size / 2 + h * (size + key_margin),
-        size, letter, "white", function() { action(letter); },
+        key_margin + key_size / 2 + i * (key_size + key_margin) + (h/2 * key_size), key_margin + key_size / 2 + h * (key_size + key_margin),
+        key_size, letter, "key", function() { action(letter); },
       );
 
       palette.letters[letter] = button;
@@ -352,26 +440,26 @@ Game.prototype.makeQwertyPalette = function(parent, size, key_margin, x, y, add_
 
     palette.del = this.makeKey(
       palette,
-      key_margin + size / 2 + 10 * (size + key_margin), key_margin + size / 2,
-      size, "del", "white", function() {self.deleteAction();}
+      key_margin + key_size / 2 + 10 * (key_size + key_margin), key_margin + key_size / 2,
+      key_size, "del", "key", function() {self.deleteAction();}
     );
 
     palette.enter_button = this.makeKey(
       palette,
-      key_margin + size / 2 + 9 * (size + key_margin) + (1/2 * size) + size / 2 - 10, key_margin + size / 2 + (size + key_margin),
-      size, "enter", "green", function() {self.enterAction();}
+      key_margin + key_size / 2 + 9 * (key_size + key_margin) + (1/2 * key_size) + key_size / 2 - 10, key_margin + key_size / 2 + (key_size + key_margin),
+      key_size, "enter", "key", function() {self.enterAction();}
     );
 
     palette.left_button = this.makeKey(
       palette,
-      key_margin + size / 2 + 8 * (size + key_margin) + (2/2 * size), key_margin + size / 2 + 2 * (size + key_margin),
-      size, "left", "white", function() {self.leftArrowAction();}
+      key_margin + key_size / 2 + 8 * (key_size + key_margin) + (2/2 * key_size) + key_margin, key_margin + key_size / 2 + 2 * (key_size + key_margin),
+      key_size, "left", "key", function() {self.leftArrowAction();}
     );
 
     palette.right_button = this.makeKey(
       palette,
-      key_margin + size / 2 + 9 * (size + key_margin) + (2/2 * size), key_margin + size / 2 + 2 * (size + key_margin),
-      size, "right", "white", function() {self.rightArrowAction();}
+      key_margin + key_size / 2 + 9 * (key_size + key_margin) + (2/2 * key_size) + key_margin, key_margin + key_size / 2 + 2 * (key_size + key_margin),
+      key_size, "right", "key", function() {self.rightArrowAction();}
     );
   }
 

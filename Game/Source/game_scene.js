@@ -46,15 +46,28 @@ Game.prototype.resetBoardBrowser = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_4_3_rough.png"));
+  var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_4_3_rough_2.png"));
   background.anchor.set(0, 0);
   scene.addChild(background);
 
-  this.player_palette = this.makeQwertyPalette(scene, 35, this.width * 1/2, this.height - 80, false, function(letter) {
+  this.player_palette = this.makeQwertyPalette({
+    parent: scene,
+    key_size: 35,
+    key_margin: 6,
+    x: this.width * 1/2 - 240, y: this.height - 158,
+    add_special_keys: false,
+    hide_mat: true,
+    action: function(letter) {}
   });
 
   // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette(scene, 20, this.width * 1/2 + 180, 426, false, function(letter) {
+  this.enemy_palette = this.makeQwertyPalette({
+    parent:scene,
+    key_size: 20,
+    key_margin: 2,
+    x: this.width * 1/2 + 80, y: 396,
+    add_special_keys: false,
+    action: function(letter) {}
   });
 
   // the player's board
@@ -133,7 +146,7 @@ Game.prototype.resetBoardBrowser = function() {
   this.score_text_box.position.set(920, 270);
   scene.addChild(this.score_text_box);
 
-  this.setEnemyDifficulty(this.level);
+  this.setEnemyDifficulty(this.level, 2);
 
   this.enemy_last_action = Date.now();
 
@@ -158,8 +171,15 @@ Game.prototype.resetBoardiPad = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  this.player_palette = this.makeQwertyPalette(scene, 60, 9, 0, this.height - 216, true, function(letter) {
-    self.keyAction(letter);
+  this.player_palette = this.makeQwertyPalette({
+    parent: scene,
+    key_size: 60,
+    key_margin: 9,
+    x: 0, y: this.height - 216,
+    add_special_keys: true,
+    action: function(letter) {
+      self.keyAction(letter);
+    }
   });
 
   // the player's board
@@ -194,7 +214,13 @@ Game.prototype.resetBoardiPad = function() {
   this.enemy_area.scale.set(0.5,0.5);
 
   // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette(this.enemy_area, 42, 7, 1, 24, false, function(letter) {
+  this.enemy_palette = this.makeQwertyPalette({
+    parent: this.enemy_area,
+    key_size: 42,
+    key_margin: 7,
+    x: 1, y: 24,
+    add_special_keys: false,
+    action: function(letter) {}
   });
 
   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -243,7 +269,7 @@ Game.prototype.resetBoardiPad = function() {
   this.score_text_box.position.set(640, 702);
   scene.addChild(this.score_text_box);
 
-  this.setEnemyDifficulty(this.level);
+  this.setEnemyDifficulty(this.level, 1);
 
   this.enemy_last_action = Date.now();
 
@@ -269,24 +295,24 @@ Game.prototype.resetBoardiPhone = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  // the qwerty palette
-  // var add_special_keys = device.platform == "iOS";
-  var add_special_keys = true;
-  this.player_palette = this.makeQwertyPalette(scene, 68, this.width * 1/2, this.height - 118, add_special_keys, function(letter) {
-    if (add_special_keys && !self.launchpad.full()) {
-      self.keyAction(letter);
-    }
-  });
-
-  // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette(scene, 24, 636, 426, false, false, function(letter) {
+  // it's a tiny piece of paper. 50 and 7.5
+  // 
+  this.player_palette = this.makeTallQwertyPalette({
+    parent: scene,
+    key_size: 60,
+    key_margin: 4,
+    side_margin: 2,
+    vertical_margin: 10,
+    x: 0, y: this.height - 394,
+    add_special_keys: true,
+    action: function(letter) {self.keyAction(letter);}
   });
 
   // the player's board
   this.player_area = new PIXI.Container();
   scene.addChild(this.player_area);
-  this.player_area.position.set(6,756);
-  // this.player_area.scale.set(0.5,0.5);
+  this.player_area.position.set(2,677);
+  this.player_area.scale.set(0.90,0.90);
 
   var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   play_mat.width = 500;
@@ -307,11 +333,25 @@ Game.prototype.resetBoardiPhone = function() {
   // the player's launchpad
   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
 
+
   // the enemy board
   this.enemy_area = new PIXI.Container();
   scene.addChild(this.enemy_area);
-  this.enemy_area.position.set(512,381);
-  this.enemy_area.scale.set(0.5,0.5);
+  this.enemy_area.position.set(454,278);
+  this.enemy_area.scale.set(0.368,0.368);
+
+  // the enemy palette
+  this.enemy_palette = this.makeTallQwertyPalette({
+    parent: this.enemy_area,
+    key_size: 42,
+    key_margin: 7,
+    side_margin: 2,
+    vertical_margin: 11,
+    x: 1, y: 24, 
+    add_special_keys: false,
+    action: function(letter) {}
+  });
+
   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   enemy_mat.width = 500;
   enemy_mat.height = 700;
@@ -327,38 +367,38 @@ Game.prototype.resetBoardiPhone = function() {
   enemy_pad_math.tint = 0xCCCCCC;
   this.enemy_area.addChild(enemy_pad_math);
 
-  // level and score
+   // level and score
   this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.level_label.anchor.set(0.5,0.5);
-  this.level_label.position.set(640, 512);
+  this.level_label.position.set(160, 60);
   scene.addChild(this.level_label);
 
   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.level_text_box.anchor.set(0.5,0.5);
-  this.level_text_box.position.set(640, 542);
+  this.level_text_box.position.set(160, 90);
   scene.addChild(this.level_text_box);
 
   this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.opponent_label.anchor.set(0.5,0.5);
-  this.opponent_label.position.set(640, 592);
+  this.opponent_label.position.set(320, 60);
   scene.addChild(this.opponent_label);
 
   this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.opponent_text_box.anchor.set(0.5,0.5);
-  this.opponent_text_box.position.set(640, 622);
+  this.opponent_text_box.position.set(320, 90);
   scene.addChild(this.opponent_text_box);
 
   this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(640, 672);
+  this.score_label.position.set(480, 60);
   scene.addChild(this.score_label);
 
   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(640, 702);
+  this.score_text_box.position.set(480, 90);
   scene.addChild(this.score_text_box);
 
-  this.setEnemyDifficulty(this.level);
+  this.setEnemyDifficulty(this.level, 1);
 
   this.enemy_last_action = Date.now();
 
@@ -380,9 +420,9 @@ Game.prototype.resetBoardiPhone = function() {
 
 
 
-Game.prototype.setEnemyDifficulty = function(level) {
-  this.enemy_wpm = 10 + 2.5 * level;
-  this.enemy_rerolls = 4 + 2 * level;
+Game.prototype.setEnemyDifficulty = function(level, scale) {
+  this.enemy_wpm = 10 + 1.25 * scale * level;
+  this.enemy_rerolls = 4 + scale * level;
   this.enemy_short_word = Math.min(6,4 + Math.floor(level / 4));
   this.enemy_long_word = Math.min(4,5 + Math.floor(level / 3));
 }
@@ -548,25 +588,25 @@ Game.prototype.checkEndCondition = function() {
   }
 }
 
-Game.prototype.testSinglePlayerUpdate = function() {
-  var self = this;
-  var scene = this.scenes["game"];
+// Game.prototype.testSinglePlayerUpdate = function() {
+//   var self = this;
+//   var scene = this.scenes["game"];
 
-  if (this.game_phase == "countdown") {
-    let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
-    this.countdown_text.text = Math.ceil(time_remaining).toString();
-    if (time_remaining <= 0) {
-      this.enemy_palette.cacheAsBitmap = true;
-      this.countdown_text.text = "GO";
-      this.game_phase = "active";
-      setTimeout(function() {self.countdown_text.text = "";}, 1600);
-      for (var i = 0; i < 10; i++) {
-        this.launchpad.cursors[i].visible = true;
-      }
-      if (annoying) this.setMusic("action_song");
-    }
-  }
-}
+//   if (this.game_phase == "countdown") {
+//     let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
+//     this.countdown_text.text = Math.ceil(time_remaining).toString();
+//     if (time_remaining <= 0) {
+//       this.enemy_palette.cacheAsBitmap = true;
+//       this.countdown_text.text = "GO";
+//       this.game_phase = "active";
+//       setTimeout(function() {self.countdown_text.text = "";}, 1600);
+//       for (var i = 0; i < 10; i++) {
+//         this.launchpad.cursors[i].visible = true;
+//       }
+//       if (annoying) this.setMusic("action_song");
+//     }
+//   }
+// }
 
 
 Game.prototype.singlePlayerUpdate = function() {
@@ -607,7 +647,7 @@ Game.prototype.singlePlayerUpdate = function() {
 
   if (this.player_palette.error > 0) {
     this.player_palette.error -= 1;
-    if (this.player_palette.error <= 0) {
+    if (this.player_palette.error <= 0 && this.player_palette.mat != null) {
       this.player_palette.mat.tint = 0x4D4D4D;
     }
   }

@@ -394,6 +394,7 @@ Game.prototype.makeKeyboard = function(options) {
   let keyboard = new PIXI.Container();
   parent.addChild(keyboard);
   keyboard.position.set(x, y);
+  keyboard.scale.set(0.625, 0.625);
   keyboard.letters = {};
   keyboard.keys = {};
   keyboard.error = 0;
@@ -411,8 +412,8 @@ Game.prototype.makeKeyboard = function(options) {
   keyboard.background = background;
 
   for (var h = 0; h < keys.length; h++) {
-    var k_x = -310 + 10;
-    var k_y = -115 + 25 + 42 * h;
+    var k_x = -610 + 10;
+    var k_y = -230 + 50 + 82 * h;
     for (var i = 0; i < keys[h].length; i++) {
       let info = keys[h][i];
       
@@ -430,13 +431,13 @@ Game.prototype.makeKeyboard = function(options) {
 
       let button = this.makeNiceKey(
         keyboard,
-        k_x + size * 20, k_y, filename, size, function() { 
+        k_x + size * 40, k_y, filename, size, function() { 
           self.pressKey(letter);
           action(letter);
         },
       );
 
-      k_x += 40 * size;
+      k_x += 80 * size;
 
       keyboard.keys[letter] = button;
       if (letter_array.includes(letter)) {

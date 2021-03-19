@@ -73,8 +73,8 @@ class Game {
     if (device == null && detectMobileBrowser() == false) {
       // Normal browser game. Proceed normally.
       console.log("I am a normal browser device");
-      this.width = 1024;
-      this.height = 768;
+      this.width = 1280;
+      this.height = 960;
       this.device_type = "browser";
       this.keyboard_sounds = true;
       this.fps = 30;

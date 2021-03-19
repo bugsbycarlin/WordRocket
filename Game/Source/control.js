@@ -4,14 +4,6 @@ Game.prototype.keyAction = function(letter) {
   let self = this;
   if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
     if (this.player_palette.letters[letter].interactive == true && !this.launchpad.full()) {
-
-      // let previous_tint = this.player_palette.letters[letter].tint;
-      // this.player_palette.letters[letter].tint = 0xBBBBBB;
-      // setTimeout(function() { self.player_palette.letters[letter].tint = previous_tint; }, 100);
-
-      // let click_sound = "keyboard_click_" + ((letter.charCodeAt(0) % 5)+1).toString();
-      // console.log(click_sound);
-      // if (this.keyboard_sounds) this.soundEffect(click_sound, 1.0);
       this.launchpad.push(this.player_palette, letter);
     } else {
       this.soundEffect("negative");

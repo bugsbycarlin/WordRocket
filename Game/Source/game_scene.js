@@ -48,17 +48,35 @@ Game.prototype.resetBoardBrowser = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  // var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_4_3_rough_2.png"));
-  // background.anchor.set(0, 0);
-  // scene.addChild(background);
+  var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_second_draft_1280.png"));
+  background.anchor.set(0, 0);
+  scene.addChild(background);
 
   this.player_palette = this.makeKeyboard({
-    parent: scene, x: this.width * 1/2, y: this.height - 125,
+    parent: scene, x: 464, y: 801,
     defense: this.player_defense, 
     action: function(letter) {
+      if (letter_array.includes(letter)) {
+        self.keyAction(letter);
+      }
 
+      if (letter === "Backspace") {
+        self.deleteAction();
+      }
+
+      if (letter === "ArrowRight") {
+        self.rightArrowAction();
+      }
+
+      if (letter === "ArrowLeft") {
+        self.leftArrowAction();
+      }
+
+      if (letter === "Enter") {
+        self.enterAction();
+      }
     }
-  })
+  });
 
   // this.player_palette = this.makeQwertyPalette({
   //   parent: scene,
@@ -71,27 +89,34 @@ Game.prototype.resetBoardBrowser = function() {
   // });
 
   // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette({
-    parent:scene,
-    key_size: 20,
-    key_margin: 2,
-    x: this.width * 1/2 + 80, y: 396,
-    add_special_keys: false,
-    action: function(letter) {}
+  // this.enemy_palette = this.makeQwertyPalette({
+  //   parent:scene,
+  //   key_size: 20,
+  //   key_margin: 2,
+  //   x: this.width * 1/2 + 80, y: 396,
+  //   add_special_keys: false,
+  //   action: function(letter) {}
+  // });
+  this.enemy_palette = this.makeKeyboard({
+    parent: scene, x: 1052, y: 483,
+    defense: this.enemy_defense, 
+    action: function(letter) {
+    }
   });
+  this.enemy_palette.scale.set(0.25, 0.25);
 
   // the player's board
   this.player_area = new PIXI.Container();
   scene.addChild(this.player_area);
-  this.player_area.position.set(this.width * 1/2 - 300,530);
-  this.player_area.scale.set(0.7,0.7);
+  this.player_area.position.set(this.width * 1/2 - 350,520);
+  this.player_area.scale.set(0.6,0.6);
 
   var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   play_mat.width = 500;
   play_mat.height = 700;
   play_mat.anchor.set(0, 1);
   play_mat.position.set(0, -50);
-  play_mat.tint = 0x4D4D4D;
+  play_mat.tint = 0x1c2120;
   this.player_area.addChild(play_mat);
 
   var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -99,7 +124,7 @@ Game.prototype.resetBoardBrowser = function() {
   pad_mat.height = 50;
   pad_mat.anchor.set(0, 1);
   pad_mat.position.set(0, 0);
-  pad_mat.tint = 0xCCCCCC;
+  pad_mat.tint = 0x2c3130;
   this.player_area.addChild(pad_mat);
 
   // the player's launchpad
@@ -108,52 +133,55 @@ Game.prototype.resetBoardBrowser = function() {
   // the enemy board
   this.enemy_area = new PIXI.Container();
   scene.addChild(this.enemy_area);
-  this.enemy_area.position.set(this.width * 1/2 + 60,380);
-  this.enemy_area.scale.set(0.5,0.5);
+  this.enemy_area.position.set(this.width * 1/2 + 350,370);
+  this.enemy_area.scale.set(0.23,0.23);
   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   enemy_mat.width = 500;
   enemy_mat.height = 700;
   enemy_mat.anchor.set(0, 1);
   enemy_mat.position.set(0, -50);
-  enemy_mat.tint = 0x4D4D4D;
+  enemy_mat.tint = 0x1c2120;
+
   this.enemy_area.addChild(enemy_mat);
   var enemy_pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   enemy_pad_mat.width = 500;
   enemy_pad_mat.height = 50;
   enemy_pad_mat.anchor.set(0, 1);
   enemy_pad_mat.position.set(0, 0);
-  enemy_pad_mat.tint = 0xCCCCCC;
+  enemy_pad_mat.tint = 0x2c3130;
   this.enemy_area.addChild(enemy_pad_mat);
 
   // level and score
   this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.level_label.anchor.set(0.5,0.5);
-  this.level_label.position.set(920, 40);
+  this.level_label.position.set(1060, 30);
   scene.addChild(this.level_label);
 
   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.level_text_box.anchor.set(0.5,0.5);
-  this.level_text_box.position.set(920, 70);
+  this.level_text_box.position.set(1060, 60);
   scene.addChild(this.level_text_box);
 
   this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.opponent_label.anchor.set(0.5,0.5);
-  this.opponent_label.position.set(920, 130);
+  this.opponent_label.position.set(1060, 130);
   scene.addChild(this.opponent_label);
+  this.opponent_label.visible = false;
 
   this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.opponent_text_box.anchor.set(0.5,0.5);
-  this.opponent_text_box.position.set(920, 180);
+  this.opponent_text_box.position.set(1060, 180);
   scene.addChild(this.opponent_text_box);
+  this.opponent_text_box.visible = false;
 
   this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(920, 240);
+  this.score_label.position.set(1060, 100);
   scene.addChild(this.score_label);
 
   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
   this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(920, 270);
+  this.score_text_box.position.set(1060, 130);
   scene.addChild(this.score_text_box);
 
   this.setEnemyDifficulty(this.level, 2);
@@ -824,12 +852,14 @@ Game.prototype.singlePlayerUpdate = function() {
       let target_x = 0;
       let target_y = 0;
       if (rocket.player == 1) {
-        target_x = this.enemy_palette.letters[disabled_letter].x + this.enemy_palette.position.x;
-        target_y = this.enemy_palette.letters[disabled_letter].y + this.enemy_palette.position.y;
+        target_x = (this.enemy_palette.letters[disabled_letter].x * this.enemy_palette.scale.x + this.enemy_palette.position.x - this.enemy_area.position.x) / this.enemy_area.scale.x;
+        target_y = (this.enemy_palette.letters[disabled_letter].y * this.enemy_palette.scale.y + this.enemy_palette.position.y - this.enemy_area.position.y) / this.enemy_area.scale.y;
         if (this.game_phase == "tutorial" && this.tutorial_number == 7) this.tutorial8();
       } else if (rocket.player == 2) {
-        target_x = (this.player_palette.letters[disabled_letter].x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
-        target_y = (this.player_palette.letters[disabled_letter].y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
+        // target_x = (this.player_palette.letters[disabled_letter].x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
+        // target_y = (this.player_palette.letters[disabled_letter].y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
+        target_x = (this.player_palette.letters[disabled_letter].x * this.player_palette.scale.x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
+        target_y = (this.player_palette.letters[disabled_letter].y * this.player_palette.scale.y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
         if (this.game_phase == "tutorial" && this.tutorial_number == 10) this.tutorial11();
       }
       let angle = Math.atan2(target_y - rocket.y, target_x - rocket.x) + Math.PI / 2;
@@ -841,7 +871,7 @@ Game.prototype.singlePlayerUpdate = function() {
         .onComplete(function() {rocket.fire_sprite.visible = true; self.soundEffect("rocket");})
         .chain(new TWEEN.Tween(rocket.position)
           .to({y: target_y, x: target_x})
-          .duration(200)
+          .duration(300)
           .easing(TWEEN.Easing.Quadratic.In)
           .onComplete(function() {
 
@@ -855,9 +885,9 @@ Game.prototype.singlePlayerUpdate = function() {
                   self.soundEffect("explosion_3");
                   
                   let fire = self.makeFire(self.enemy_area, 
-                    self.enemy_palette.letters[disabled_letter].x + self.enemy_palette.position.x,
-                    self.enemy_palette.letters[disabled_letter].y + self.enemy_palette.position.y - 24,
-                    0.3/2, 0.25/2);
+                    target_x,
+                    target_y - 24,
+                    0.4, 0.33);
                   fire.visible = false;
 
                   let explosion = self.makeExplosion(self.enemy_area, 

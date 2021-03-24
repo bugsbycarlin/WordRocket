@@ -7,7 +7,7 @@ Game.prototype.keyAction = function(letter) {
       this.launchpad.push(this.player_palette, letter);
     } else {
       this.soundEffect("negative");
-      this.player_palette.flashError();
+      this.launchpad.flashError();
     }
   }
 }

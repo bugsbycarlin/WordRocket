@@ -1,8 +1,8 @@
 'use strict';
 
-var annoying = false;
+var annoying = true;
 var use_scores = false;
-var silence = true;
+var silence = false;
 var log_performance = true;
 
 var performance_result = null;
@@ -184,12 +184,13 @@ class Game {
       TWEEN.update(now);
       self.trackStop("tween");
 
-      if (now - last_frame >= 1000 / self.fps) {
+      //if (now - last_frame >= 1000 / self.fps) {
         fps_counter += 1;
+        let diff = now - last_frame;
         last_frame = now;
 
         self.trackStart("update");
-        self.update();
+        self.update(diff);
         self.trackStop("update");
 
         self.trackStart("animate");
@@ -204,7 +205,7 @@ class Game {
           last_performance_update = now;
           self.trackPrint(["update", "tween", "animate"]);
         }
-      }
+      //}
       requestAnimationFrame(animate);
     }
     animate(0);
@@ -245,13 +246,13 @@ class Game {
 
   intializeAnimations() {
     var self = this;
-    if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
-      PIXI.Loader.shared.add("Art/fire.json").load(function() {
+    if (!PIXI.Loader.shared.resources["Art/fire_pixelated.json"]) {
+      PIXI.Loader.shared.add("Art/fire_pixelated.json").load(function() {
 
         self.initializeTitleScreen();
 
-        if (!PIXI.Loader.shared.resources["Art/fire_pixelated.json"]) {
-          PIXI.Loader.shared.add("Art/fire_pixelated.json").load(function() {
+        if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
+          PIXI.Loader.shared.add("Art/fire.json").load(function() {
             if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
               PIXI.Loader.shared.add("Art/explosion.json").load(function() {
               });
@@ -362,9 +363,9 @@ class Game {
   // }
 
 
-  update() {
+  update(diff) {
     if (this.current_scene == "game") {
-      this.singlePlayerUpdate();
+      this.singlePlayerUpdate(diff);
     }
   }
 

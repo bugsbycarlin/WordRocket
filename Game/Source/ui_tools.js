@@ -167,6 +167,16 @@ Game.prototype.makeParachute = function(parent, x, y, xScale, yScale) {
 }
 
 
+Game.prototype.makePixelatedParachute = function(parent, x, y, xScale, yScale) {
+  let parachute_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/parachute_pixelated_v2.png"));
+  parachute_sprite.anchor.set(0.5, 0.5);
+  parachute_sprite.scale.set(xScale, yScale);
+  parachute_sprite.position.set(x, y);
+  parent.addChild(parachute_sprite);
+  return parachute_sprite;
+}
+
+
 Game.prototype.makeExplosion = function(parent, x, y, xScale, yScale, action) {
   var sheet = PIXI.Loader.shared.resources["Art/explosion.json"].spritesheet;
   let explosion_sprite = new PIXI.AnimatedSprite(sheet.animations["explosion"]);
@@ -370,7 +380,7 @@ Game.prototype.makeTallQwertyPalette = function(options) {
   }
 
   palette.flashError = function(){
-    palette.error = 5;
+    palette.error = Date.now();
     palette.mat.tint = 0xdb5858;
   }
 
@@ -471,13 +481,6 @@ Game.prototype.makeKeyboard = function(options) {
     }
   }
 
-  keyboard.flashError = function(){
-    keyboard.error = 5;
-    // if (keyboard.mat != null) {
-    //   keyboard.mat.tint = 0xdb5858;
-    // }
-  }
-
   return keyboard;
 }
 
@@ -560,7 +563,7 @@ Game.prototype.makeQwertyPalette = function(options) {
 
 
   palette.flashError = function(){
-    palette.error = 5;
+    palette.error = Date.now();
     if (palette.mat != null) {
       palette.mat.tint = 0xdb5858;
     }

@@ -27,6 +27,14 @@ class Launchpad {
 
     this.player = player;
 
+    this.pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    this.pad_mat.width = this.outer_size * board_width;
+    this.pad_mat.height = this.outer_size;
+    this.pad_mat.anchor.set(0, 1);
+    this.pad_mat.position.set(0, 0);
+    this.pad_mat.tint = 0x2c3130;
+    this.parent.addChild(this.pad_mat);
+
     // cursor markers
     this.cursors = [];
     for (var i = 0; i < board_width; i++) {
@@ -80,6 +88,22 @@ class Launchpad {
       word += this.tiles[i].text;
     }
     return word;
+  }
+
+
+  flashError = function(){
+    this.error = Date.now();
+    this.pad_mat.tint = 0xdb5858;
+  }
+
+
+  checkError = function(){
+    if (this.error != null) {
+      if (Date.now() - this.error >= 150) {
+        this.error = null;
+        this.pad_mat.tint = 0x2c3130;
+      }
+    }
   }
 
 
@@ -183,7 +207,7 @@ class Launchpad {
 
 
   shiftRight(){
-    if (!this.full()) {
+    if (!(this.wordSize() + this.shift >= board_width)) {
       this.shift += 1;
       for (var i = 0; i < this.tiles.length; i++) {
         var item = this.tiles[i];

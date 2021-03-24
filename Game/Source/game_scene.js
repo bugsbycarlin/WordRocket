@@ -130,14 +130,6 @@ Game.prototype.resetBoardBrowser = function() {
   play_mat.tint = 0x303889;
   this.player_area.addChild(play_mat);
 
-  var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  pad_mat.width = 50 * board_width;
-  pad_mat.height = 50;
-  pad_mat.anchor.set(0, 1);
-  pad_mat.position.set(0, 0);
-  pad_mat.tint = 0x2c3130;
-  this.player_area.addChild(pad_mat);
-
   // the player's launchpad
   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
 
@@ -193,9 +185,9 @@ Game.prototype.resetBoardBrowser = function() {
   enemy_pad_mat.tint = 0x2c3130;
   this.enemy_area.addChild(enemy_pad_mat);
 
-  for (var m = 0; m < 2; m++) {
+  for (var p = 0; p < 2; p++) {
     let area = this.player_area;
-    if (m == 1) area = this.enemy_area;
+    if (p == 1) area = this.enemy_area;
     for(var i = 0; i < 2 + Math.floor(Math.random() * 4); i++) {
       let num = 1 + Math.floor(Math.random() * 3)
       let cloud = new PIXI.Sprite(PIXI.Texture.from("Art/cloud_" + num + ".png"));
@@ -208,13 +200,25 @@ Game.prototype.resetBoardBrowser = function() {
     }
 
     for (var i = 0; i < 2; i++) {
-      let rock_wall = new PIXI.Sprite(PIXI.Texture.from("Art/rock_wall_v3.png"));
-      rock_wall.anchor.set(1 - i, 1);
-      rock_wall.position.set(((i == 0 ? -4 : 10) + board_width*32*i)/.65, 0)
-      rock_wall.scale.set(2/0.65, 2/0.65);
-      rock_wall.alpha = 0.5;
-      rock_wall.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+      let rock_wall = new PIXI.Container();
+      // rock_wall.anchor.set(1 - i, 1);
+      //rock_wall.position.set(((i == 0 ? -8 : 6) + board_width*32*i)/.65, 0)
+      rock_wall.scale.set(1/0.65, 1/0.65);
       area.addChild(rock_wall);
+      for (var m = 1; m < 5; m++) {
+        for (var n = 1; n < 16; n++) {
+          let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
+          c = (30 + Math.floor(Math.random() * 30)) / 255.0;
+          // c = (30 + 5 * (m + n) % 30) / 255.0;
+          tile.tint = PIXI.utils.rgb2hex([c,c,c]);
+          tile.width = 32;
+          tile.height = 32;
+          shift = i == 0 ? 0 : (board_width + 4) * 32;
+          tile.position.set(shift - 32 * m, 0 - 32 * n);
+          rock_wall.addChild(tile);
+        }
+      }
+      rock_wall.cacheAsBitmap = true;
     }
   }
 
@@ -717,31 +721,12 @@ Game.prototype.checkEndCondition = function() {
   }
 }
 
-// Game.prototype.testSinglePlayerUpdate = function() {
-//   var self = this;
-//   var scene = this.scenes["game"];
 
-//   if (this.game_phase == "countdown") {
-//     let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
-//     this.countdown_text.text = Math.ceil(time_remaining).toString();
-//     if (time_remaining <= 0) {
-//       this.enemy_palette.cacheAsBitmap = true;
-//       this.countdown_text.text = "GO";
-//       this.game_phase = "active";
-//       setTimeout(function() {self.countdown_text.text = "";}, 1600);
-//       for (var i = 0; i < 10; i++) {
-//         this.launchpad.cursors[i].visible = true;
-//       }
-//       if (annoying) this.setMusic("action_song");
-//     }
-//   }
-// }
-
-
-Game.prototype.singlePlayerUpdate = function() {
+Game.prototype.singlePlayerUpdate = function(diff) {
   var self = this;
   var scene = this.scenes["game"];
 
+  let fractional = diff / (1000/30.0);
 
   if (this.game_phase == "tutorial") {
     this.tutorial_screen.tutorial_text.hover();
@@ -763,45 +748,26 @@ Game.prototype.singlePlayerUpdate = function() {
   }
 
   for (let item of [scene, this.player_area, this.enemy_area]) {
-    if (item.shake > 0) {
+    if (item.shake != null) {
       if (item.permanent_x == null) item.permanent_x = item.position.x;
       if (item.permanent_y == null) item.permanent_y = item.position.y;
       item.position.set(item.permanent_x - 3 + Math.random() * 6, item.permanent_y - 3 + Math.random() * 6)
-      item.shake -= 1;
-      if (item.shake <= 0) {
+      //item.shake -= 1;
+      if (Date.now() - item.shake >= 150) {
+        item.shake = null;
         item.position.set(item.permanent_x, item.permanent_y)
       }
     }
   }
 
-  if (this.player_palette.error > 0) {
-    this.player_palette.error -= 1;
-    if (this.player_palette.error <= 0 && this.player_palette.mat != null) {
-      this.player_palette.mat.tint = 0x4D4D4D;
-    }
-  }
-
-  for (var i = 0; i < letter_array.length; i++) {
-    var letter = letter_array[i];
-    if (this.player_palette.letters[letter].error > 0) {
-      // this.player_palette.letters[letter].fronting.tint = 0xdb5858;
-      this.player_palette.letters[letter].error -= 1;
-      // if (this.player_palette.letters[letter].error <= 0) {
-      //   this.player_palette.letters[letter].fronting.tint = 0xFFFFFF;
-      // }
-    }
-  }
+  this.launchpad.checkError();
 
   for (var i = 0; i < this.freefalling.length; i++) {
     var item = this.freefalling[i];
-    item.position.x += item.vx;
-    item.position.y += item.vy;
-    item.vy += this.gravity;
-    // if (this.game_phase == "gameover" && item.parent == null)
-    // { 
-    //   console.log("STEVE HOLT");
-    //   console.log(item);
-    // }
+    item.position.x += item.vx * fractional;
+    item.position.y += item.vy * fractional;
+    item.vy += this.gravity * fractional;
+
     if (item.position.y > this.height * 1.25) {
       if (item.parent != null) {
         item.parent.removeChild(item);
@@ -835,12 +801,12 @@ Game.prototype.singlePlayerUpdate = function() {
     var rocket = this.rocket_letters[i];
     // rocket.angle = 0;
     if (rocket.status === "rocket") {
-      rocket.position.y += rocket.vy;
-      rocket.vy -= this.boost;
+      rocket.position.y += rocket.vy * fractional;
+      rocket.vy -= this.boost * fractional;
       if (rocket.vy < this.boost_limit) rocket.vy = this.boost_limit;
     } else if (rocket.status === "descent") {
-      rocket.position.y += rocket.vy;
-      rocket.vy += this.gentle_drop;
+      rocket.position.y += rocket.vy * fractional;
+      rocket.vy += this.gentle_drop * fractional;
       if (rocket.vy > this.gentle_limit) rocket.vy = this.gentle_limit;
       // rocket.angle = 5 * Math.sin((Date.now() - rocket.start_time) / 400)
     }
@@ -921,9 +887,9 @@ Game.prototype.singlePlayerUpdate = function() {
           }
 
           if (rocket_1.player == 1) {
-            this.player_area.shake = 5;
+            this.player_area.shake = Date.now();
           } else if (rocket_1.player == 2) {
-            this.enemy_area.shake = 5;
+            this.enemy_area.shake = Date.now();
           }
         }
       }
@@ -1009,7 +975,7 @@ Game.prototype.singlePlayerUpdate = function() {
               } else {
                 if (self.player_palette.letters[disabled_letter].interactive == true) {
                   self.player_palette.letters[disabled_letter].disable();
-                  scene.shake = 5;
+                  scene.shake = Date.now();
                   self.soundEffect("explosion_3");
                   
                   let fire = self.makeFire(self.player_palette.letters[disabled_letter], 

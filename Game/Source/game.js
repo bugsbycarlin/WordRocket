@@ -1,8 +1,8 @@
 'use strict';
 
-var annoying = true;
+var annoying = false;
 var use_scores = false;
-var silence = false;
+var silence = true;
 var log_performance = true;
 
 var performance_result = null;
@@ -247,10 +247,15 @@ class Game {
     var self = this;
     if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
       PIXI.Loader.shared.add("Art/fire.json").load(function() {
+
         self.initializeTitleScreen();
 
-        if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
-          PIXI.Loader.shared.add("Art/explosion.json").load(function() {
+        if (!PIXI.Loader.shared.resources["Art/fire_pixelated.json"]) {
+          PIXI.Loader.shared.add("Art/fire_pixelated.json").load(function() {
+            if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
+              PIXI.Loader.shared.add("Art/explosion.json").load(function() {
+              });
+            }
           });
         }
       });
@@ -280,7 +285,7 @@ class Game {
     var self = this;
     this.legal_words = {};
     let enemy_word_dict = {};
-    for (var i = 0; i <= 10; i++) {
+    for (var i = 0; i <= board_width; i++) {
       enemy_word_dict[i] = {};
     }
 
@@ -302,13 +307,13 @@ class Game {
         if (word != null && word.length >= 3) {
           self.legal_words[word.toUpperCase()] = 1;
         }
-        if (word != null && word.length <= 10) {
+        if (word != null && word.length <= board_width) {
           enemy_word_dict[word.length][word.toUpperCase()] = 1;
         }
       }
 
       self.enemy_words = {};
-      for (var i = 0; i <= 10; i++) {
+      for (var i = 0; i <= board_width; i++) {
         self.enemy_words[i] = Object.keys(enemy_word_dict[i]);
       }
 

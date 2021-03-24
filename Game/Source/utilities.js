@@ -5,6 +5,8 @@
 // Red: 0xdb5858
 // Green: 0x71d07d
 
+const board_width = 12;
+
 const letter_values = {
   "A": 1, "B": 2, "C": 1, "D": 1, "E": 1, "F": 2, "G": 1,
   "H": 2, "I": 1, "J": 3, "K": 2, "L": 1, "M": 1, "N": 1,

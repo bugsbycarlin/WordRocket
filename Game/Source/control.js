@@ -9,10 +9,6 @@ Game.prototype.keyAction = function(letter) {
       this.soundEffect("negative");
       this.player_palette.flashError();
     }
-
-    if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
-      this.tutorial2();
-    }
   }
 }
 
@@ -88,13 +84,6 @@ Game.prototype.pressKey = function(key) {
       }, 50);
     }
   }
-  // let previous_tint = this.player_palette.letters[letter].tint;
-      // this.player_palette.letters[letter].tint = 0xBBBBBB;
-      // setTimeout(function() { self.player_palette.letters[letter].tint = previous_tint; }, 100);
-
-      // let click_sound = "keyboard_click_" + ((letter.charCodeAt(0) % 5)+1).toString();
-      // console.log(click_sound);
-      // if (this.keyboard_sounds) this.soundEffect(click_sound, 1.0);
 }
 
 
@@ -110,6 +99,10 @@ Game.prototype.handleKeyDown = function(ev) {
       if (ev.code == "ShiftRight") key = "RShift";
     }
     this.pressKey(key);
+  }
+
+  if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
+    this.tutorial2();
   }
 
   for (i in lower_array) {

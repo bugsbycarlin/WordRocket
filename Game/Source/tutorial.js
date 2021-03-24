@@ -9,12 +9,12 @@ Game.prototype.tutorial1 = function() {
 
   this.pickDefense(0,0);
 
-  this.tutorial_screen = this.makeTutorialScreen(scene, 2000, 20, this.player_palette.position.y - 108, 748, this.player_palette.position.y + 108, "HERE IS A KEYBOARD. PLEASE START TYPING.", this.width / 2, 660);
+  this.tutorial_screen = this.makeTutorialScreen(scene, 2000, 80, 656, 856, 953, "HERE IS A KEYBOARD. PLEASE START TYPING.", this.width / 2, 660);
 
   this.tutorial_1_snide_clicks = 0;
   this.tutorial_1_snide_click_responses = [
-    "NO, USE YOUR REAL KEYBOARD, JERK.",
-    "OOF, STUBBORN.",
+    "NO, USE YOUR ACTUAL KEYBOARD, KID.",
+    "STUBBORN!",
     "HEY, START TYPING ON KEYS.",
     "ACTUAL KEYS.",
     "HEY! LOOK DOWN. LOOK. DOWN.",
@@ -22,14 +22,14 @@ Game.prototype.tutorial1 = function() {
     "FINE, I GIVE UP.",
   ]
 
-  for (var i = 0; i < 26; i++) {
-    this.player_palette.letters[letter_array[i]].inner_action = function(letter) {
-      if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
-        self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
-        self.tutorial_1_snide_clicks += 1
-      }
-    }
-  }
+  // for (var i = 0; i < 26; i++) {
+  //   this.player_palette.letters[letter_array[i]].inner_action = function(letter) {
+  //     if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
+  //       self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
+  //       self.tutorial_1_snide_clicks += 1
+  //     }
+  //   }
+  // }
 
   for (var i = 0; i < 10; i++) {
     this.launchpad.cursors[i].visible = true;
@@ -47,7 +47,7 @@ Game.prototype.tutorial2 = function() {
   setTimeout(function() {
     self.tutorial_screen.fade(500);
     self.tutorial_number = 2;
-    self.tutorial_screen = self.makeTutorialScreen(scene, 500, 5, 700, 505, 810, "THIS IS THE LAUNCHPAD.", self.width / 2, 560);
+    self.tutorial_screen = self.makeTutorialScreen(scene, 500, 264, 479, 675, 535, "THIS IS THE LAUNCHPAD.", self.width / 2, 560);
 
     setTimeout(function() {
       self.tutorial_number = 2.5;
@@ -102,7 +102,7 @@ Game.prototype.tutorial6 = function() {
 
   setTimeout(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 5, 5, 505, 705, "IT FLIES UP HERE,", 255, 275);
+    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 260, 30, 671, 531, "IT FLIES UP HERE,", 255, 275);
   }, 500);
 }
 
@@ -115,7 +115,7 @@ Game.prototype.tutorial7 = function() {
   this.tutorial_number = 7;
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 510, 5, 760, 355, "COMES DOWN HERE,", 600, 200);
+  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 958, 92, 1168, 348, "COMES DOWN HERE,", 600, 200);
 }
 
 
@@ -128,7 +128,7 @@ Game.prototype.tutorial8 = function() {
   this.enemy_last_action = Date.now();
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 510, 390, 760, 460, "AND CRASHES INTO THE SOVIET'S KEYBOARD,\nTEMPORARILY DISABLING SOME KEYS.", 380, 530);
+  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 867, 394, 1259, 548, "AND CRASHES INTO THE SOVIET'S KEYBOARD,\nTEMPORARILY DISABLING SOME KEYS.", 380, 530);
 }
 
 
@@ -140,7 +140,7 @@ Game.prototype.tutorial9 = function() {
   this.tutorial_number = 9;
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 510, 5, 760, 355, "THE SOVIET WILL FIRE ROCKETS", 380, 200);
+  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 958, 92, 1168, 348, "THE SOVIET WILL FIRE ROCKETS", 380, 200);
 }
 
 
@@ -152,7 +152,7 @@ Game.prototype.tutorial10 = function() {
 
   setTimeout(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 5, 5, 505, 705, "WHICH COME DOWN ON YOU!", 255, 275);
+    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 260, 30, 671, 531, "WHICH COME DOWN ON YOU!", 255, 275);
   }, 500);
 }
 
@@ -164,10 +164,17 @@ Game.prototype.tutorial11 = function() {
   this.tutorial_number = 11;
 
   this.pickDefense(6, 10);
+  if (this.device_type == "browser") {
+    this.resetBoardBrowser();
+  } else if (this.device_type == "iPad") {
+    this.resetBoardiPad();
+  } else if (this.device_type == "iPhone") {
+    this.resetBoardiPhone();
+  }
 
   setTimeout(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 20, self.player_palette.position.y - 108, 748, self.player_palette.position.y + 108, "YOU HAVE 3 BLUE KEYS TO DEFEND", self.width / 2, 660);
+    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 80, 656, 856, 953, "YOU HAVE 3 BLUE KEYS TO DEFEND", self.width / 2, 660);
   }, 500);
 
   setTimeout(function() {
@@ -184,7 +191,7 @@ Game.prototype.tutorial12 = function() {
   this.tutorial_number = 12;
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 510, 390, 760, 460, "AND SO DOES THE SOVIET.", 380, 530);
+  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 867, 394, 1259, 548, "AND SO DOES THE SOVIET.", 380, 530);
 
   setTimeout(function() {
     self.tutorial_screen.tutorial_text.text = "WHEN BLUE KEYS ARE HIT,\nTHEY'RE PERMANENTLY DISABLED.";
@@ -212,7 +219,7 @@ Game.prototype.tutorial12 = function() {
     // self.game_phase = "countdown";
     // if (annoying) self.soundEffect("countdown");
     self.tutorial = false;
-    self.resetBoard();
+    self.reset();
   }, 12000); 
 }
 

@@ -1,5 +1,4 @@
 
-
 class Launchpad {
   constructor(game, parent, player, x, y, outer_size, inner_size, use_picker = false) {
     this.tiles = [];
@@ -8,6 +7,10 @@ class Launchpad {
 
     this.game = game;
     this.parent = parent;
+
+    this.pad = new PIXI.Container();
+    this.parent.addChild(this.pad);
+    this.pad.position.set(x, y);
 
     this.outer_size = outer_size;
     this.inner_size = inner_size;
@@ -26,42 +29,41 @@ class Launchpad {
 
     // cursor markers
     this.cursors = [];
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < board_width; i++) {
       var cursor = PIXI.Sprite.from(PIXI.Texture.WHITE);
       this.cursors[i] = cursor;
       cursor.width = 48;
       cursor.height = 4;
       cursor.anchor.set(0.5, 0.5);
-      cursor.position.set(this.xi(this.cursor + this.shift + i), this.y + 4);
+      cursor.position.set(this.xi(this.cursor + this.shift + i), 4);
       cursor.tint = 0x3cb0f3;
-      cursor.alpha = (10 - i) / 15;
-      this.parent.addChild(cursor);
+      cursor.alpha = (board_width - i) / (board_width + 4);
+      this.pad.addChild(cursor);
     }
 
-    // cursor cover patch
-    // var cover_patch = PIXI.Sprite.from(PIXI.Texture.WHITE);
-    // cover_patch.width = this.outer_size * 10;
-    // cover_patch.height = this.outer_size;
-    // cover_patch.anchor.set(0, 0);
-    // cover_patch.position.set(this.x + this.outer_size * 10, this.y - this.inner_size / 2);
-    // cover_patch.tint = 0xFFFFFF;
-    // this.parent.addChild(cover_patch);
+    // mask to prevent overflow
+    let launchpad_mask = new PIXI.Graphics();
+    launchpad_mask.beginFill(0xFF3300);
+    launchpad_mask.drawRect(this.parent.x + this.x, this.parent.y + this.y - 50, this.parent.scale.x * this.outer_size * board_width, this.parent.scale.y * 250);
+    launchpad_mask.endFill();
+    this.pad.mask = launchpad_mask;
+
 
     // red underline of course
     this.red_underlines = [];
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < board_width; i++) {
       this.red_underlines[i] = new PIXI.Sprite(PIXI.Texture.from("Art/underline.png"));
       this.red_underlines[i].anchor.set(0.5, 0.5);
       this.red_underlines[i].scale.set(1,0.5);
-      this.red_underlines[i].position.set(this.xi(this.cursor + this.shift + i), this.y + 6)
-      this.parent.addChild(this.red_underlines[i]);
+      this.red_underlines[i].position.set(this.xi(this.cursor + this.shift + i), 6)
+      this.pad.addChild(this.red_underlines[i]);
       this.red_underlines[i].visible = false;
     }
 
     this.underline_text = new PIXI.Text("TOO SHORT", {fontFamily: "Bebas Neue", fontSize: 24, fill: 0xc16363, letterSpacing: 6, align: "center"});
-    this.underline_text.position.set(this.x + 5 * this.outer_size, this.y + 26);
+    this.underline_text.position.set(5 * this.outer_size, 26);
     this.underline_text.anchor.set(0.5,0.5);
-    this.parent.addChild(this.underline_text);
+    this.pad.addChild(this.underline_text);
     this.underline_text.visible = false;
   }
 
@@ -74,19 +76,22 @@ class Launchpad {
   word() {
     var word = "";
     for (var i = 0; i < this.tiles.length; i++) {
-      word += this.tiles[i].text.text;
+      //word += this.tiles[i].text.text;
+      word += this.tiles[i].text;
     }
     return word;
   }
 
 
   full() {
-    return this.wordSize() + this.shift >= 10;
+    // return this.wordSize() + this.shift >= board_width;
+    return this.wordSize() >= board_width;
   }
 
 
   xi(number) {
-    return this.x + this.gap / 2 + this.outer_size * (number) + this.inner_size / 2;
+    //return this.x + this.gap / 2 + this.outer_size * (number) + this.inner_size / 2;
+    return this.gap / 2 + this.outer_size * (number) + this.inner_size / 2;
   }
 
 
@@ -98,8 +103,9 @@ class Launchpad {
     var start_x = (palette.letters[letter].position.x + palette.position.x - this.parent.position.x) / this.parent.scale.x;
     var start_y = (palette.letters[letter].position.y + palette.position.y - this.parent.position.y) / this.parent.scale.y;
 
-    var tile = game.makeTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
+    var tile = game.makePixelatedTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
     // var tile = game.makeTile(this.parent, target_x, target_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
+    tile.text = letter;
     tile.parent = this.parent;
     this.tiles.push(tile);
     this.cursor += 1;
@@ -155,6 +161,10 @@ class Launchpad {
           .start()
       }
     }
+
+    if (this.wordSize() + this.shift > board_width) {
+      this.shiftLeft();
+    }
   }
 
 
@@ -185,7 +195,7 @@ class Launchpad {
           .start();
       }
 
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < board_width; i++) {
         var cursor = this.cursors[i];
         var x = this.xi(i + this.shift);
         var tween = new TWEEN.Tween(cursor.position)
@@ -213,7 +223,7 @@ class Launchpad {
           .start();
       }
 
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < board_width; i++) {
         var cursor = this.cursors[i];
         var x = this.xi(i + this.shift);
         var tween = new TWEEN.Tween(cursor.position)
@@ -250,12 +260,12 @@ class Launchpad {
 
     if (this.can_play) {
       this.underline_text.visible = false;
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < board_width; i++) {
         this.red_underlines[i].visible = false;
       }
     } else {
       this.underline_text.visible = true;
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < board_width; i++) {
         if (i >= this.shift && i < this.shift + this.wordSize()) {
           this.red_underlines[i].visible = true;
         } else {
@@ -274,7 +284,8 @@ class Launchpad {
       game.played_words[word] = 1;
       for (var i = 0; i < this.tiles.length; i++) {
         var pad_item = this.tiles[i];
-        var letter = pad_item.text.text;
+        // var letter = pad_item.text.text;
+        var letter = pad_item.text;
 
         let rocket_tile = game.makeRocketTile(area, letter, word.length, i, this.shift, this.player, this.inner_size, this.outer_size)
 

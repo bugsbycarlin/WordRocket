@@ -48,14 +48,20 @@ Game.prototype.resetBoardBrowser = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_second_draft_1280.png"));
+  var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_fourth_draft_1280.png"));
   background.anchor.set(0, 0);
   scene.addChild(background);
 
   this.player_palette = this.makeKeyboard({
-    parent: scene, x: 464, y: 801,
+    parent: scene, x: 467, y: 807,
     defense: this.player_defense, 
     action: function(letter) {
+
+      if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
+        self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
+        self.tutorial_1_snide_clicks += 1
+      }
+
       if (letter_array.includes(letter)) {
         self.keyAction(letter);
       }
@@ -98,29 +104,34 @@ Game.prototype.resetBoardBrowser = function() {
   //   action: function(letter) {}
   // });
   this.enemy_palette = this.makeKeyboard({
-    parent: scene, x: 1052, y: 483,
+    parent: scene, x: 1062.5, y: 472,
     defense: this.enemy_defense, 
     action: function(letter) {
     }
   });
-  this.enemy_palette.scale.set(0.25, 0.25);
+  this.enemy_palette.scale.set(0.3125, 0.3125);
 
   // the player's board
   this.player_area = new PIXI.Container();
   scene.addChild(this.player_area);
-  this.player_area.position.set(this.width * 1/2 - 350,520);
-  this.player_area.scale.set(0.6,0.6);
+  this.player_area.position.set(this.width * 1/2 - 370,520);
+  this.player_area.scale.set(0.65,0.65);
+
+  this.player_live_area = new PIXI.Container();
+  scene.addChild(this.player_live_area);
+  this.player_live_area.position.set(this.player_area.x, this.player_area.y);
+  this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
 
   var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  play_mat.width = 500;
+  play_mat.width = 50 * board_width;
   play_mat.height = 700;
   play_mat.anchor.set(0, 1);
   play_mat.position.set(0, -50);
-  play_mat.tint = 0x1c2120;
+  play_mat.tint = 0x303889;
   this.player_area.addChild(play_mat);
 
   var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  pad_mat.width = 500;
+  pad_mat.width = 50 * board_width;
   pad_mat.height = 50;
   pad_mat.anchor.set(0, 1);
   pad_mat.position.set(0, 0);
@@ -130,58 +141,110 @@ Game.prototype.resetBoardBrowser = function() {
   // the player's launchpad
   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
 
+  // silly mouse buttons
+  for (let i = 0; i < 3; i++) {
+    let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
+    mouse_button.anchor.set(0, 0);
+    mouse_button.position.set(962.5 + 39.25*i, 741);
+    scene.addChild(mouse_button);
+
+    mouse_button.interactive = true;
+    mouse_button.buttonMode = true;
+    mouse_button.button_pressed = false;
+    mouse_button.on("pointerdown", function() {
+      if (self.keyboard_sounds) self.soundEffect("keyboard_click_1", 1.0);
+      if (mouse_button.button_pressed != true) {
+        mouse_button.button_pressed = true;
+        // let old_y = mouse_button.position.y;
+        mouse_button.position.y += 3;
+        setTimeout(function() {
+          mouse_button.button_pressed = false;
+          mouse_button.position.y -= 3;
+        }, 50);
+      }
+    });
+  }
+
   // the enemy board
   this.enemy_area = new PIXI.Container();
   scene.addChild(this.enemy_area);
-  this.enemy_area.position.set(this.width * 1/2 + 350,370);
-  this.enemy_area.scale.set(0.23,0.23);
+  this.enemy_area.position.set(this.width * 1/2 + 325,340);
+  this.enemy_area.scale.set(0.325,0.325);
+
+
+  this.enemy_live_area = new PIXI.Container();
+  scene.addChild(this.enemy_live_area);
+  this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
+  this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
+
   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  enemy_mat.width = 500;
+  enemy_mat.width = 50 * board_width;
   enemy_mat.height = 700;
   enemy_mat.anchor.set(0, 1);
   enemy_mat.position.set(0, -50);
-  enemy_mat.tint = 0x1c2120;
+  enemy_mat.tint = 0x303889;
 
   this.enemy_area.addChild(enemy_mat);
   var enemy_pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  enemy_pad_mat.width = 500;
+  enemy_pad_mat.width = 50 * board_width;
   enemy_pad_mat.height = 50;
   enemy_pad_mat.anchor.set(0, 1);
   enemy_pad_mat.position.set(0, 0);
   enemy_pad_mat.tint = 0x2c3130;
   this.enemy_area.addChild(enemy_pad_mat);
 
+  for (var m = 0; m < 2; m++) {
+    let area = this.player_area;
+    if (m == 1) area = this.enemy_area;
+    for(var i = 0; i < 2 + Math.floor(Math.random() * 4); i++) {
+      let num = 1 + Math.floor(Math.random() * 3)
+      let cloud = new PIXI.Sprite(PIXI.Texture.from("Art/cloud_" + num + ".png"));
+      cloud.anchor.set(0.5, 0.5);
+      cloud.position.set(96 + Math.floor(Math.random() * 320), -200 - i * (150 + Math.floor(Math.random()*50)))
+      cloud.scale.set(1/0.65, 1/0.65);
+      cloud.alpha = 0.3 + Math.floor(Math.random() * 4) / 10.0;
+      cloud.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+      area.addChild(cloud);
+    }
+
+    for (var i = 0; i < 2; i++) {
+      let rock_wall = new PIXI.Sprite(PIXI.Texture.from("Art/rock_wall_v3.png"));
+      rock_wall.anchor.set(1 - i, 1);
+      rock_wall.position.set(((i == 0 ? -4 : 10) + board_width*32*i)/.65, 0)
+      rock_wall.scale.set(2/0.65, 2/0.65);
+      rock_wall.alpha = 0.5;
+      rock_wall.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+      area.addChild(rock_wall);
+    }
+  }
+
   // level and score
-  this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 10, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_label.anchor.set(0.5,0.5);
-  this.level_label.position.set(1060, 30);
+  this.level_label.position.set(203, 180);
+  this.level_label.scale.set(2,2);
+  this.level_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.level_label);
 
-  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_text_box.anchor.set(0.5,0.5);
-  this.level_text_box.position.set(1060, 60);
+  this.level_text_box.position.set(203, 215);
+  this.level_text_box.scale.set(2,2);
+  this.level_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.level_text_box);
 
-  this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.opponent_label.anchor.set(0.5,0.5);
-  this.opponent_label.position.set(1060, 130);
-  scene.addChild(this.opponent_label);
-  this.opponent_label.visible = false;
-
-  this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.opponent_text_box.anchor.set(0.5,0.5);
-  this.opponent_text_box.position.set(1060, 180);
-  scene.addChild(this.opponent_text_box);
-  this.opponent_text_box.visible = false;
-
-  this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 10, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(1060, 100);
+  this.score_label.position.set(728, 180);
+  this.score_label.scale.set(2,2);
+  this.score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.score_label);
 
-  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(1060, 130);
+  this.score_text_box.position.set(728, 215);
+  this.score_text_box.scale.set(2,2);
+  this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.score_text_box);
 
   this.setEnemyDifficulty(this.level, 2);
@@ -194,267 +257,295 @@ Game.prototype.resetBoardBrowser = function() {
   this.gentle_limit = 12.5;
   this.boost_limit = -40;
 
-  for (var i = 0; i < 10; i++) {
+  for (var i = 0; i < board_width; i++) {
     this.launchpad.cursors[i].visible = false;
   }
 
-  this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
+  this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.countdown_text.anchor.set(0.5,0.5);
-  this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
+  this.countdown_text.position.set(475, 203);
+  this.countdown_text.scale.set(4,4);
+  this.countdown_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.countdown_text);
+
+  // 129,39 sheen
+  // let player_sheen = new PIXI.Sprite(PIXI.Texture.from("Art/sheen.png"));
+  // player_sheen.anchor.set(0, 0);
+  // player_sheen.position.set(129, 39);
+  // player_sheen.alpha = 0.15;
+  // scene.addChild(player_sheen);
+
+  let player_monitor_mask = new PIXI.Graphics();
+  player_monitor_mask.beginFill(0xFF3300);
+  player_monitor_mask.drawRect(129, 39, 669, 504);
+  player_monitor_mask.endFill();
+  this.player_area.mask = player_monitor_mask;
+
+  // let enemy_sheen = new PIXI.Sprite(PIXI.Texture.from("Art/sheen.png"));
+  // enemy_sheen.anchor.set(0, 0);
+  // enemy_sheen.position.set(894, 98);
+  // enemy_sheen.scale.set(0.5, 0.5);
+  // enemy_sheen.alpha = 0.15;
+  // scene.addChild(enemy_sheen);
+
+  let enemy_monitor_mask = new PIXI.Graphics();
+  enemy_monitor_mask.beginFill(0xFF3300);
+  enemy_monitor_mask.drawRect(894, 98, 334, 251);
+  enemy_monitor_mask.endFill();
+  this.enemy_area.mask = enemy_monitor_mask;
 }
 
 
-Game.prototype.resetBoardiPad = function() {
-  var self = this;
-  var scene = this.scenes["game"];
+// Game.prototype.resetBoardiPad = function() {
+//   var self = this;
+//   var scene = this.scenes["game"];
 
-  this.player_palette = this.makeQwertyPalette({
-    parent: scene,
-    key_size: 60,
-    key_margin: 9,
-    x: 0, y: this.height - 216,
-    add_special_keys: true,
-    action: function(letter) {
-      self.keyAction(letter);
-    }
-  });
+//   this.player_palette = this.makeQwertyPalette({
+//     parent: scene,
+//     key_size: 60,
+//     key_margin: 9,
+//     x: 0, y: this.height - 216,
+//     add_special_keys: true,
+//     action: function(letter) {
+//       self.keyAction(letter);
+//     }
+//   });
 
-  // the player's board
-  this.player_area = new PIXI.Container();
-  scene.addChild(this.player_area);
-  this.player_area.position.set(6,756);
-  // this.player_area.scale.set(0.5,0.5);
+//   // the player's board
+//   this.player_area = new PIXI.Container();
+//   scene.addChild(this.player_area);
+//   this.player_area.position.set(6,756);
+//   // this.player_area.scale.set(0.5,0.5);
 
-  var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  play_mat.width = 500;
-  play_mat.height = 700;
-  play_mat.anchor.set(0, 1);
-  play_mat.position.set(0, -50);
-  play_mat.tint = 0x4D4D4D;
-  this.player_area.addChild(play_mat);
+//   var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   play_mat.width = 500;
+//   play_mat.height = 700;
+//   play_mat.anchor.set(0, 1);
+//   play_mat.position.set(0, -50);
+//   play_mat.tint = 0x4D4D4D;
+//   this.player_area.addChild(play_mat);
 
-  var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  pad_mat.width = 500;
-  pad_mat.height = 50;
-  pad_mat.anchor.set(0, 1);
-  pad_mat.position.set(0, 0);
-  pad_mat.tint = 0xCCCCCC;
-  this.player_area.addChild(pad_mat);
+//   var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   pad_mat.width = 500;
+//   pad_mat.height = 50;
+//   pad_mat.anchor.set(0, 1);
+//   pad_mat.position.set(0, 0);
+//   pad_mat.tint = 0xCCCCCC;
+//   this.player_area.addChild(pad_mat);
 
-  // the player's launchpad
-  this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
+//   // the player's launchpad
+//   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
 
-  // the enemy board
-  this.enemy_area = new PIXI.Container();
-  scene.addChild(this.enemy_area);
-  this.enemy_area.position.set(512,381);
-  this.enemy_area.scale.set(0.5,0.5);
+//   // the enemy board
+//   this.enemy_area = new PIXI.Container();
+//   scene.addChild(this.enemy_area);
+//   this.enemy_area.position.set(512,381);
+//   this.enemy_area.scale.set(0.5,0.5);
 
-  // the enemy palette
-  this.enemy_palette = this.makeQwertyPalette({
-    parent: this.enemy_area,
-    key_size: 42,
-    key_margin: 7,
-    x: 1, y: 24,
-    add_special_keys: false,
-    action: function(letter) {}
-  });
+//   // the enemy palette
+//   this.enemy_palette = this.makeQwertyPalette({
+//     parent: this.enemy_area,
+//     key_size: 42,
+//     key_margin: 7,
+//     x: 1, y: 24,
+//     add_special_keys: false,
+//     action: function(letter) {}
+//   });
 
-  var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  enemy_mat.width = 500;
-  enemy_mat.height = 700;
-  enemy_mat.anchor.set(0, 1);
-  enemy_mat.position.set(0, -50);
-  enemy_mat.tint = 0x4D4D4D;
-  this.enemy_area.addChild(enemy_mat);
-  var enemy_pad_math = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  enemy_pad_math.width = 500;
-  enemy_pad_math.height = 50;
-  enemy_pad_math.anchor.set(0, 1);
-  enemy_pad_math.position.set(0, 0);
-  enemy_pad_math.tint = 0xCCCCCC;
-  this.enemy_area.addChild(enemy_pad_math);
+//   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   enemy_mat.width = 500;
+//   enemy_mat.height = 700;
+//   enemy_mat.anchor.set(0, 1);
+//   enemy_mat.position.set(0, -50);
+//   enemy_mat.tint = 0x4D4D4D;
+//   this.enemy_area.addChild(enemy_mat);
+//   var enemy_pad_math = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   enemy_pad_math.width = 500;
+//   enemy_pad_math.height = 50;
+//   enemy_pad_math.anchor.set(0, 1);
+//   enemy_pad_math.position.set(0, 0);
+//   enemy_pad_math.tint = 0xCCCCCC;
+//   this.enemy_area.addChild(enemy_pad_math);
 
-  // level and score
-  this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.level_label.anchor.set(0.5,0.5);
-  this.level_label.position.set(640, 512);
-  scene.addChild(this.level_label);
+//   // level and score
+//   this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.level_label.anchor.set(0.5,0.5);
+//   this.level_label.position.set(640, 512);
+//   scene.addChild(this.level_label);
 
-  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.level_text_box.anchor.set(0.5,0.5);
-  this.level_text_box.position.set(640, 542);
-  scene.addChild(this.level_text_box);
+//   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.level_text_box.anchor.set(0.5,0.5);
+//   this.level_text_box.position.set(640, 542);
+//   scene.addChild(this.level_text_box);
 
-  this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.opponent_label.anchor.set(0.5,0.5);
-  this.opponent_label.position.set(640, 592);
-  scene.addChild(this.opponent_label);
+//   this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.opponent_label.anchor.set(0.5,0.5);
+//   this.opponent_label.position.set(640, 592);
+//   scene.addChild(this.opponent_label);
 
-  this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.opponent_text_box.anchor.set(0.5,0.5);
-  this.opponent_text_box.position.set(640, 622);
-  scene.addChild(this.opponent_text_box);
+//   this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.opponent_text_box.anchor.set(0.5,0.5);
+//   this.opponent_text_box.position.set(640, 622);
+//   scene.addChild(this.opponent_text_box);
 
-  this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(640, 672);
-  scene.addChild(this.score_label);
+//   this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.score_label.anchor.set(0.5,0.5);
+//   this.score_label.position.set(640, 672);
+//   scene.addChild(this.score_label);
 
-  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(640, 702);
-  scene.addChild(this.score_text_box);
+//   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.score_text_box.anchor.set(0.5,0.5);
+//   this.score_text_box.position.set(640, 702);
+//   scene.addChild(this.score_text_box);
 
-  this.setEnemyDifficulty(this.level, 1);
+//   this.setEnemyDifficulty(this.level, 1);
 
-  this.enemy_last_action = Date.now();
+//   this.enemy_last_action = Date.now();
 
-  this.gravity = 6;
-  this.boost = 0.25;
-  this.gentle_drop = 0.1;
-  this.gentle_limit = 12.5;
-  this.boost_limit = -40;
+//   this.gravity = 6;
+//   this.boost = 0.25;
+//   this.gentle_drop = 0.1;
+//   this.gentle_limit = 12.5;
+//   this.boost_limit = -40;
 
-  for (var i = 0; i < 10; i++) {
-    this.launchpad.cursors[i].visible = false;
-  }
+//   for (var i = 0; i < board_width; i++) {
+//     this.launchpad.cursors[i].visible = false;
+//   }
 
-  this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.countdown_text.anchor.set(0.5,0.5);
-  this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
-  scene.addChild(this.countdown_text);
-}
-
-
-
-Game.prototype.resetBoardiPhone = function() {
-  var self = this;
-  var scene = this.scenes["game"];
-
-  // it's a tiny piece of paper. 50 and 7.5
-  // 
-  this.player_palette = this.makeTallQwertyPalette({
-    parent: scene,
-    key_size: 60,
-    key_margin: 4,
-    side_margin: 2,
-    vertical_margin: 10,
-    x: 0, y: this.height - 394,
-    add_special_keys: true,
-    action: function(letter) {self.keyAction(letter);}
-  });
-
-  // the player's board
-  this.player_area = new PIXI.Container();
-  scene.addChild(this.player_area);
-  this.player_area.position.set(2,677);
-  this.player_area.scale.set(0.90,0.90);
-
-  var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  play_mat.width = 500;
-  play_mat.height = 700;
-  play_mat.anchor.set(0, 1);
-  play_mat.position.set(0, -50);
-  play_mat.tint = 0x4D4D4D;
-  this.player_area.addChild(play_mat);
-
-  var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  pad_mat.width = 500;
-  pad_mat.height = 50;
-  pad_mat.anchor.set(0, 1);
-  pad_mat.position.set(0, 0);
-  pad_mat.tint = 0xCCCCCC;
-  this.player_area.addChild(pad_mat);
-
-  // the player's launchpad
-  this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
+//   this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.countdown_text.anchor.set(0.5,0.5);
+//   this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
+//   scene.addChild(this.countdown_text);
+// }
 
 
-  // the enemy board
-  this.enemy_area = new PIXI.Container();
-  scene.addChild(this.enemy_area);
-  this.enemy_area.position.set(454,278);
-  this.enemy_area.scale.set(0.368,0.368);
 
-  // the enemy palette
-  this.enemy_palette = this.makeTallQwertyPalette({
-    parent: this.enemy_area,
-    key_size: 42,
-    key_margin: 7,
-    side_margin: 2,
-    vertical_margin: 11,
-    x: 1, y: 24, 
-    add_special_keys: false,
-    action: function(letter) {}
-  });
+// Game.prototype.resetBoardiPhone = function() {
+//   var self = this;
+//   var scene = this.scenes["game"];
 
-  var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  enemy_mat.width = 500;
-  enemy_mat.height = 700;
-  enemy_mat.anchor.set(0, 1);
-  enemy_mat.position.set(0, -50);
-  enemy_mat.tint = 0x4D4D4D;
-  this.enemy_area.addChild(enemy_mat);
-  var enemy_pad_math = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  enemy_pad_math.width = 500;
-  enemy_pad_math.height = 50;
-  enemy_pad_math.anchor.set(0, 1);
-  enemy_pad_math.position.set(0, 0);
-  enemy_pad_math.tint = 0xCCCCCC;
-  this.enemy_area.addChild(enemy_pad_math);
+//   // it's a tiny piece of paper. 50 and 7.5
+//   // 
+//   this.player_palette = this.makeTallQwertyPalette({
+//     parent: scene,
+//     key_size: 60,
+//     key_margin: 4,
+//     side_margin: 2,
+//     vertical_margin: 10,
+//     x: 0, y: this.height - 394,
+//     add_special_keys: true,
+//     action: function(letter) {self.keyAction(letter);}
+//   });
 
-   // level and score
-  this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.level_label.anchor.set(0.5,0.5);
-  this.level_label.position.set(160, 60);
-  scene.addChild(this.level_label);
+//   // the player's board
+//   this.player_area = new PIXI.Container();
+//   scene.addChild(this.player_area);
+//   this.player_area.position.set(2,677);
+//   this.player_area.scale.set(0.90,0.90);
 
-  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.level_text_box.anchor.set(0.5,0.5);
-  this.level_text_box.position.set(160, 90);
-  scene.addChild(this.level_text_box);
+//   var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   play_mat.width = 500;
+//   play_mat.height = 700;
+//   play_mat.anchor.set(0, 1);
+//   play_mat.position.set(0, -50);
+//   play_mat.tint = 0x4D4D4D;
+//   this.player_area.addChild(play_mat);
 
-  this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.opponent_label.anchor.set(0.5,0.5);
-  this.opponent_label.position.set(320, 60);
-  scene.addChild(this.opponent_label);
+//   var pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   pad_mat.width = 500;
+//   pad_mat.height = 50;
+//   pad_mat.anchor.set(0, 1);
+//   pad_mat.position.set(0, 0);
+//   pad_mat.tint = 0xCCCCCC;
+//   this.player_area.addChild(pad_mat);
 
-  this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.opponent_text_box.anchor.set(0.5,0.5);
-  this.opponent_text_box.position.set(320, 90);
-  scene.addChild(this.opponent_text_box);
+//   // the player's launchpad
+//   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 50, 48, false);
 
-  this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(480, 60);
-  scene.addChild(this.score_label);
 
-  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(480, 90);
-  scene.addChild(this.score_text_box);
+//   // the enemy board
+//   this.enemy_area = new PIXI.Container();
+//   scene.addChild(this.enemy_area);
+//   this.enemy_area.position.set(454,278);
+//   this.enemy_area.scale.set(0.368,0.368);
 
-  this.setEnemyDifficulty(this.level, 1);
+//   // the enemy palette
+//   this.enemy_palette = this.makeTallQwertyPalette({
+//     parent: this.enemy_area,
+//     key_size: 42,
+//     key_margin: 7,
+//     side_margin: 2,
+//     vertical_margin: 11,
+//     x: 1, y: 24, 
+//     add_special_keys: false,
+//     action: function(letter) {}
+//   });
 
-  this.enemy_last_action = Date.now();
+//   var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   enemy_mat.width = 500;
+//   enemy_mat.height = 700;
+//   enemy_mat.anchor.set(0, 1);
+//   enemy_mat.position.set(0, -50);
+//   enemy_mat.tint = 0x4D4D4D;
+//   this.enemy_area.addChild(enemy_mat);
+//   // var enemy_pad_math = PIXI.Sprite.from(PIXI.Texture.WHITE);
+//   // enemy_pad_math.width = 500;
+//   // enemy_pad_math.height = 50;
+//   // enemy_pad_math.anchor.set(0, 1);
+//   // enemy_pad_math.position.set(0, 0);
+//   // enemy_pad_math.tint = 0xCCCCCC;
+//   // this.enemy_area.addChild(enemy_pad_math);
 
-  this.gravity = 6;
-  this.boost = 0.25;
-  this.gentle_drop = 0.1;
-  this.gentle_limit = 12.5;
-  this.boost_limit = -40;
+//    // level and score
+//   this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.level_label.anchor.set(0.5,0.5);
+//   this.level_label.position.set(160, 60);
+//   scene.addChild(this.level_label);
 
-  for (var i = 0; i < 10; i++) {
-    this.launchpad.cursors[i].visible = false;
-  }
+//   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.level_text_box.anchor.set(0.5,0.5);
+//   this.level_text_box.position.set(160, 90);
+//   scene.addChild(this.level_text_box);
 
-  this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
-  this.countdown_text.anchor.set(0.5,0.5);
-  this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
-  scene.addChild(this.countdown_text);
-}
+//   this.opponent_label = new PIXI.Text("Opponent", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.opponent_label.anchor.set(0.5,0.5);
+//   this.opponent_label.position.set(320, 60);
+//   scene.addChild(this.opponent_label);
+
+//   this.opponent_text_box = new PIXI.Text(character_names[(this.level - 1) % 26], {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.opponent_text_box.anchor.set(0.5,0.5);
+//   this.opponent_text_box.position.set(320, 90);
+//   scene.addChild(this.opponent_text_box);
+
+//   this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 15, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.score_label.anchor.set(0.5,0.5);
+//   this.score_label.position.set(480, 60);
+//   scene.addChild(this.score_label);
+
+//   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 30, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.score_text_box.anchor.set(0.5,0.5);
+//   this.score_text_box.position.set(480, 90);
+//   scene.addChild(this.score_text_box);
+
+//   this.setEnemyDifficulty(this.level, 1);
+
+//   this.enemy_last_action = Date.now();
+
+//   this.gravity = 6;
+//   this.boost = 0.25;
+//   this.gentle_drop = 0.1;
+//   this.gentle_limit = 12.5;
+//   this.boost_limit = -40;
+
+//   for (var i = 0; i < board_width; i++) {
+//     this.launchpad.cursors[i].visible = false;
+//   }
+
+//   this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 80, fill: 0x000000, letterSpacing: 6, align: "center"});
+//   this.countdown_text.anchor.set(0.5,0.5);
+//   this.countdown_text.position.set(this.width * 1/2, this.height * 1/2);
+//   scene.addChild(this.countdown_text);
+// }
 
 
 
@@ -523,7 +614,7 @@ Game.prototype.enemyAction = function(rerolls, targeting = true) {
     var word_size = this.enemy_short_word + Math.floor(Math.random() * (1 + this.enemy_long_word - this.enemy_short_word));
     var word_list = this.enemy_words[word_size];
     var candidate_word = word_list[Math.floor(Math.random() * word_list.length)];
-    var candidate_shift = Math.floor(Math.random() *(11 - candidate_word.length));
+    var candidate_shift = Math.floor(Math.random() *(board_width + 1 - candidate_word.length));
 
     var legal_keys = true;
     for (var j = 0; j < candidate_word.length; j++) {
@@ -664,7 +755,7 @@ Game.prototype.singlePlayerUpdate = function() {
       this.countdown_text.text = "GO";
       this.game_phase = "active";
       setTimeout(function() {self.countdown_text.text = "";}, 1600);
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;
       }
       if (annoying) this.setMusic("action_song");
@@ -851,13 +942,19 @@ Game.prototype.singlePlayerUpdate = function() {
       rocket.vx = 0;
       let target_x = 0;
       let target_y = 0;
+      let old_x = rocket.x;
+      let old_y = rocket.y;
       if (rocket.player == 1) {
+        this.enemy_area.removeChild(rocket);
+        this.enemy_live_area.addChild(rocket);
+        rocket.position.set(old_x,old_y);
         target_x = (this.enemy_palette.letters[disabled_letter].x * this.enemy_palette.scale.x + this.enemy_palette.position.x - this.enemy_area.position.x) / this.enemy_area.scale.x;
         target_y = (this.enemy_palette.letters[disabled_letter].y * this.enemy_palette.scale.y + this.enemy_palette.position.y - this.enemy_area.position.y) / this.enemy_area.scale.y;
         if (this.game_phase == "tutorial" && this.tutorial_number == 7) this.tutorial8();
       } else if (rocket.player == 2) {
-        // target_x = (this.player_palette.letters[disabled_letter].x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
-        // target_y = (this.player_palette.letters[disabled_letter].y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
+        this.player_area.removeChild(rocket);
+        this.player_live_area.addChild(rocket);
+        rocket.position.set(old_x,old_y);
         target_x = (this.player_palette.letters[disabled_letter].x * this.player_palette.scale.x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
         target_y = (this.player_palette.letters[disabled_letter].y * this.player_palette.scale.y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
         if (this.game_phase == "tutorial" && this.tutorial_number == 10) this.tutorial11();
@@ -884,23 +981,23 @@ Game.prototype.singlePlayerUpdate = function() {
                   self.enemy_palette.letters[disabled_letter].disable();
                   self.soundEffect("explosion_3");
                   
-                  let fire = self.makeFire(self.enemy_area, 
+                  let fire = self.makeFire(self.enemy_live_area, 
                     target_x,
                     target_y - 24,
                     0.4, 0.33);
                   fire.visible = false;
 
-                  let explosion = self.makeExplosion(self.enemy_area, 
-                    self.enemy_palette.letters[disabled_letter].x + self.enemy_palette.position.x,
-                    self.enemy_palette.letters[disabled_letter].y + self.enemy_palette.position.y,
-                  1/2, 1/2, function() {fire.visible = true; self.enemy_area.removeChild(explosion)});
+                  let explosion = self.makeExplosion(self.enemy_live_area, 
+                    target_x,
+                    target_y,
+                  1/2, 1/2, function() {fire.visible = true; self.enemy_live_area.removeChild(explosion)});
 
 
                   if (!self.enemy_defense.includes(disabled_letter)) {
                     self.score += rocket.score_value;
                     self.score_text_box.text = self.score;
                     setTimeout(function() {
-                      self.enemy_area.removeChild(fire);
+                      self.enemy_live_area.removeChild(fire);
                       self.enemy_palette.letters[disabled_letter].enable()
                     }, self.disabledTime(disabled_letter));
                   } else {

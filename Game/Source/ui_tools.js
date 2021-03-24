@@ -98,13 +98,14 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
   rocket_tile.position.set(start_x, start_y);
   rocket_tile.vy = 0;
 
-  let fire_sprite = this.makeFire(rocket_tile, 0, 48, 0.2, -0.2);
+  let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 48, 0.2, -0.2);
   fire_sprite.visible = false;
 
   let parachute_sprite = this.makeParachute(rocket_tile, 0, -50, 0.3, 0.3);
   parachute_sprite.visible = false;
 
-  var tile = this.makeTile(rocket_tile, 0, 0, letter, inner_size, inner_size, inner_size, 0xFFFFFF, "", function() {});
+  var tile = this.makePixelatedTile(rocket_tile, 0, 0, letter, inner_size, inner_size, inner_size, 0xFFFFFF, "", function() {});
+
   rocket_tile.fire_sprite = fire_sprite;
   rocket_tile.parachute_sprite = parachute_sprite;
   rocket_tile.start_time = Date.now() - Math.floor(Math.random() * 300);
@@ -142,6 +143,20 @@ Game.prototype.makeFire = function(parent, x, y, xScale, yScale) {
 }
 
 
+Game.prototype.makePixelatedFire = function(parent, x, y, xScale, yScale) {
+  var sheet = PIXI.Loader.shared.resources["Art/fire_pixelated.json"].spritesheet;
+  let fire_sprite = new PIXI.AnimatedSprite(sheet.animations["fire_peeee"]);
+  fire_sprite.anchor.set(0.5,0.5);
+  fire_sprite.position.set(x, y);
+  parent.addChild(fire_sprite);
+  fire_sprite.animationSpeed = 0.5; 
+  fire_sprite.scale.set(xScale, yScale);
+  fire_sprite.play();
+  fire_sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  return fire_sprite;
+}
+
+
 Game.prototype.makeParachute = function(parent, x, y, xScale, yScale) {
   let parachute_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/parachute_v1.png"));
   parachute_sprite.anchor.set(0.5, 0.5);
@@ -172,6 +187,15 @@ Game.prototype.makeExplosion = function(parent, x, y, xScale, yScale, action) {
 Game.prototype.makeTile = function(parent, x, y, text, text_size, backing_width, backing_height, backing_color, value, action) {
   var button = this.makeButton(parent, x, y, text, text_size, 6, 0x000000, backing_width, backing_height, backing_color, action);
   return button;
+}
+
+Game.prototype.makePixelatedTile = function(parent, x, y, text, text_size, backing_width, backing_height, backing_color, value, action) {
+  var tile = new PIXI.Sprite(PIXI.Texture.from("Art/PixelatedKeys/pixelated_" + text + ".png"));
+  parent.addChild(tile);
+  tile.anchor.set(0.5,0.5);
+  tile.scale.set(1/0.65, 1/0.65);
+  tile.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  return tile;
 }
 
 

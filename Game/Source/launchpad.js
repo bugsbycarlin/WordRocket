@@ -2,8 +2,8 @@
 class Launchpad {
   constructor(game, parent, player, x, y, outer_size, inner_size, use_picker = false) {
     this.tiles = [];
-    this.shift = 0;
     this.cursor = 0;
+    this.shift = 0;
 
     this.game = game;
     this.parent = parent;
@@ -32,7 +32,7 @@ class Launchpad {
     this.pad_mat.height = this.outer_size;
     this.pad_mat.anchor.set(0, 1);
     this.pad_mat.position.set(0, 0);
-    this.pad_mat.tint = 0x2c3130;
+    this.pad_mat.tint = 0x000000; // 0x2c3130;
     this.parent.addChild(this.pad_mat);
 
     // cursor markers
@@ -73,6 +73,8 @@ class Launchpad {
     this.underline_text.anchor.set(0.5,0.5);
     this.pad.addChild(this.underline_text);
     this.underline_text.visible = false;
+
+    //this.shiftSet(board_width / 2 - 2);
   }
 
 
@@ -92,6 +94,7 @@ class Launchpad {
 
 
   flashError = function(){
+    this.game.soundEffect("negative");
     this.error = Date.now();
     this.pad_mat.tint = 0xdb5858;
   }
@@ -101,7 +104,7 @@ class Launchpad {
     if (this.error != null) {
       if (Date.now() - this.error >= 150) {
         this.error = null;
-        this.pad_mat.tint = 0x2c3130;
+        this.pad_mat.tint = 0x000000; //0x2c3130;
       }
     }
   }
@@ -127,8 +130,8 @@ class Launchpad {
     var start_x = (palette.letters[letter].position.x + palette.position.x - this.parent.position.x) / this.parent.scale.x;
     var start_y = (palette.letters[letter].position.y + palette.position.y - this.parent.position.y) / this.parent.scale.y;
 
-    var tile = game.makePixelatedTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
-    // var tile = game.makeTile(this.parent, target_x, target_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
+    //var tile = game.makePixelatedTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
+    var tile = game.makePixelatedLetterTile(this.parent, letter, "white");
     tile.text = letter;
     tile.parent = this.parent;
     this.tiles.push(tile);
@@ -187,7 +190,7 @@ class Launchpad {
     }
 
     if (this.wordSize() + this.shift > board_width) {
-      this.shiftLeft();
+      this.smallShiftLeft();
     }
   }
 
@@ -205,38 +208,53 @@ class Launchpad {
   }
 
 
+  clear() {
+    let size = this.wordSize();
+    for (i = 0; i < size; i++) {
+      this.pop();
+    }
+  }
 
-  shiftRight(){
+
+  smallShiftRight(){
     if (!(this.wordSize() + this.shift >= board_width)) {
-      this.shift += 1;
-      for (var i = 0; i < this.tiles.length; i++) {
-        var item = this.tiles[i];
-        var x = this.xi(i + this.shift);
-        var tween = new TWEEN.Tween(item.position)
-          .to({x: x})
-          .duration(200)
-          .easing(TWEEN.Easing.Cubic.InOut)
-          .start();
-      }
-
-      for (var i = 0; i < board_width; i++) {
-        var cursor = this.cursors[i];
-        var x = this.xi(i + this.shift);
-        var tween = new TWEEN.Tween(cursor.position)
-          .to({x: x})
-          .duration(200)
-          .easing(TWEEN.Easing.Cubic.InOut)
-          .start();
-      }
+      this.shiftSet(this.shift + 1);
 
       this.checkWord();
     }
   }
 
 
-  shiftLeft(){
+  smallShiftLeft(){
     if (this.shift > 0) {
-      this.shift -= 1;
+      this.shiftSet(this.shift - 1);
+
+      this.checkWord();
+    }
+  }
+
+
+  bigShiftRight(){
+    if (!(this.wordSize() + this.shift >= board_width)) {
+      this.shiftSet(board_width - this.wordSize());
+
+      this.checkWord();
+    }
+  }
+
+
+  bigShiftLeft(){
+    if (this.shift > 0) {
+      this.shiftSet(0);
+
+      this.checkWord();
+    }
+  }
+
+
+  shiftSet(value) {
+    if (value >= 0 && value < board_width) {
+      this.shift = value;
       for (var i = 0; i < this.tiles.length; i++) {
         var item = this.tiles[i];
         var x = this.xi(i + this.shift);
@@ -256,8 +274,6 @@ class Launchpad {
           .easing(TWEEN.Easing.Cubic.InOut)
           .start();
       }
-
-      this.checkWord();
     }
   }
 
@@ -320,6 +336,9 @@ class Launchpad {
 
       this.tiles = [];
       this.cursor = 0;
+      //this.shiftSet(board_width / 2 - 2);
+    } else {
+      this.flashError();
     }
   }
 }

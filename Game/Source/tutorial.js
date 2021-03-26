@@ -51,7 +51,7 @@ Game.prototype.tutorial2 = function() {
 
     setTimeout(function() {
       self.tutorial_number = 2.5;
-      self.tutorial_screen.tutorial_text.text = "PRESS THE LEFT AND RIGHT KEYS\nTO MOVE THE WORD.";
+      self.tutorial_screen.tutorial_text.text = "PRESS THE LEFT AND RIGHT KEYS TO MOVE THE WORD A LITTLE,\nOR LEFT AND RIGHT SHIFT TO MOVE THE WORD A LOT.";
     }, 2500);
 
   }, 2000);
@@ -63,7 +63,7 @@ Game.prototype.tutorial3 = function() {
   var scene = this.scenes["game"];
   
   this.tutorial_number = 3;
-  this.tutorial_screen.tutorial_text.text = "PRESS DELETE OR BACKSPACE\nTO DELETE A LETTER.";
+  this.tutorial_screen.tutorial_text.text = "PRESS DELETE OR BACKSPACE TO DELETE A LETTER,\n AND ESCAPE TO CLEAR THE BOARD.";
 }
 
 

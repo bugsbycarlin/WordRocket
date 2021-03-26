@@ -101,10 +101,19 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
   let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 48, 0.2, -0.2);
   fire_sprite.visible = false;
 
-  let parachute_sprite = this.makeParachute(rocket_tile, 0, -50, 0.3, 0.3);
+  let parachute_sprite = this.makeParachute(rocket_tile, 0, -75, 0.3, 0.3);
   parachute_sprite.visible = false;
 
-  var tile = this.makePixelatedTile(rocket_tile, 0, 0, letter, inner_size, inner_size, inner_size, 0xFFFFFF, "", function() {});
+
+  let rocket_file = "rocket_super_pixelated_large";
+  if (player == 1) rocket_file = "rocket_super_pixelated_american_large_2";
+  var rocket_proper = new PIXI.Sprite(PIXI.Texture.from("Art/" + rocket_file + ".png"));
+  rocket_proper.anchor.set(0.5, 0.5);
+  rocket_proper.scale.set(1/0.65, 1/0.65);
+  rocket_tile.addChild(rocket_proper);
+
+  var tile = this.makePixelatedLetterTile(rocket_tile, letter, "white");
+  tile.tint = 0x38351e;
 
   rocket_tile.fire_sprite = fire_sprite;
   rocket_tile.parachute_sprite = parachute_sprite;
@@ -178,15 +187,15 @@ Game.prototype.makePixelatedParachute = function(parent, x, y, xScale, yScale) {
 
 
 Game.prototype.makeExplosion = function(parent, x, y, xScale, yScale, action) {
-  var sheet = PIXI.Loader.shared.resources["Art/explosion.json"].spritesheet;
+  let sheet = PIXI.Loader.shared.resources["Art/explosion.json"].spritesheet;
   let explosion_sprite = new PIXI.AnimatedSprite(sheet.animations["explosion"]);
   explosion_sprite.anchor.set(0.5,0.5);
   explosion_sprite.position.set(x, y);
   parent.addChild(explosion_sprite);
   explosion_sprite.animationSpeed = 0.5; 
   explosion_sprite.scale.set(xScale, yScale);
-  explosion_sprite.play();
   explosion_sprite.loop = false;
+  explosion_sprite.play();
   explosion_sprite.onComplete = function() {
     action();
   }
@@ -199,8 +208,8 @@ Game.prototype.makeTile = function(parent, x, y, text, text_size, backing_width,
   return button;
 }
 
-Game.prototype.makePixelatedTile = function(parent, x, y, text, text_size, backing_width, backing_height, backing_color, value, action) {
-  var tile = new PIXI.Sprite(PIXI.Texture.from("Art/PixelatedKeys/pixelated_" + text + ".png"));
+Game.prototype.makePixelatedLetterTile = function(parent, text, color) {
+  var tile = new PIXI.Sprite(PIXI.Texture.from("Art/PixelatedKeys/pixelated_" + color + "_" + text + ".png"));
   parent.addChild(tile);
   tile.anchor.set(0.5,0.5);
   tile.scale.set(1/0.65, 1/0.65);
@@ -380,6 +389,7 @@ Game.prototype.makeTallQwertyPalette = function(options) {
   }
 
   palette.flashError = function(){
+    this.soundEffect("negative");
     palette.error = Date.now();
     palette.mat.tint = 0xdb5858;
   }
@@ -563,6 +573,7 @@ Game.prototype.makeQwertyPalette = function(options) {
 
 
   palette.flashError = function(){
+    this.soundEffect("negative");
     palette.error = Date.now();
     if (palette.mat != null) {
       palette.mat.tint = 0xdb5858;

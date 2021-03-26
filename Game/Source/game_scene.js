@@ -66,6 +66,18 @@ Game.prototype.resetBoardBrowser = function() {
         self.keyAction(letter);
       }
 
+      if (letter === "RShift") {
+        self.rightShiftAction();
+      }
+
+      if (letter === "LShift") {
+        self.leftShiftAction();
+      }
+
+      if (letter === "Escape") {
+        self.clearAction();
+      }
+
       if (letter === "Backspace") {
         self.deleteAction();
       }
@@ -127,7 +139,10 @@ Game.prototype.resetBoardBrowser = function() {
   play_mat.height = 700;
   play_mat.anchor.set(0, 1);
   play_mat.position.set(0, -50);
-  play_mat.tint = 0x303889;
+  let color_scale = Math.max(0,(1.0 - this.level/26));
+  console.log(color_scale);
+  play_mat.tint = 0x303889; //dark sky  // make this black for terrifying effect on a nasty level
+  //play_mat.tint = PIXI.utils.rgb2hex([117 * color_scale/ 255, 211 * color_scale / 255, 254 * color_scale / 255]);
   this.player_area.addChild(play_mat);
 
   // the player's launchpad
@@ -182,7 +197,7 @@ Game.prototype.resetBoardBrowser = function() {
   enemy_pad_mat.height = 50;
   enemy_pad_mat.anchor.set(0, 1);
   enemy_pad_mat.position.set(0, 0);
-  enemy_pad_mat.tint = 0x2c3130;
+  enemy_pad_mat.tint = 0x000000; //0x2c3130;
   this.enemy_area.addChild(enemy_pad_mat);
 
   for (var p = 0; p < 2; p++) {
@@ -884,6 +899,15 @@ Game.prototype.singlePlayerUpdate = function(diff) {
             rocket_2.vx = -10 + Math.random() * 20;
             rocket_2.vy = -4 - Math.random() * 14;
             this.freefalling.push(rocket_2);
+
+            let explosion_parent = this.enemy_area;
+            if (rocket_1.parent == this.player_area) {
+              explosion_parent = this.player_area;
+            }
+            let explosion = self.makeExplosion(explosion_parent, 
+              (rocket_1.x + rocket_2.x) / 2,
+              (rocket_1.y + rocket_2.y) / 2,
+            1, 1, function() {explosion_parent.removeChild(explosion)});
           }
 
           if (rocket_1.player == 1) {

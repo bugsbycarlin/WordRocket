@@ -6,7 +6,6 @@ Game.prototype.keyAction = function(letter) {
     if (this.player_palette.letters[letter].interactive == true && !this.launchpad.full()) {
       this.launchpad.push(this.player_palette, letter);
     } else {
-      this.soundEffect("negative");
       this.launchpad.flashError();
     }
   }
@@ -27,7 +26,7 @@ Game.prototype.deleteAction = function() {
 Game.prototype.rightArrowAction = function() {
   if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
-      this.launchpad.shiftRight();
+      this.launchpad.smallShiftRight();
       if (this.game_phase == "tutorial") {
         if (this.tutorial_number == 2.5) {
           this.tutorial_number = 2.75
@@ -43,7 +42,7 @@ Game.prototype.rightArrowAction = function() {
 Game.prototype.leftArrowAction = function() {
   if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
-      this.launchpad.shiftLeft();
+      this.launchpad.smallShiftLeft();
       if (this.game_phase == "tutorial") {
         if (this.tutorial_number == 2.5) {
           this.tutorial_number = 2.75
@@ -55,6 +54,30 @@ Game.prototype.leftArrowAction = function() {
   }
 }
 
+
+Game.prototype.rightShiftAction = function() {
+  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+    this.launchpad.bigShiftRight();
+  }
+}
+
+
+Game.prototype.leftShiftAction = function() {
+  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+    this.launchpad.bigShiftLeft();
+  }
+}
+
+
+Game.prototype.clearAction = function() {
+  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+    if (this.keyboard_sounds) this.soundEffect("keyboard_click_1", 1.0);
+    this.launchpad.clear();
+    if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
+      this.tutorial4();
+    }
+  }
+}
 
 
 Game.prototype.enterAction = function() {
@@ -122,6 +145,19 @@ Game.prototype.handleKeyDown = function(ev) {
   if (ev.key === "ArrowLeft") {
     this.leftArrowAction();
   }
+
+  if (ev.code === "ShiftRight") {
+    this.rightShiftAction();
+  }
+
+  if (ev.code === "ShiftLeft") {
+    this.leftShiftAction();
+  }
+
+  if (ev.key === "Escape") {
+    this.clearAction();
+  }
+
 
   if (ev.key === "Enter") {
     this.enterAction();

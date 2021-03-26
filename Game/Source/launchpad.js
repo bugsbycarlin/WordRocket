@@ -40,8 +40,8 @@ class Launchpad {
     for (var i = 0; i < board_width; i++) {
       var cursor = PIXI.Sprite.from(PIXI.Texture.WHITE);
       this.cursors[i] = cursor;
-      cursor.width = 48;
-      cursor.height = 4;
+      cursor.width = inner_size - 2;
+      cursor.height = 2;
       cursor.anchor.set(0.5, 0.5);
       cursor.position.set(this.xi(this.cursor + this.shift + i), 4);
       cursor.tint = 0x3cb0f3;
@@ -52,24 +52,24 @@ class Launchpad {
     // mask to prevent overflow
     let launchpad_mask = new PIXI.Graphics();
     launchpad_mask.beginFill(0xFF3300);
-    launchpad_mask.drawRect(this.parent.x + this.x, this.parent.y + this.y - 50, this.parent.scale.x * this.outer_size * board_width, this.parent.scale.y * 250);
+    launchpad_mask.drawRect(this.parent.x + this.x, this.parent.y + this.y - 32, this.parent.scale.x * this.outer_size * board_width, this.parent.scale.y * 150);
     launchpad_mask.endFill();
     this.pad.mask = launchpad_mask;
 
 
     // red underline of course
-    this.red_underlines = [];
-    for (var i = 0; i < board_width; i++) {
-      this.red_underlines[i] = new PIXI.Sprite(PIXI.Texture.from("Art/underline.png"));
-      this.red_underlines[i].anchor.set(0.5, 0.5);
-      this.red_underlines[i].scale.set(1,0.5);
-      this.red_underlines[i].position.set(this.xi(this.cursor + this.shift + i), 6)
-      this.pad.addChild(this.red_underlines[i]);
-      this.red_underlines[i].visible = false;
-    }
+    // this.red_underlines = [];
+    // for (var i = 0; i < board_width; i++) {
+    //   this.red_underlines[i] = new PIXI.Sprite(PIXI.Texture.from("Art/underline.png"));
+    //   this.red_underlines[i].anchor.set(0.5, 0.5);
+    //   this.red_underlines[i].scale.set(0.625,0.3125);
+    //   this.red_underlines[i].position.set(this.xi(this.cursor + this.shift + i), 6)
+    //   this.pad.addChild(this.red_underlines[i]);
+    //   this.red_underlines[i].visible = false;
+    // }
 
-    this.underline_text = new PIXI.Text("TOO SHORT", {fontFamily: "Bebas Neue", fontSize: 24, fill: 0xc16363, letterSpacing: 6, align: "center"});
-    this.underline_text.position.set(5 * this.outer_size, 26);
+    this.underline_text = new PIXI.Text("TOO SHORT", {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xc16363, letterSpacing: 6, align: "center"});
+    this.underline_text.position.set(5 * this.outer_size, 16);
     this.underline_text.anchor.set(0.5,0.5);
     this.pad.addChild(this.underline_text);
     this.underline_text.visible = false;
@@ -301,16 +301,12 @@ class Launchpad {
     if (this.can_play) {
       this.underline_text.visible = false;
       for (var i = 0; i < board_width; i++) {
-        this.red_underlines[i].visible = false;
+        this.cursors[i].tint = 0x3cb0f3;
       }
     } else {
       this.underline_text.visible = true;
       for (var i = 0; i < board_width; i++) {
-        if (i >= this.shift && i < this.shift + this.wordSize()) {
-          this.red_underlines[i].visible = true;
-        } else {
-          this.red_underlines[i].visible = false;
-        }
+        this.cursors[i].tint = 0xc16363;
       }
     }
   }

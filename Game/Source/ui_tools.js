@@ -98,10 +98,10 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
   rocket_tile.position.set(start_x, start_y);
   rocket_tile.vy = 0;
 
-  let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 48, 0.2, -0.2);
+  let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 30, 0.2, -0.2);
   fire_sprite.visible = false;
 
-  let parachute_sprite = this.makeParachute(rocket_tile, 0, -75, 0.3, 0.3);
+  let parachute_sprite = this.makeParachute(rocket_tile, 0, -60, 0.3, 0.3);
   parachute_sprite.visible = false;
 
 
@@ -109,7 +109,6 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
   if (player == 1) rocket_file = "rocket_super_pixelated_american_large_2";
   var rocket_proper = new PIXI.Sprite(PIXI.Texture.from("Art/" + rocket_file + ".png"));
   rocket_proper.anchor.set(0.5, 0.5);
-  rocket_proper.scale.set(1/0.65, 1/0.65);
   rocket_tile.addChild(rocket_proper);
 
   var tile = this.makePixelatedLetterTile(rocket_tile, letter, "white");
@@ -212,7 +211,6 @@ Game.prototype.makePixelatedLetterTile = function(parent, text, color) {
   var tile = new PIXI.Sprite(PIXI.Texture.from("Art/PixelatedKeys/pixelated_" + color + "_" + text + ".png"));
   parent.addChild(tile);
   tile.anchor.set(0.5,0.5);
-  tile.scale.set(1/0.65, 1/0.65);
   tile.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   return tile;
 }

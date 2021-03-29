@@ -23,6 +23,8 @@ var character_names = [
   "YAIR", "ZHANG",
 ];
 
+var fire_colors = [0xda5533, 0xf66931, 0xef912d, 0xfaae4b];
+
 const letter_array = Object.keys(letter_values);
 const lower_array = [];
 for (i in letter_array) {

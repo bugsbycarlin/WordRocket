@@ -12,25 +12,25 @@ Game.prototype.initializeTitleScreen = function() {
 
   let rock_wall = new PIXI.Container();
   this.scenes["title"].addChild(rock_wall);
-  for (var m = 0; m < 16; m++) {
-    for (var n = 0; n < 12; n++) {
-      if (m < 3 || m > 12) {
+  for (var m = 0; m < 20; m++) {
+    for (var n = 0; n < 15; n++) {
+      if (m < 4 || m > 15) {
         let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
         c = (30 + Math.floor(Math.random() * 30)) / 255.0;
         // c = (30 + 5 * (m + n) % 30) / 255.0;
         tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-        tile.width = 80;
-        tile.height = 80;
+        tile.width = 64;
+        tile.height = 64;
         //shift = i == 0 ? 0 : (board_width + 4) * 32;
-        tile.position.set(80 * m, 80 * n);
+        tile.position.set(64 * m, 64 * n);
         rock_wall.addChild(tile);
-      } else if (n == 11) {
+      } else if (n == 14) {
         let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
         c = 70 / 255.0;
         tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-        tile.width = 80;
-        tile.height = 80;
-        tile.position.set(80 * m, 80 * n);
+        tile.width = 64;
+        tile.height = 64;
+        tile.position.set(64 * m, 64 * n);
         rock_wall.addChild(tile);
       }
     }
@@ -62,25 +62,27 @@ Game.prototype.initializeTitleScreen = function() {
   left_player.position.set(this.width / 2 - 250, this.height - 130);
   this.scenes["title"].addChild(left_player);
 
-  let size = 80;
-  for (var i = 0; i < 4; i++) {
-    let x = 240 + 80 * i + 40;
-    let y = 80 + 40;
-    this.makePixelatedParachute(this.scenes["title"], x, y - size, 0.5, 0.5);
-  }
-  let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/title_word_v4.png"));
+  //let size = 80;
+  // for (var i = 0; i < 4; i++) {
+  //   let x = 240 + 80 * i + 40;
+  //   let y = 80 + 40;
+  //   //let parachute = this.makePixelatedParachute(this.scenes["title"], x, y - size, 2.5, 2.5);
+  // }
+  let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/title_word_v5.png"));
   title_word.anchor.set(0,0);
-  title_word.position.set(240, 80);
+  title_word.position.set(320 + 32, 80);
   this.scenes["title"].addChild(title_word);
 
   for (var i = 0; i < 7; i++) {
-    let x = 480 + 80 * i + 40;
-    let y = 240 + 40;
-    let fire = this.makePixelatedFire(this.scenes["title"], x, y + size * 0.8, 0.4, -0.3);
+    let x = 512 + 64 * i - 2;
+    let y = 370;
+    //let fire = this.makePixelatedFire(this.scenes["title"], x, y + 64 * 0.8, 1.5, 1.2);
+    let fire = this.makeFire(this.scenes["title"], x, y + 52, 0.35, -0.18);
+    fire.animationSpeed = 0.35; 
   }
-  let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/title_rockets_v4.png"));
+  let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/title_rockets_v5.png"));
   title_rockets.anchor.set(0,0);
-  title_rockets.position.set(480, 240);
+  title_rockets.position.set(512 - 32, 320 - 112);
   this.scenes["title"].addChild(title_rockets);
 
 

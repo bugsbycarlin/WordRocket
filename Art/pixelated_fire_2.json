@@ -1,0 +1,28 @@
+{"frames": {
+
+"simpler_fire_0_pixelated.png":
+{
+	"frame": {"x":0,"y":0,"w":40,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
+	"sourceSize": {"w":40,"h":40}
+},
+"simpler_fire_1_pixelated.png":
+{
+	"frame": {"x":40,"y":0,"w":40,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
+	"sourceSize": {"w":40,"h":40}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "pixelated_fire_2.png",
+	"format": "RGBA8888",
+	"size": {"w":80,"h":40},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:7ed8b664a9d42824ba5bc0d0e76ebfd9:219ce8f08d92a858369930042799b9a9:42e6f8193a7ee7020743b8f2b2444d12$"
+}
+}

@@ -98,15 +98,16 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
   rocket_tile.position.set(start_x, start_y);
   rocket_tile.vy = 0;
 
-  let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 30, 0.2, -0.2);
+  let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 36, .75, .6);
+  // let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 30, 0.2, -0.2);
   fire_sprite.visible = false;
 
-  let parachute_sprite = this.makeParachute(rocket_tile, 0, -60, 0.3, 0.3);
+  let parachute_sprite = this.makePixelatedParachute(rocket_tile, 0, -56, 1, 1);
   parachute_sprite.visible = false;
 
 
-  let rocket_file = "rocket_super_pixelated_large";
-  if (player == 1) rocket_file = "rocket_super_pixelated_american_large_2";
+  let rocket_file = "rocket_super_pixelated_finless_large";
+  if (player == 1) rocket_file = "rocket_super_pixelated_finless_american_large_2";
   var rocket_proper = new PIXI.Sprite(PIXI.Texture.from("Art/" + rocket_file + ".png"));
   rocket_proper.anchor.set(0.5, 0.5);
   rocket_tile.addChild(rocket_proper);
@@ -124,7 +125,7 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
 
   new TWEEN.Tween(rocket_tile.position)
     .to({y: start_y - inner_size})
-    .duration(400)
+    .duration(350)
     .onComplete(function() {fire_sprite.visible = true; rocket_tile.status = "rocket"; self.soundEffect("rocket");})
     .start()
 
@@ -151,13 +152,27 @@ Game.prototype.makeFire = function(parent, x, y, xScale, yScale) {
 }
 
 
+// Game.prototype.makePixelatedFire = function(parent, x, y, xScale, yScale) {
+//   var sheet = PIXI.Loader.shared.resources["Art/fire_pixelated.json"].spritesheet;
+//   let fire_sprite = new PIXI.AnimatedSprite(sheet.animations["fire_peeee"]);
+//   fire_sprite.anchor.set(0.5,0.5);
+//   fire_sprite.position.set(x, y);
+//   parent.addChild(fire_sprite);
+//   fire_sprite.animationSpeed = 0.5; 
+//   fire_sprite.scale.set(xScale, yScale);
+//   fire_sprite.play();
+//   fire_sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+//   return fire_sprite;
+// }
+
+
 Game.prototype.makePixelatedFire = function(parent, x, y, xScale, yScale) {
-  var sheet = PIXI.Loader.shared.resources["Art/fire_pixelated.json"].spritesheet;
-  let fire_sprite = new PIXI.AnimatedSprite(sheet.animations["fire_peeee"]);
+  var sheet = PIXI.Loader.shared.resources["Art/fire_3.json"].spritesheet;
+  let fire_sprite = new PIXI.AnimatedSprite(sheet.animations["fire_3"]);
   fire_sprite.anchor.set(0.5,0.5);
   fire_sprite.position.set(x, y);
   parent.addChild(fire_sprite);
-  fire_sprite.animationSpeed = 0.5; 
+  fire_sprite.animationSpeed = 0.15; 
   fire_sprite.scale.set(xScale, yScale);
   fire_sprite.play();
   fire_sprite.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
@@ -176,7 +191,7 @@ Game.prototype.makeParachute = function(parent, x, y, xScale, yScale) {
 
 
 Game.prototype.makePixelatedParachute = function(parent, x, y, xScale, yScale) {
-  let parachute_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/parachute_pixelated_v2.png"));
+  let parachute_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/parachute_second_draft_v6.png"));
   parachute_sprite.anchor.set(0.5, 0.5);
   parachute_sprite.scale.set(xScale, yScale);
   parachute_sprite.position.set(x, y);
@@ -432,6 +447,7 @@ Game.prototype.makeKeyboard = function(options) {
   let y = options.y == null ? 0 : options.y;
   let defense = options.defense == null ? [] : options.defense;
   let action = options.action == null ? function(){} : options.action;
+  let player = options.player;
 
   let keyboard = new PIXI.Container();
   parent.addChild(keyboard);
@@ -474,8 +490,10 @@ Game.prototype.makeKeyboard = function(options) {
       let button = this.makeNiceKey(
         keyboard,
         k_x + size * 40, k_y, filename, size, function() { 
-          self.pressKey(letter);
-          action(letter);
+          if (player == 1) {
+            self.pressKey(letter);
+            action(letter);
+          }
         },
       );
 

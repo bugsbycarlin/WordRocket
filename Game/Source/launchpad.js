@@ -236,7 +236,11 @@ class Launchpad {
 
   bigShiftRight(){
     if (!(this.wordSize() + this.shift >= board_width)) {
-      this.shiftSet(board_width - this.wordSize());
+      if (this.wordSize() > 0) {
+        this.shiftSet(board_width - this.wordSize());
+      } else {
+        this.shiftSet(board_width - 1);
+      }
 
       this.checkWord();
     }
@@ -253,7 +257,7 @@ class Launchpad {
 
 
   shiftSet(value) {
-    if (value >= 0 && value < board_width) {
+    if (value >= 0 && value <= board_width) {
       this.shift = value;
       for (var i = 0; i < this.tiles.length; i++) {
         var item = this.tiles[i];

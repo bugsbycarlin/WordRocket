@@ -246,13 +246,18 @@ class Game {
 
   intializeAnimations() {
     var self = this;
-    if (!PIXI.Loader.shared.resources["Art/fire_pixelated.json"]) {
-      PIXI.Loader.shared.add("Art/fire_pixelated.json").load(function() {
+    if (!PIXI.Loader.shared.resources["Art/fire_3.json"]) {
+      PIXI.Loader.shared.add("Art/fire_3.json").load(function() {
+    // if (!PIXI.Loader.shared.resources["Art/pixelated_fire_2.json"]) {
+    //   PIXI.Loader.shared.add("Art/pixelated_fire_2.json").load(function() {
+    // if (!PIXI.Loader.shared.resources["Art/fire_pixelated.json"]) {
+      // PIXI.Loader.shared.add("Art/fire_pixelated.json").load(function() {
 
-        self.initializeTitleScreen();
+        
 
         if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
           PIXI.Loader.shared.add("Art/fire.json").load(function() {
+            self.initializeTitleScreen();
             if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
               PIXI.Loader.shared.add("Art/explosion.json").load(function() {
               });

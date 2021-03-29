@@ -53,6 +53,7 @@ Game.prototype.resetBoardBrowser = function() {
   scene.addChild(background);
 
   this.player_palette = this.makeKeyboard({
+    player: 1,
     parent: scene, x: 467, y: 807,
     defense: this.player_defense, 
     action: function(letter) {
@@ -116,6 +117,7 @@ Game.prototype.resetBoardBrowser = function() {
   //   action: function(letter) {}
   // });
   this.enemy_palette = this.makeKeyboard({
+    player: 2,
     parent: scene, x: 1062.5, y: 472,
     defense: this.enemy_defense, 
     action: function(letter) {
@@ -524,9 +526,15 @@ Game.prototype.singlePlayerUpdate = function(diff) {
     var item = this.freefalling[i];
     item.position.x += item.vx * fractional;
     item.position.y += item.vy * fractional;
-    item.vy += this.gravity * fractional;
+    if (item.type != "ember") {
+      item.vy += this.gravity * fractional;
+    } else {
+      item.alpha *= 0.97;
+      item.vy += this.gentle_drop * fractional;
+      if (item.vy > this.gentle_limit) item.vy = this.gentle_limit;
+    }
 
-    if (item.position.y > 200) {
+    if (item.position.y > 200 || item.alpha < 0.04) {
       if (item.parent != null) {
         item.parent.removeChild(item);
       }
@@ -562,6 +570,22 @@ Game.prototype.singlePlayerUpdate = function(diff) {
       rocket.position.y += rocket.vy * fractional;
       rocket.vy -= this.boost * fractional;
       if (rocket.vy < this.boost_limit) rocket.vy = this.boost_limit;
+
+      if (Math.random() * 100 > Math.min(-0.6 * rocket.y, 95)) {
+        // drop an ember
+        let ember = PIXI.Sprite.from(PIXI.Texture.WHITE);
+        
+        ember.tint = fire_colors[Math.floor(Math.random()*fire_colors.length)];
+        ember.width = 4;
+        ember.height = 4;
+        ember.vx = -1 + Math.floor(Math.random() * 2);
+        ember.vy = 0;
+        ember.type = "ember";
+        ember.parent = rocket.parent;
+        ember.position.set(rocket.x - 16 + Math.floor(Math.random() * 32), rocket.y + 30);
+        rocket.parent.addChild(ember);
+        this.freefalling.push(ember);
+      }
     } else if (rocket.status === "descent") {
       rocket.position.y += rocket.vy * fractional;
       rocket.vy += this.gentle_drop * fractional;
@@ -600,7 +624,7 @@ Game.prototype.singlePlayerUpdate = function(diff) {
     for (var j = 0; j < this.rocket_letters.length; j++) {
       var rocket_2 = this.rocket_letters[j];
       if (rocket_1.column == rocket_2.column && rocket_1.parent == rocket_2.parent) {
-        if (rocket_1.status == "rocket" && rocket_2.status == "descent"
+        if ((rocket_1.status == "rocket" || rocket_1.status == "load") && rocket_2.status == "descent"
           && rocket_1.position.y < rocket_2.position.y) {
           // blooie
           // this.soundEffect("fart");

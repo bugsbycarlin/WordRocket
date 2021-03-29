@@ -1,6 +1,6 @@
 {"frames": {
 
-"firep00.png":
+"fire00.png":
 {
 	"frame": {"x":0,"y":0,"w":400,"h":400},
 	"rotated": false,
@@ -8,7 +8,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep01.png":
+"fire01.png":
 {
 	"frame": {"x":400,"y":0,"w":400,"h":400},
 	"rotated": false,
@@ -16,7 +16,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep02.png":
+"fire02.png":
 {
 	"frame": {"x":800,"y":0,"w":400,"h":400},
 	"rotated": false,
@@ -24,7 +24,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep03.png":
+"fire03.png":
 {
 	"frame": {"x":1200,"y":0,"w":400,"h":400},
 	"rotated": false,
@@ -32,7 +32,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep04.png":
+"fire04.png":
 {
 	"frame": {"x":1600,"y":0,"w":400,"h":400},
 	"rotated": false,
@@ -40,7 +40,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep05.png":
+"fire05.png":
 {
 	"frame": {"x":0,"y":400,"w":400,"h":400},
 	"rotated": false,
@@ -48,7 +48,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep06.png":
+"fire06.png":
 {
 	"frame": {"x":400,"y":400,"w":400,"h":400},
 	"rotated": false,
@@ -56,7 +56,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep07.png":
+"fire07.png":
 {
 	"frame": {"x":800,"y":400,"w":400,"h":400},
 	"rotated": false,
@@ -64,7 +64,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep08.png":
+"fire08.png":
 {
 	"frame": {"x":1200,"y":400,"w":400,"h":400},
 	"rotated": false,
@@ -72,7 +72,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":400,"h":400},
 	"sourceSize": {"w":400,"h":400}
 },
-"firep09.png":
+"fire09.png":
 {
 	"frame": {"x":1600,"y":400,"w":400,"h":400},
 	"rotated": false,
@@ -81,12 +81,12 @@
 	"sourceSize": {"w":400,"h":400}
 }},
 "animations": {
-	"fire_peeee": ["firep00.png","firep01.png","firep02.png","firep03.png","firep04.png","firep05.png","firep06.png","firep07.png","firep08.png","firep09.png"]
+	"fire": ["fire00.png","fire01.png","fire02.png","fire03.png","fire04.png","fire05.png","fire06.png","fire07.png","fire08.png","fire09.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
-	"image": "fire_pixelated.png",
+	"image": "fire.png",
 	"format": "RGBA8888",
 	"size": {"w":2000,"h":800},
 	"scale": "1",

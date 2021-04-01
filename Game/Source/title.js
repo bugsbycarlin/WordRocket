@@ -38,6 +38,22 @@ Game.prototype.initializeTitleScreen = function() {
   rock_wall.cacheAsBitmap = true;
 
 
+  let right_flag = new PIXI.Sprite(PIXI.Texture.from("Art/flag_soviet_first_draft_pixelated_v3.png"));
+  right_flag.anchor.set(0.5,0.5);
+  right_flag.scale.set(2,2);
+  right_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  right_flag.position.set(760, this.height - 440);
+  this.scenes["title"].addChild(right_flag);
+
+
+  let left_flag = new PIXI.Sprite(PIXI.Texture.from("Art/flag_american_first_draft_pixelated_v3.png"));
+  left_flag.anchor.set(0.5,0.5);
+  left_flag.scale.set(-2,2);
+  left_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  left_flag.position.set(515, this.height - 440);
+  this.scenes["title"].addChild(left_flag);
+
+
   let bbg = new PIXI.Sprite(PIXI.Texture.from("Art/pixelated_bbg.png"));
   bbg.tint = 0x212b67;
   bbg.scale.set(4,4);
@@ -74,11 +90,10 @@ Game.prototype.initializeTitleScreen = function() {
   this.scenes["title"].addChild(title_word);
 
   for (var i = 0; i < 7; i++) {
-    let x = 512 + 64 * i - 2;
+    let x = 512 + 64 * i + 2;
     let y = 370;
-    //let fire = this.makePixelatedFire(this.scenes["title"], x, y + 64 * 0.8, 1.5, 1.2);
-    let fire = this.makeFire(this.scenes["title"], x, y + 52, 0.35, -0.18);
-    fire.animationSpeed = 0.35; 
+    let fire = this.makeFire(this.scenes["title"], x - 2, y + 43, 0.32*1.25, 0.24*1.25);
+    fire.animationSpeed = 0.2;
   }
   let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/title_rockets_v5.png"));
   title_rockets.anchor.set(0,0);
@@ -94,7 +109,9 @@ Game.prototype.initializeTitleScreen = function() {
   tutorial_button.buttonMode = true;
   tutorial_button.on("pointerdown", function() {
     self.tutorial = true;
-    self.singlePlayerGame();
+    self.difficulty_level = "EASY";
+    self.initializeSinglePlayerScene();
+    self.animateSceneSwitch("title", "game");
   });
 
   let new_game_button = new PIXI.Sprite(PIXI.Texture.from("Art/new_game_button.png"));
@@ -105,8 +122,15 @@ Game.prototype.initializeTitleScreen = function() {
   new_game_button.buttonMode = true;
   new_game_button.on("pointerdown", function() {
     self.tutorial = false;
-    self.singlePlayerGame();
+    self.initializeSetupSingleScene();
+    self.animateSceneSwitch("title", "setup_single");
   });
+
+
+  // var spanky = new PIXI.Text("Spanky", {fontFamily: "Press Start 2P", fontSize: 48, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+  // spanky.anchor.set(0.5,0.5);
+  // spanky.position.set(500,500);
+  // this.scenes["title"].addChild(spanky);
 
   // this.makeButton(
   //   this.scenes["title"],

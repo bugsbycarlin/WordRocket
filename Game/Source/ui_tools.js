@@ -98,9 +98,15 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
   rocket_tile.position.set(start_x, start_y);
   rocket_tile.vy = 0;
 
-  let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 36, .75, .6);
-  // let fire_sprite = this.makePixelatedFire(rocket_tile, 0, 30, 0.2, -0.2);
+  let fire_sprite = this.makeFire(rocket_tile, 0, 34, 0.32, 0.24);
+  fire_sprite.original_x = fire_sprite.x;
+  fire_sprite.original_y = fire_sprite.y;
   fire_sprite.visible = false;
+  // let fire_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/test_fire_2.png"));
+  // fire_sprite.anchor.set(0.5, 0.5);
+  // fire_sprite.position.set(0, 40);
+  // fire_sprite.scale.set(0.75, 0.5);
+  // rocket_tile.addChild(fire_sprite);
 
   let parachute_sprite = this.makePixelatedParachute(rocket_tile, 0, -56, 1, 1);
   parachute_sprite.visible = false;
@@ -140,15 +146,36 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
 
 
 Game.prototype.makeFire = function(parent, x, y, xScale, yScale) {
-  var sheet = PIXI.Loader.shared.resources["Art/fire.json"].spritesheet;
-  let fire_sprite = new PIXI.AnimatedSprite(sheet.animations["fire"]);
+  var sheet = PIXI.Loader.shared.resources["Art/fire_draft_6.json"].spritesheet;
+  let fire_sprite = new PIXI.AnimatedSprite(sheet.animations["fire_draft_6_pixelated"]);
   fire_sprite.anchor.set(0.5,0.5);
+  fire_sprite.scaleMode = PIXI.SCALE_MODES.NEAREST;
   fire_sprite.position.set(x, y);
   parent.addChild(fire_sprite);
-  fire_sprite.animationSpeed = 0.5; 
+  fire_sprite.animationSpeed = 0.35; 
   fire_sprite.scale.set(xScale, yScale);
   fire_sprite.play();
   return fire_sprite;
+}
+
+
+Game.prototype.makeZappy = function(parent, x, y, xScale, yScale) {
+  let zappy_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/zappy.png"));
+  zappy_sprite.anchor.set(0.5, 0.5);
+  zappy_sprite.scale.set(xScale, yScale);
+  zappy_sprite.position.set(x, y);
+
+  zappy_sprite.randomize = function() {
+    this.angle = Math.floor(Math.random() * 360);
+    this.tint = PIXI.utils.rgb2hex([0.4 + 0.6 * Math.random(), 1, 1]);
+    this.last_random = Date.now();
+    this.next_random = 50 + 50 * Math.random();
+  }
+  zappy_sprite.randomize();
+
+  zappy_sprite.status = "active";
+  parent.addChild(zappy_sprite);
+  return zappy_sprite;
 }
 
 
@@ -214,6 +241,23 @@ Game.prototype.makeExplosion = function(parent, x, y, xScale, yScale, action) {
     action();
   }
   return explosion_sprite;
+}
+
+
+Game.prototype.makeElectric = function(parent, x, y, xScale, yScale) {
+  let sheet = PIXI.Loader.shared.resources["Art/electric.json"].spritesheet;
+  let electric_sprite = new PIXI.AnimatedSprite(sheet.animations["electric"]);
+  electric_sprite.anchor.set(0.5,0.5);
+  electric_sprite.position.set(x, y);
+  electric_sprite.angle = Math.random() * 360;
+  parent.addChild(electric_sprite);
+  electric_sprite.animationSpeed = 0.4; 
+  electric_sprite.scale.set(xScale, yScale);
+  electric_sprite.play();
+  electric_sprite.onLoop = function() {
+    this.angle = Math.random() * 360;
+  }
+  return electric_sprite;
 }
 
 
@@ -524,6 +568,7 @@ Game.prototype.makeNiceKey = function(parent, x, y, filename, size, action) {
 
   key_button.disable = function() {
     this.interactive = false;
+    this.disable_time = Date.now();
   }
 
   key_button.enable = function() {
@@ -683,6 +728,39 @@ Game.prototype.makeOptionChooser = function(parent, x, y, options, option_name, 
         }
       }
     );
+  }
+}
+
+
+Game.prototype.initializeScenes = function() {
+  var self = this;
+  this.scenes = [];
+
+  this.makeScene("title");
+  this.makeScene("setup_single");
+  this.makeScene("game");
+  this.scenes["title"].position.x = 0;
+
+  this.alertMask = new PIXI.Container();
+  pixi.stage.addChild(this.alertMask);
+  this.alertBox = new PIXI.Container();
+  pixi.stage.addChild(this.alertBox);
+}
+
+
+Game.prototype.makeScene = function(name) {
+  this.scenes[name] = new PIXI.Container();
+  this.scenes[name].name = name;
+  this.scenes[name].position.x = this.width;
+  pixi.stage.addChild(this.scenes[name]);
+}
+
+
+Game.prototype.clearScene = function(scene) {
+  console.log("here i am cleaning " + scene.name);
+  while(scene.children[0]) {
+    let x = scene.removeChild(scene.children[0]);
+    x.destroy();
   }
 }
 

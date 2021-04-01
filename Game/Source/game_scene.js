@@ -4,6 +4,8 @@ Game.prototype.initializeSinglePlayerScene = function() {
   this.level = 1;
   this.score = 0;
 
+  console.log(this.difficulty_level);
+
   this.reset();
 }
 
@@ -13,6 +15,7 @@ Game.prototype.reset = function() {
   this.clearScene(scene);
 
   this.freefalling = [];
+  //this.zappies = [];
   this.pickers = [];
   this.played_words = {};
 
@@ -236,31 +239,31 @@ Game.prototype.resetBoardBrowser = function() {
   }
 
   // level and score
-  this.level_label = new PIXI.Text("Level", {fontFamily: "Bebas Neue", fontSize: 10, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.level_label = new PIXI.Text("Level", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_label.anchor.set(0.5,0.5);
   this.level_label.position.set(203, 180);
-  this.level_label.scale.set(2,2);
+  // this.level_label.scale.set(2,2);
   this.level_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.level_label);
 
-  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_text_box.anchor.set(0.5,0.5);
   this.level_text_box.position.set(203, 215);
-  this.level_text_box.scale.set(2,2);
+  // this.level_text_box.scale.set(2,2);
   this.level_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.level_text_box);
 
-  this.score_label = new PIXI.Text("Score", {fontFamily: "Bebas Neue", fontSize: 10, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.score_label = new PIXI.Text("Score", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(728, 180);
-  this.score_label.scale.set(2,2);
+  this.score_label.position.set(720, 180);
+  // this.score_label.scale.set(2,2);
   this.score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.score_label);
 
-  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(728, 215);
-  this.score_text_box.scale.set(2,2);
+  this.score_text_box.position.set(720, 215);
+  // this.score_text_box.scale.set(2,2);
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.score_text_box);
 
@@ -278,10 +281,10 @@ Game.prototype.resetBoardBrowser = function() {
     this.launchpad.cursors[i].visible = false;
   }
 
-  this.countdown_text = new PIXI.Text("", {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.countdown_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 40, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.countdown_text.anchor.set(0.5,0.5);
   this.countdown_text.position.set(475, 203);
-  this.countdown_text.scale.set(4,4);
+  // this.countdown_text.scale.set(4,4);
   this.countdown_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.countdown_text);
 
@@ -496,7 +499,7 @@ Game.prototype.singlePlayerUpdate = function(diff) {
     let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
     this.countdown_text.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
-      this.enemy_palette.cacheAsBitmap = true;
+      // this.enemy_palette.cacheAsBitmap = true;
       this.countdown_text.text = "GO";
       this.game_phase = "active";
       setTimeout(function() {self.countdown_text.text = "";}, 1600);
@@ -522,8 +525,8 @@ Game.prototype.singlePlayerUpdate = function(diff) {
 
   this.launchpad.checkError();
 
-  for (var i = 0; i < this.freefalling.length; i++) {
-    var item = this.freefalling[i];
+  for (let i = 0; i < this.freefalling.length; i++) {
+    let item = this.freefalling[i];
     item.position.x += item.vx * fractional;
     item.position.y += item.vy * fractional;
     if (item.type != "ember") {
@@ -542,14 +545,40 @@ Game.prototype.singlePlayerUpdate = function(diff) {
     }
   }
 
-  var new_freefalling = [];
-  for (var i = 0; i < this.freefalling.length; i++) {
-    var item = this.freefalling[i];
+  let new_freefalling = [];
+  for (let i = 0; i < this.freefalling.length; i++) {
+    let item = this.freefalling[i];
     if (item.status != "dead") {
       new_freefalling.push(item);
     }
   }
   this.freefalling = new_freefalling;
+
+  // let new_zappies = [];
+  // for (let i = 0; i < this.zappies.length; i++) {
+  //   let zappy = this.zappies[i];
+  //   if (Date.now() - zappy.last_random > zappy.next_random) {
+  //     zappy.randomize();
+  //   }
+  //   if (zappy.status != "dead") {
+  //     new_zappies.push(zappy);
+  //   }
+  // }
+  // this.zappies = new_zappies;
+
+  // tegmark
+  for (let i = 0; i < letter_array.length; i++) {
+    let letter = letter_array[i];
+    let key = this.player_palette.letters[letter];
+    if (key.interactive == false && !this.player_defense.includes(letter)) {
+      let v = Date.now() - key.disable_time - this.disabledTime(letter);
+      if (v > -500) {
+        let portion = Math.min(1,(v + 500) / 500);
+        key.tint = PIXI.utils.rgb2hex([portion * 0.7 + 0.3, portion * 0.7 + 0.3, portion * 0.7 + 0.3]);
+      }      
+    }
+  }
+  
 
 
   if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
@@ -565,11 +594,14 @@ Game.prototype.singlePlayerUpdate = function(diff) {
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
-    // rocket.angle = 0;
     if (rocket.status === "rocket") {
       rocket.position.y += rocket.vy * fractional;
       rocket.vy -= this.boost * fractional;
       if (rocket.vy < this.boost_limit) rocket.vy = this.boost_limit;
+
+      rocket.fire_sprite.position.set(
+        rocket.fire_sprite.original_x - 1 + 2 * Math.random(),
+        rocket.fire_sprite.original_y - 1 + 2 * Math.random());
 
       if (Math.random() * 100 > Math.min(-0.6 * rocket.y, 95)) {
         // drop an ember
@@ -738,24 +770,33 @@ Game.prototype.singlePlayerUpdate = function(diff) {
                   self.enemy_palette.letters[disabled_letter].disable();
                   self.soundEffect("explosion_3");
                   
-                  let fire = self.makeFire(self.enemy_live_area, 
+                  // let fire = self.makeFire(self.enemy_live_area, 
+                  //   target_x,
+                  //   target_y - 24,
+                  //   0.25, 0.2);
+                  // fire.visible = false;
+
+                  let electric = self.makeElectric(self.enemy_live_area, 
                     target_x,
-                    target_y - 24,
-                    0.25, 0.2);
-                  fire.visible = false;
+                    target_y,
+                    0.75, 0.75);
 
                   let explosion = self.makeExplosion(self.enemy_live_area, 
                     target_x,
                     target_y,
-                  0.3125, 0.3125, function() {fire.visible = true; self.enemy_live_area.removeChild(explosion)});
+                  0.3125, 0.3125, function() {electric.visible = true; self.enemy_live_area.removeChild(explosion)});
 
+                  self.enemy_palette.letters[disabled_letter].tint = 0x4c4c4c;
+                  self.enemy_palette.letters[disabled_letter].angle = -10 + 20 * Math.random();
 
                   if (!self.enemy_defense.includes(disabled_letter)) {
                     self.score += rocket.score_value;
                     self.score_text_box.text = self.score;
                     setTimeout(function() {
-                      self.enemy_live_area.removeChild(fire);
-                      self.enemy_palette.letters[disabled_letter].enable()
+                      self.enemy_live_area.removeChild(electric);
+                      self.enemy_palette.letters[disabled_letter].enable();
+                      self.enemy_palette.letters[disabled_letter].tint = 0xFFFFFF;
+                      self.enemy_palette.letters[disabled_letter].angle = 0;
                     }, self.disabledTime(disabled_letter));
                   } else {
                     self.score += Math.floor(Math.pow(rocket.score_value, 1.5));
@@ -768,22 +809,26 @@ Game.prototype.singlePlayerUpdate = function(diff) {
                   self.player_palette.letters[disabled_letter].disable();
                   scene.shake = Date.now();
                   self.soundEffect("explosion_3");
-                  
-                  let fire = self.makeFire(self.player_palette.letters[disabled_letter], 
-                    0,
-                    -24,
-                    0.3, 0.25);
-                  fire.visible = false;
 
-                  let explosion = self.makeExplosion(self.player_palette.letters[disabled_letter], 
+                  let electric = self.makeElectric(self.player_palette.letters[disabled_letter], 
                     0,
                     0,
-                  1, 1, function() {fire.visible = true; self.player_palette.letters[disabled_letter].removeChild(explosion);});
+                    1.5, 1.5);
+
+                  self.player_palette.letters[disabled_letter].tint = 0x4c4c4c;
+                  self.player_palette.letters[disabled_letter].angle = -10 + 20 * Math.random();
+
+                  let explosion = self.makeExplosion(self.player_palette, 
+                    self.player_palette.letters[disabled_letter].x,
+                    self.player_palette.letters[disabled_letter].y,
+                  1, 1, function() {electric.visible = true; self.player_palette.removeChild(explosion);});
 
                   if (!self.player_defense.includes(disabled_letter)) {
                       setTimeout(function() {
-                      self.player_palette.letters[disabled_letter].removeChild(fire);
                       self.player_palette.letters[disabled_letter].enable()
+                      self.player_palette.letters[disabled_letter].tint = 0xFFFFFF;
+                      self.player_palette.letters[disabled_letter].angle = 0;
+                      self.player_palette.letters[disabled_letter].removeChild(electric);
                     }, self.disabledTime(disabled_letter));
                   } else {
                     self.checkEndCondition();

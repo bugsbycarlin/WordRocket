@@ -16,7 +16,7 @@ function initialize() {
 
 WebFont.load({
   google: {
-    families: ['Bebas Neue']
+    families: ['Bebas Neue', 'Press Start 2P']
   }
 });
 
@@ -246,44 +246,32 @@ class Game {
 
   intializeAnimations() {
     var self = this;
-    if (!PIXI.Loader.shared.resources["Art/fire_3.json"]) {
-      PIXI.Loader.shared.add("Art/fire_3.json").load(function() {
+    if (!PIXI.Loader.shared.resources["Art/fire_draft_6.json"]) {
+      PIXI.Loader.shared.add("Art/fire_draft_6.json").load(function() {
     // if (!PIXI.Loader.shared.resources["Art/pixelated_fire_2.json"]) {
     //   PIXI.Loader.shared.add("Art/pixelated_fire_2.json").load(function() {
     // if (!PIXI.Loader.shared.resources["Art/fire_pixelated.json"]) {
       // PIXI.Loader.shared.add("Art/fire_pixelated.json").load(function() {
 
         
-
-        if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
-          PIXI.Loader.shared.add("Art/fire.json").load(function() {
+        if (!PIXI.Loader.shared.resources["Art/vertical_flame.json"]) {
+          PIXI.Loader.shared.add("Art/vertical_flame.json").load(function() {
+        // if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
+        //   PIXI.Loader.shared.add("Art/fire.json").load(function() {
             self.initializeTitleScreen();
             if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
               PIXI.Loader.shared.add("Art/explosion.json").load(function() {
+                if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
+                  PIXI.Loader.shared.add("Art/electric.json").load(function() {
+                  });
+                }
               });
             }
+            
           });
         }
       });
     }
-  }
-
-
-  initializeScenes() {
-    var self = this;
-    this.scenes = [];
-
-    this.scenes["title"] = new PIXI.Container();
-    pixi.stage.addChild(this.scenes["title"]);
-    this.scenes["game"] = new PIXI.Container();
-    this.scenes["game"].position.x = this.width;
-    pixi.stage.addChild(this.scenes["game"]);
-
-
-    this.alertMask = new PIXI.Container();
-    pixi.stage.addChild(this.alertMask);
-    this.alertBox = new PIXI.Container();
-    pixi.stage.addChild(this.alertBox);
   }
 
 
@@ -328,14 +316,16 @@ class Game {
   }
 
 
-  singlePlayerGame() {
-    this.player = 1;
+  // singlePlayerGame() {
+  //   this.player = 1;
 
-    var self = this;
+  //   var self = this;
 
-    self.initializeSinglePlayerScene();
-    self.animateSceneSwitch("title", "game");
-  }
+  //   // self.initializeSinglePlayerScene();
+  //   // self.animateSceneSwitch("title", "game");
+  //   self.initializeSetupSingleScene();
+  //   self.animateSceneSwitch("title", "setup_single");
+  // }
 
 
   resetTitle() {
@@ -354,23 +344,11 @@ class Game {
   }
 
 
-  clearScene(scene) {
-    console.log("here i am cleaning");
-    while(scene.children[0]) {
-      let x = scene.removeChild(scene.children[0]);
-      x.destroy();
-    }
-  }
-
-
-  // render() {
-  //   pixi.renderer.render(pixi.stage);
-  // }
-
-
   update(diff) {
     if (this.current_scene == "game") {
       this.singlePlayerUpdate(diff);
+    } else if(this.current_scene == "setup_single") {
+      this.setupSingleUpdate(diff);
     }
   }
 

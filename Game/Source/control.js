@@ -2,7 +2,7 @@
 
 Game.prototype.keyAction = function(letter) {
   let self = this;
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.player_palette.letters[letter].interactive == true && !this.launchpad.full()) {
       this.launchpad.push(this.player_palette, letter);
     } else {
@@ -13,7 +13,7 @@ Game.prototype.keyAction = function(letter) {
 
 
 Game.prototype.deleteAction = function() {
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.keyboard_sounds) this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.pop();
     if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
@@ -24,7 +24,7 @@ Game.prototype.deleteAction = function() {
 
 
 Game.prototype.rightArrowAction = function() {
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
       this.launchpad.smallShiftRight();
       if (this.game_phase == "tutorial") {
@@ -40,7 +40,7 @@ Game.prototype.rightArrowAction = function() {
 
 
 Game.prototype.leftArrowAction = function() {
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
       this.launchpad.smallShiftLeft();
       if (this.game_phase == "tutorial") {
@@ -56,21 +56,21 @@ Game.prototype.leftArrowAction = function() {
 
 
 Game.prototype.rightShiftAction = function() {
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     this.launchpad.bigShiftRight();
   }
 }
 
 
 Game.prototype.leftShiftAction = function() {
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     this.launchpad.bigShiftLeft();
   }
 }
 
 
 Game.prototype.clearAction = function() {
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.keyboard_sounds) this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.clear();
     if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
@@ -81,7 +81,7 @@ Game.prototype.clearAction = function() {
 
 
 Game.prototype.enterAction = function() {
-  if (this.current_scene == "game" && (this.game_phase == "active" || this.game_phase == "tutorial")) {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 5) {
       this.launchpad.launch(this.player_area);
       if (this.game_phase == "tutorial" && this.tutorial_number == 5) {
@@ -101,9 +101,12 @@ Game.prototype.pressKey = function(key) {
       keyboard_key.key_pressed = true;
       // let old_y = keyboard_key.position.y;
       keyboard_key.position.y += 3;
+      let old_tint = keyboard_key.tint;
+      keyboard_key.tint = 0xDDDDDD;
       setTimeout(function() {
         keyboard_key.key_pressed = false;
         keyboard_key.position.y -= 3;
+        keyboard_key.tint = old_tint;
       }, 50);
     }
   }
@@ -115,51 +118,69 @@ Game.prototype.handleKeyDown = function(ev) {
   // Don't always need to do this.
   // ev.preventDefault();
 
-  if (this.current_scene == "game") {
+  if(this.current_scene == "game") {
+
     let key = ev.key;
     if (key == "Shift") {
       if (ev.code == "ShiftLeft") key = "LShift";
       if (ev.code == "ShiftRight") key = "RShift";
     }
     this.pressKey(key);
-  }
 
-  if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
-    this.tutorial2();
-  }
-
-  for (i in lower_array) {
-    if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
-      this.keyAction(letter_array[i]);
+    if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
+      this.tutorial2();
     }
-  }
 
-  if (ev.key === "Backspace" || ev.key === "Delete") {
-    this.deleteAction();
-  }
+    for (i in lower_array) {
+      if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
+        this.keyAction(letter_array[i]);
+      }
+    }
 
-  if (ev.key === "ArrowRight") {
-    this.rightArrowAction();
-  }
+    if (ev.key === "Backspace" || ev.key === "Delete") {
+      this.deleteAction();
+    }
 
-  if (ev.key === "ArrowLeft") {
-    this.leftArrowAction();
-  }
+    if (ev.key === "ArrowRight") {
+      this.rightArrowAction();
+    }
 
-  if (ev.code === "ShiftRight") {
-    this.rightShiftAction();
-  }
+    if (ev.key === "ArrowLeft") {
+      this.leftArrowAction();
+    }
 
-  if (ev.code === "ShiftLeft") {
-    this.leftShiftAction();
-  }
+    if (ev.code === "ShiftRight") {
+      this.rightShiftAction();
+    }
 
-  if (ev.key === "Escape") {
-    this.clearAction();
-  }
+    if (ev.code === "ShiftLeft") {
+      this.leftShiftAction();
+    }
+
+    if (ev.key === "Escape") {
+      this.clearAction();
+    }
 
 
-  if (ev.key === "Enter") {
-    this.enterAction();
+    if (ev.key === "Enter") {
+      this.enterAction();
+    }
+  } else if (this.current_scene == "setup_single") {
+    if (ev.key === "ArrowRight") {
+      this.option_markers[this.option_choice].tint = 0xFFFFFF;
+      this.option_choice = (this.option_choice + 1) % 4;
+      this.option_markers[this.option_choice].tint = 0x75d3fe;
+      this.option_info.setPartial(this.option_info_values[this.option_choice]);
+
+    } else if (ev.key === "ArrowLeft") {
+      this.option_markers[this.option_choice].tint = 0xFFFFFF;
+      this.option_choice = (this.option_choice + 3) % 4;
+      this.option_markers[this.option_choice].tint = 0x75d3fe;
+      this.option_info.setPartial(this.option_info_values[this.option_choice]);
+    } else if (ev.key === "Enter") {
+      this.difficulty_level = this.option_values[this.option_choice];
+      this.initializeSinglePlayerScene();
+      this.animateSceneSwitch("setup_single", "game");
+    }
   }
 }

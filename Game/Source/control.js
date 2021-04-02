@@ -27,7 +27,7 @@ Game.prototype.deleteAction = function() {
     if (this.keyboard_sounds) this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.pop();
     if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
-      this.tutorial4();
+      this.tutorial35();
     }
   }
 }
@@ -37,11 +37,10 @@ Game.prototype.rightArrowAction = function() {
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
       this.launchpad.smallShiftRight();
-      if (this.game_phase == "tutorial") {
-        if (this.tutorial_number == 2.5) {
-          this.tutorial_number = 2.75
-        } else if (this.tutorial_number == 2.75) {
-          this.tutorial3();
+      if (this.game_phase == "tutorial" && this.tutorial_number == 2.5) {
+        this.tutorial_conditions["right"] = 1;
+        if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
+          this.tutorial275();
         }
       }
     }
@@ -53,11 +52,10 @@ Game.prototype.leftArrowAction = function() {
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
       this.launchpad.smallShiftLeft();
-      if (this.game_phase == "tutorial") {
-        if (this.tutorial_number == 2.5) {
-          this.tutorial_number = 2.75
-        } else if (this.tutorial_number == 2.75) {
-          this.tutorial3();
+      if (this.game_phase == "tutorial" && this.tutorial_number == 2.5) {
+        this.tutorial_conditions["left"] = 1;
+        if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
+          this.tutorial275();
         }
       }
     }
@@ -67,14 +65,30 @@ Game.prototype.leftArrowAction = function() {
 
 Game.prototype.rightShiftAction = function() {
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
-    this.launchpad.bigShiftRight();
+    if (this.game_phase != "tutorial" || this.tutorial_number >= 2.75) {
+      this.launchpad.bigShiftRight();
+      if (this.game_phase == "tutorial" && this.tutorial_number == 2.75) {
+        this.tutorial_conditions["right"] = 1;
+        if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
+          this.tutorial3();
+        }
+      }
+    }
   }
 }
 
 
 Game.prototype.leftShiftAction = function() {
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
-    this.launchpad.bigShiftLeft();
+    if (this.game_phase != "tutorial" || this.tutorial_number >= 2.75) {
+      this.launchpad.bigShiftLeft();
+      if (this.game_phase == "tutorial" && this.tutorial_number == 2.75) {
+        this.tutorial_conditions["left"] = 1;
+        if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
+          this.tutorial3();
+        }
+      }
+    }
   }
 }
 
@@ -83,7 +97,7 @@ Game.prototype.clearAction = function() {
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
     if (this.keyboard_sounds) this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.clear();
-    if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
+    if (this.game_phase == "tutorial" && this.tutorial_number == 3.5) {
       this.tutorial4();
     }
   }

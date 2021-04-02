@@ -15,15 +15,12 @@ Game.prototype.reset = function() {
   this.clearScene(scene);
 
   this.freefalling = [];
-  //this.zappies = [];
   this.pickers = [];
   this.played_words = {};
 
   this.rocket_letters = [];
 
-  if (!this.tutorial) {
-    this.pickDefense(6, 10);
-  }
+  this.pickDefense(6, 10);
 
   if (this.device_type == "browser") {
     this.resetBoardBrowser();
@@ -100,25 +97,6 @@ Game.prototype.resetBoardBrowser = function() {
     }
   });
 
-  // this.player_palette = this.makeQwertyPalette({
-  //   parent: scene,
-  //   key_size: 35,
-  //   key_margin: 6,
-  //   x: this.width * 1/2 - 240, y: this.height - 158,
-  //   add_special_keys: false,
-  //   hide_mat: true,
-  //   action: function(letter) {}
-  // });
-
-  // the enemy palette
-  // this.enemy_palette = this.makeQwertyPalette({
-  //   parent:scene,
-  //   key_size: 20,
-  //   key_margin: 2,
-  //   x: this.width * 1/2 + 80, y: 396,
-  //   add_special_keys: false,
-  //   action: function(letter) {}
-  // });
   this.enemy_palette = this.makeKeyboard({
     player: 2,
     parent: scene, x: 1062.5, y: 472,
@@ -132,7 +110,6 @@ Game.prototype.resetBoardBrowser = function() {
   this.player_area = new PIXI.Container();
   scene.addChild(this.player_area);
   this.player_area.position.set(this.width * 1/2 - 370,520);
-  // this.player_area.scale.set(0.65,0.65);
 
   this.player_live_area = new PIXI.Container();
   scene.addChild(this.player_live_area);
@@ -145,9 +122,6 @@ Game.prototype.resetBoardBrowser = function() {
   play_mat.anchor.set(0, 1);
   play_mat.position.set(0, -32);
   play_mat.tint = 0x303889;
-  // let color_scale = Math.max(0,(1.0 - this.level/26));
-   //dark sky  // make this black for terrifying effect on a nasty level
-  //play_mat.tint = PIXI.utils.rgb2hex([117 * color_scale/ 255, 211 * color_scale / 255, 254 * color_scale / 255]);
   this.player_area.addChild(play_mat);
 
   // the player's launchpad
@@ -167,7 +141,6 @@ Game.prototype.resetBoardBrowser = function() {
       if (self.keyboard_sounds) self.soundEffect("keyboard_click_1", 1.0);
       if (mouse_button.button_pressed != true) {
         mouse_button.button_pressed = true;
-        // let old_y = mouse_button.position.y;
         mouse_button.position.y += 3;
         setTimeout(function() {
           mouse_button.button_pressed = false;
@@ -225,7 +198,6 @@ Game.prototype.resetBoardBrowser = function() {
         for (var n = 1; n < 16; n++) {
           let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
           c = (30 + Math.floor(Math.random() * 30)) / 255.0;
-          // c = (30 + 5 * (m + n) % 30) / 255.0;
           tile.tint = PIXI.utils.rgb2hex([c,c,c]);
           tile.width = 32;
           tile.height = 32;
@@ -242,28 +214,24 @@ Game.prototype.resetBoardBrowser = function() {
   this.level_label = new PIXI.Text("Level", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_label.anchor.set(0.5,0.5);
   this.level_label.position.set(203, 180);
-  // this.level_label.scale.set(2,2);
   this.level_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.level_label);
 
   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_text_box.anchor.set(0.5,0.5);
   this.level_text_box.position.set(203, 215);
-  // this.level_text_box.scale.set(2,2);
   this.level_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.level_text_box);
 
   this.score_label = new PIXI.Text("Score", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_label.anchor.set(0.5,0.5);
   this.score_label.position.set(720, 180);
-  // this.score_label.scale.set(2,2);
   this.score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.score_label);
 
-  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_text_box.anchor.set(0.5,0.5);
   this.score_text_box.position.set(720, 215);
-  // this.score_text_box.scale.set(2,2);
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.score_text_box);
 
@@ -284,11 +252,9 @@ Game.prototype.resetBoardBrowser = function() {
   this.countdown_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.countdown_text.anchor.set(0.5,0.5);
   this.countdown_text.position.set(470, 203);
-  // this.countdown_text.scale.set(4,4);
   this.countdown_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.countdown_text);
 
-  // 129,39 sheen
   // let player_sheen = new PIXI.Sprite(PIXI.Texture.from("Art/sheen.png"));
   // player_sheen.anchor.set(0, 0);
   // player_sheen.position.set(129, 39);
@@ -333,12 +299,6 @@ Game.prototype.pickDefense = function(number, retries) {
     this.player_defense = player_picks;
     this.enemy_defense = enemy_picks;
 
-    // for (var i = 0; i < this.enemy_defense.length; i++) {
-    //   this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
-    // }
-    // for (var i = 0; i < this.player_defense.length; i++) {
-    //   this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
-    // }
     return;
   }
 
@@ -353,13 +313,6 @@ Game.prototype.pickDefense = function(number, retries) {
   } else {
     this.player_defense = player_picks;
     this.enemy_defense = enemy_picks;
-
-    // for (var i = 0; i < this.enemy_defense.length; i++) {
-    //   this.enemy_palette.letters[this.enemy_defense[i]].tint = 0x63bff5;
-    // }
-    // for (var i = 0; i < this.player_defense.length; i++) {
-    //   this.player_palette.letters[this.player_defense[i]].tint = 0x63bff5;
-    // }
   }
 }
 
@@ -381,7 +334,110 @@ Game.prototype.disabledTime = function(letter) {
 }
 
 
-Game.prototype.enemyAction = function(rerolls, targeting = true) {
+Game.prototype.updateCountdown = function() {
+  if (this.game_phase == "countdown") {
+    let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
+    this.countdown_text.text = Math.ceil(time_remaining).toString();
+    if (time_remaining <= 0) {
+      this.countdown_text.text = "GO";
+      this.game_phase = "active";
+      setTimeout(function() {self.countdown_text.text = "";}, 1600);
+      for (var i = 0; i < board_width; i++) {
+        this.launchpad.cursors[i].visible = true;
+      }
+      if (annoying) this.setMusic("action_song");
+    }
+  }
+}
+
+
+Game.prototype.shakeDamage = function() {
+  var self = this;
+  var scene = this.scenes["game"];
+
+  for (let item of [scene, this.player_area, this.enemy_area]) {
+    if (item.shake != null) {
+      if (item.permanent_x == null) item.permanent_x = item.position.x;
+      if (item.permanent_y == null) item.permanent_y = item.position.y;
+      item.position.set(item.permanent_x - 3 + Math.random() * 6, item.permanent_y - 3 + Math.random() * 6)
+      //item.shake -= 1;
+      if (Date.now() - item.shake >= 150) {
+        item.shake = null;
+        item.position.set(item.permanent_x, item.permanent_y)
+      }
+    }
+  }
+}
+
+
+Game.prototype.freeeeeFreeeeeFalling = function(fractional) {
+  var self = this;
+  var scene = this.scenes["game"];
+
+  for (let i = 0; i < this.freefalling.length; i++) {
+    let item = this.freefalling[i];
+    item.position.x += item.vx * fractional;
+    item.position.y += item.vy * fractional;
+    if (item.type != "ember") {
+      item.vy += this.gravity * fractional;
+    } else {
+      item.alpha *= 0.97;
+      item.vy += this.gentle_drop * fractional;
+      if (item.vy > this.gentle_limit) item.vy = this.gentle_limit;
+    }
+
+    if (item.position.y > 200 || item.alpha < 0.04) {
+      if (item.parent != null) {
+        item.parent.removeChild(item);
+      }
+      item.status = "dead";
+    }
+  }
+
+  let new_freefalling = [];
+  for (let i = 0; i < this.freefalling.length; i++) {
+    let item = this.freefalling[i];
+    if (item.status != "dead") {
+      new_freefalling.push(item);
+    }
+  }
+  this.freefalling = new_freefalling;
+}
+
+
+Game.prototype.coolHotKeys = function() {
+  var self = this;
+  var scene = this.scenes["game"];
+
+  for (let i = 0; i < letter_array.length; i++) {
+    let letter = letter_array[i];
+    let key = this.player_palette.letters[letter];
+    if (key.playable == false && !this.player_defense.includes(letter)) {
+      let v = Date.now() - key.disable_time - this.disabledTime(letter);
+      if (v > -500) {
+        let portion = Math.min(1,(v + 500) / 500);
+        key.tint = PIXI.utils.rgb2hex([portion * 0.7 + 0.3, portion * 0.7 + 0.3, portion * 0.7 + 0.3]);
+      }      
+    }
+  }
+}
+
+
+Game.prototype.enemyAction = function() {
+  // guard
+  if (this.game_phase == "tutorial" && this.tutorial_number < 8) {
+    return;
+  }
+
+  if (Date.now() - this.enemy_last_action <= 60000/this.enemy_wpm) {
+    return;
+  } else {
+    this.enemy_last_action = Date.now() - 0.2 * (60000/this.enemy_wpm) + 0.4 * Math.random() * 60000/this.enemy_wpm;
+  }
+
+  let targeting = this.game_phase != "tutorial";
+  let rerolls = this.enemy_rerolls;
+
   var best_word = null;
   var best_shift = null;
 
@@ -485,120 +541,14 @@ Game.prototype.checkEndCondition = function() {
         rocket.vy = -4 - Math.random() * 14;
         this.freefalling.push(rocket);
       }
-      
-      //this.fadeMusic(1500);
-      
     }
   }
 }
 
 
-Game.prototype.singlePlayerUpdate = function(diff) {
+Game.prototype.boostRockets = function(fractional) {
   var self = this;
   var scene = this.scenes["game"];
-
-  let fractional = diff / (1000/30.0);
-
-  if (this.game_phase == "tutorial") {
-    this.tutorial_screen.tutorial_text.hover();
-  }
-
-  if (this.game_phase == "countdown") {
-    let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
-    this.countdown_text.text = Math.ceil(time_remaining).toString();
-    if (time_remaining <= 0) {
-      // this.enemy_palette.cacheAsBitmap = true;
-      this.countdown_text.text = "GO";
-      this.game_phase = "active";
-      setTimeout(function() {self.countdown_text.text = "";}, 1600);
-      for (var i = 0; i < board_width; i++) {
-        this.launchpad.cursors[i].visible = true;
-      }
-      if (annoying) this.setMusic("action_song");
-    }
-  }
-
-  for (let item of [scene, this.player_area, this.enemy_area]) {
-    if (item.shake != null) {
-      if (item.permanent_x == null) item.permanent_x = item.position.x;
-      if (item.permanent_y == null) item.permanent_y = item.position.y;
-      item.position.set(item.permanent_x - 3 + Math.random() * 6, item.permanent_y - 3 + Math.random() * 6)
-      //item.shake -= 1;
-      if (Date.now() - item.shake >= 150) {
-        item.shake = null;
-        item.position.set(item.permanent_x, item.permanent_y)
-      }
-    }
-  }
-
-  this.launchpad.checkError();
-
-  for (let i = 0; i < this.freefalling.length; i++) {
-    let item = this.freefalling[i];
-    item.position.x += item.vx * fractional;
-    item.position.y += item.vy * fractional;
-    if (item.type != "ember") {
-      item.vy += this.gravity * fractional;
-    } else {
-      item.alpha *= 0.97;
-      item.vy += this.gentle_drop * fractional;
-      if (item.vy > this.gentle_limit) item.vy = this.gentle_limit;
-    }
-
-    if (item.position.y > 200 || item.alpha < 0.04) {
-      if (item.parent != null) {
-        item.parent.removeChild(item);
-      }
-      item.status = "dead";
-    }
-  }
-
-  let new_freefalling = [];
-  for (let i = 0; i < this.freefalling.length; i++) {
-    let item = this.freefalling[i];
-    if (item.status != "dead") {
-      new_freefalling.push(item);
-    }
-  }
-  this.freefalling = new_freefalling;
-
-  // let new_zappies = [];
-  // for (let i = 0; i < this.zappies.length; i++) {
-  //   let zappy = this.zappies[i];
-  //   if (Date.now() - zappy.last_random > zappy.next_random) {
-  //     zappy.randomize();
-  //   }
-  //   if (zappy.status != "dead") {
-  //     new_zappies.push(zappy);
-  //   }
-  // }
-  // this.zappies = new_zappies;
-
-  // tegmark
-  for (let i = 0; i < letter_array.length; i++) {
-    let letter = letter_array[i];
-    let key = this.player_palette.letters[letter];
-    if (key.playable == false && !this.player_defense.includes(letter)) {
-      let v = Date.now() - key.disable_time - this.disabledTime(letter);
-      if (v > -500) {
-        let portion = Math.min(1,(v + 500) / 500);
-        key.tint = PIXI.utils.rgb2hex([portion * 0.7 + 0.3, portion * 0.7 + 0.3, portion * 0.7 + 0.3]);
-      }      
-    }
-  }
-  
-
-
-  if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
-    return;
-  }
-
-  if (this.game_phase != "tutorial" || this.tutorial_number >= 8) {
-    if (Date.now() - this.enemy_last_action > 60000/this.enemy_wpm) {
-      this.enemyAction(this.enemy_rerolls, this.game_phase != "tutorial");
-      this.enemy_last_action = Date.now() - 0.2 * (60000/this.enemy_wpm) + 0.4 * Math.random() * 60000/this.enemy_wpm;
-    }
-  }
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
@@ -630,9 +580,14 @@ Game.prototype.singlePlayerUpdate = function(diff) {
       rocket.position.y += rocket.vy * fractional;
       rocket.vy += this.gentle_drop * fractional;
       if (rocket.vy > this.gentle_limit) rocket.vy = this.gentle_limit;
-      // rocket.angle = 5 * Math.sin((Date.now() - rocket.start_time) / 400)
     }
   }
+}
+
+
+Game.prototype.checkRocketScreenChange = function() {
+  var self = this;
+  var scene = this.scenes["game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
@@ -657,7 +612,12 @@ Game.prototype.singlePlayerUpdate = function(diff) {
       rocket.status = "descent";
     }
   }
+}
 
+
+Game.prototype.checkRocketCollisions = function() {
+  var self = this;
+  var scene = this.scenes["game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket_1 = this.rocket_letters[i];
@@ -726,7 +686,12 @@ Game.prototype.singlePlayerUpdate = function(diff) {
       }
     }
   }
+}
 
+
+Game.prototype.checkRocketAttacks = function() {
+  var self = this;
+  var scene = this.scenes["game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     let rocket = this.rocket_letters[i];
@@ -778,12 +743,6 @@ Game.prototype.singlePlayerUpdate = function(diff) {
                   self.enemy_palette.letters[disabled_letter].disable();
                   self.enemy_palette.letters[disabled_letter].playable = false;
                   self.soundEffect("explosion_3");
-                  
-                  // let fire = self.makeFire(self.enemy_live_area, 
-                  //   target_x,
-                  //   target_y - 24,
-                  //   0.25, 0.2);
-                  // fire.visible = false;
 
                   let electric = self.makeElectric(self.enemy_live_area, 
                     target_x,
@@ -853,6 +812,12 @@ Game.prototype.singlePlayerUpdate = function(diff) {
         .start()
     }
   }
+}
+
+
+Game.prototype.cleanRockets = function() {
+  var self = this;
+  var scene = this.scenes["game"];
 
   var new_rocket_letters = [];
   for (var i = 0; i < this.rocket_letters.length; i++) {
@@ -863,14 +828,38 @@ Game.prototype.singlePlayerUpdate = function(diff) {
     }
   }
   this.rocket_letters = new_rocket_letters;
-  // var new_rocket_letters = [];
-  // for (var i = 0; i < this.rocket_letters.length; i++) {
-  //   var rocket = this.rocket_letters[i];
-  //   if (rocket.status != "dead") {
-  //     new_freefalling.push(item);
-  //   }
-  // }
-  // this.freefalling = new_freefalling;
 }
+
+
+Game.prototype.singlePlayerUpdate = function(diff) {
+  var self = this;
+  var scene = this.scenes["game"];
+
+  let fractional = diff / (1000/30.0);
+
+  if (this.game_phase == "tutorial") {
+    this.tutorial_screen.tutorial_text.hover();
+  }
+
+  this.updateCountdown();
+  this.shakeDamage();
+  this.launchpad.checkError();
+  this.freeeeeFreeeeeFalling(fractional);
+  this.coolHotKeys();
+
+  // Skip the rest if we aren't in active gameplay
+  if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
+    return;
+  }
+
+  this.enemyAction();  
+  this.boostRockets(fractional);
+  this.checkRocketScreenChange();
+  this.checkRocketCollisions();
+  this.checkRocketAttacks();
+  this.cleanRockets();
+}
+
+
 
 

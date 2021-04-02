@@ -281,9 +281,9 @@ Game.prototype.resetBoardBrowser = function() {
     this.launchpad.cursors[i].visible = false;
   }
 
-  this.countdown_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 40, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.countdown_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.countdown_text.anchor.set(0.5,0.5);
-  this.countdown_text.position.set(475, 203);
+  this.countdown_text.position.set(470, 203);
   // this.countdown_text.scale.set(4,4);
   this.countdown_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.countdown_text);
@@ -365,10 +365,18 @@ Game.prototype.pickDefense = function(number, retries) {
 
 
 Game.prototype.disabledTime = function(letter) {
-  if (["A", "E", "I", "O", "U"].includes(letter)) {
-    return 1000;
+  if (this.difficulty_level != "BEACON") {
+    if (["A", "E", "I", "O", "U"].includes(letter)) {
+      return 2000;
+    } else {
+      return 3000;
+    }
   } else {
-    return 2000;
+    if (["A", "E", "I", "O", "U"].includes(letter)) {
+      return 1000;
+    } else {
+      return 2000;
+    }
   }
 }
 
@@ -385,7 +393,7 @@ Game.prototype.enemyAction = function(rerolls, targeting = true) {
 
     var legal_keys = true;
     for (var j = 0; j < candidate_word.length; j++) {
-      if (this.enemy_palette.letters[candidate_word[j]].interactive == false) legal_keys = false;
+      if (this.enemy_palette.letters[candidate_word[j]].playable == false) legal_keys = false;
     }
 
     var legit = (legal_keys && !(candidate_word in this.played_words));
@@ -398,7 +406,7 @@ Game.prototype.enemyAction = function(rerolls, targeting = true) {
 
       var targeted = false;
       for (var j = 0; j < this.player_defense.length; j++) {
-        if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].interactive == true) {
+        if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].playable == true) {
           targeted = true;
         }
       }
@@ -437,7 +445,7 @@ Game.prototype.checkEndCondition = function() {
   if (this.game_phase == "active") {
     let player_dead = true;
     for (var i = 0; i < this.player_defense.length; i++) {
-      if (this.player_palette.letters[this.player_defense[i]].interactive === true) {
+      if (this.player_palette.letters[this.player_defense[i]].playable === true) {
         player_dead = false;
       }
     }
@@ -445,7 +453,7 @@ Game.prototype.checkEndCondition = function() {
 
     let enemy_dead = true;
     for (var i = 0; i < this.enemy_defense.length; i++) {
-      if (this.enemy_palette.letters[this.enemy_defense[i]].interactive === true) {
+      if (this.enemy_palette.letters[this.enemy_defense[i]].playable === true) {
         enemy_dead = false;
       }
     }
@@ -570,7 +578,7 @@ Game.prototype.singlePlayerUpdate = function(diff) {
   for (let i = 0; i < letter_array.length; i++) {
     let letter = letter_array[i];
     let key = this.player_palette.letters[letter];
-    if (key.interactive == false && !this.player_defense.includes(letter)) {
+    if (key.playable == false && !this.player_defense.includes(letter)) {
       let v = Date.now() - key.disable_time - this.disabledTime(letter);
       if (v > -500) {
         let portion = Math.min(1,(v + 500) / 500);
@@ -766,8 +774,9 @@ Game.prototype.singlePlayerUpdate = function(diff) {
               rocket.vx = -10 + Math.random() * 20;
               rocket.vy = -4 - Math.random() * 14;
               if (rocket.player == 1) {
-                if (self.enemy_palette.letters[disabled_letter].interactive == true) {
+                if (self.enemy_palette.letters[disabled_letter].playable === true) {
                   self.enemy_palette.letters[disabled_letter].disable();
+                  self.enemy_palette.letters[disabled_letter].playable = false;
                   self.soundEffect("explosion_3");
                   
                   // let fire = self.makeFire(self.enemy_live_area, 
@@ -795,6 +804,7 @@ Game.prototype.singlePlayerUpdate = function(diff) {
                     setTimeout(function() {
                       self.enemy_live_area.removeChild(electric);
                       self.enemy_palette.letters[disabled_letter].enable();
+                      self.enemy_palette.letters[disabled_letter].playable = true;
                       self.enemy_palette.letters[disabled_letter].tint = 0xFFFFFF;
                       self.enemy_palette.letters[disabled_letter].angle = 0;
                     }, self.disabledTime(disabled_letter));
@@ -805,8 +815,9 @@ Game.prototype.singlePlayerUpdate = function(diff) {
                   }
                 }
               } else {
-                if (self.player_palette.letters[disabled_letter].interactive == true) {
+                if (self.player_palette.letters[disabled_letter].playable === true) {
                   self.player_palette.letters[disabled_letter].disable();
+                  self.player_palette.letters[disabled_letter].playable = false;
                   scene.shake = Date.now();
                   self.soundEffect("explosion_3");
 
@@ -826,6 +837,7 @@ Game.prototype.singlePlayerUpdate = function(diff) {
                   if (!self.player_defense.includes(disabled_letter)) {
                       setTimeout(function() {
                       self.player_palette.letters[disabled_letter].enable()
+                      self.player_palette.letters[disabled_letter].playable = true;
                       self.player_palette.letters[disabled_letter].tint = 0xFFFFFF;
                       self.player_palette.letters[disabled_letter].angle = 0;
                       self.player_palette.letters[disabled_letter].removeChild(electric);

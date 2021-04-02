@@ -378,6 +378,7 @@ Game.prototype.makeKey = function(parent, x, y, size, letter, type, action) {
   if (size != 60) key_button.scale.set(size / 60, size / 60);
   parent.addChild(key_button);
 
+  key_button.playable = true;
   key_button.interactive = true;
   key_button.buttonMode = true;
   key_button.on("pointerdown", action);
@@ -560,6 +561,7 @@ Game.prototype.makeNiceKey = function(parent, x, y, filename, size, action) {
   key_button.position.set(x, y);
   parent.addChild(key_button);
 
+  key_button.playable = true;
   key_button.interactive = true;
   key_button.buttonMode = true;
   key_button.on("pointerdown", action);

@@ -7,6 +7,34 @@ Game.prototype.initializeSetupSingleScene = function() {
 
   this.option_values = ["EASY", "MEDIUM", "HARD", "BEACON"];
 
+
+  //
+  // EASY difficulty means a ten year old could beat it with some work.
+  // The stunned keys just make gaps in the rocket volley.
+  // There are no special phases.
+  // Difficulty ramps up slower than what I've been doing.
+  // Jin or Joey should be able to beat it, or else I should re-tune.
+  //
+  // MEDIUM difficulty means I can beat it without trying harder than current.
+  // The stunned keys just make gaps in the rocket volley.
+  // There are special phases, if I've programmed them.
+  // Difficulty ramps up a little slower than what I've got so far;
+  // I should calibrate for level 17 of the old game, assuming
+  // the gap thing doesn't make that too easy.
+  // 
+  // HARD should be a little beyond my current ability to beat.
+  // The stunned keys just make gaps in the rocket volley. <- consider whether this is good or not.
+  // There are special phases, if I've programmed them.
+  // Difficulty as currently exists, provided the final level is playable.
+  //
+  // BEACON is very very hard. I don't think I'll ever beat it.
+  // The stunned keys don't work.
+  // There are special phases, if I've programmed them.
+  // Difficulty is harder than currently exists. I'd like to struggle to reach level 10.
+  // But I need to make sure the final level is playable. Perhaps it'll just be
+  // all really long words.
+  //
+
   this.option_info_values = [
     "Things are easy. Very easy.",
     "Eh, so, a little harder.",

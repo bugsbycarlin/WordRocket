@@ -137,6 +137,7 @@ class Launchpad {
     this.tiles.push(tile);
     this.cursor += 1;
     tile.parent = this.parent;
+    tile.broken = false;
 
     this.checkWord();
 
@@ -192,6 +193,8 @@ class Launchpad {
     if (this.wordSize() + this.shift > board_width) {
       this.smallShiftLeft();
     }
+
+    return tile;
   }
 
 
@@ -327,9 +330,10 @@ class Launchpad {
         // var letter = pad_item.text.text;
         var letter = pad_item.text;
 
-        let rocket_tile = game.makeRocketTile(area, letter, word.length, i, this.shift, this.player, this.inner_size, this.outer_size)
-
-        game.rocket_letters.push(rocket_tile);
+        if (pad_item.broken === false) {
+          let rocket_tile = game.makeRocketTile(area, letter, word.length, i, this.shift, this.player, this.inner_size, this.outer_size)
+          game.rocket_letters.push(rocket_tile);
+        }
 
         this.parent.removeChild(pad_item);
       }

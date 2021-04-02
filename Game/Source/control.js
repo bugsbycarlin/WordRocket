@@ -3,10 +3,20 @@
 Game.prototype.keyAction = function(letter) {
   let self = this;
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
-    if (this.player_palette.letters[letter].interactive == true && !this.launchpad.full()) {
-      this.launchpad.push(this.player_palette, letter);
+    if (this.difficulty_level == "BEACON") {
+      if (this.player_palette.letters[letter].playable === true && !this.launchpad.full()) {
+        this.launchpad.push(this.player_palette, letter);
+      } else {
+        this.launchpad.flashError();
+      }
     } else {
-      this.launchpad.flashError();
+      if (!this.launchpad.full()) {
+        let tile = this.launchpad.push(this.player_palette, letter);
+        if (this.player_palette.letters[letter].playable === false) {
+          tile.broken = true;
+          tile.tint = 0xdb5858;
+        }
+      }
     }
   }
 }

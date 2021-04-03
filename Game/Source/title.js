@@ -3,81 +3,43 @@
 Game.prototype.initializeTitleScreen = function() {  
   var self = this;
 
-
   let blue_bg = PIXI.Sprite.from(PIXI.Texture.WHITE);
   blue_bg.width = 1280;
   blue_bg.height = 960;
   blue_bg.tint = 0x313b87;
   this.scenes["title"].addChild(blue_bg);
 
-  // let rock_wall = new PIXI.Container();
-  // this.scenes["title"].addChild(rock_wall);
-  // for (var m = 0; m < 20; m++) {
-  //   for (var n = 0; n < 15; n++) {
-  //     if (m < 4 || m > 15) {
-  //       let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  //       c = (30 + Math.floor(Math.random() * 30)) / 255.0;
-  //       // c = (30 + 5 * (m + n) % 30) / 255.0;
-  //       tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-  //       tile.width = 64;
-  //       tile.height = 64;
-  //       //shift = i == 0 ? 0 : (board_width + 4) * 32;
-  //       tile.position.set(64 * m, 64 * n);
-  //       rock_wall.addChild(tile);
-  //     } else if (n == 14) {
-  //       let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  //       c = 70 / 255.0;
-  //       tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-  //       tile.width = 64;
-  //       tile.height = 64;
-  //       tile.position.set(64 * m, 64 * n);
-  //       rock_wall.addChild(tile);
-  //     }
-  //   }
-  // }
-  // rock_wall.cacheAsBitmap = true;
-
-  // let floor = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // floor.width = 1280;
-  // floor.height = 60;
-  // floor.tint = 0x222d65;
-  // floor.position.set(0,820);
-  // this.scenes["title"].addChild(floor);
-
-
-  let adjust = 30;
-
-
+  // ! flags
   let right_flag = new PIXI.Sprite(PIXI.Texture.from("Art/flag_soviet_first_draft_pixelated_v3.png"));
   right_flag.anchor.set(0.5,0.5);
   right_flag.scale.set(3,3);
   right_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  right_flag.position.set(760 + 20 + 10, this.height - 440 - adjust - 170 - 70);
+  right_flag.position.set(790, this.height - 710);
   this.scenes["title"].addChild(right_flag);
-
 
   let left_flag = new PIXI.Sprite(PIXI.Texture.from("Art/flag_american_first_draft_pixelated_v3.png"));
   left_flag.anchor.set(0.5,0.5);
   left_flag.scale.set(-3,3);
   left_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  left_flag.position.set(515 - 20 - 10, this.height - 440 - adjust - 170 - 70);
+  left_flag.position.set(485, this.height - 710);
   this.scenes["title"].addChild(left_flag);
 
+  // ! brandenburg
+  let brandenburg = new PIXI.Sprite(PIXI.Texture.from("Art/pixelated_bbg.png"));
+  brandenburg.tint = 0x212b67;
+  brandenburg.scale.set(6,6);
+  brandenburg.anchor.set(0.5,0.5);
+  brandenburg.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  brandenburg.position.set(this.width / 2, this.height - 520);
+  this.scenes["title"].addChild(brandenburg);
 
-  let bbg = new PIXI.Sprite(PIXI.Texture.from("Art/pixelated_bbg.png"));
-  bbg.tint = 0x212b67;
-  bbg.scale.set(6,6);
-  bbg.anchor.set(0.5,0.5);
-  bbg.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  bbg.position.set(this.width / 2, this.height - 290 - adjust - 200);
-  this.scenes["title"].addChild(bbg);
-
+  // ! players
   let right_player = new PIXI.Sprite(PIXI.Texture.from("Art/player_pixelated_v2.png"));
   right_player.tint = 0x111b57;
   right_player.scale.set(4,4);
   right_player.anchor.set(0.5,0.5);
   right_player.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  right_player.position.set(this.width / 2 + 250 + 64, this.height - 130 - adjust - 32);
+  right_player.position.set(this.width / 2 + 314, this.height - 192);
   this.scenes["title"].addChild(right_player);
 
   let left_player = new PIXI.Sprite(PIXI.Texture.from("Art/player_pixelated_v2.png"));
@@ -85,33 +47,28 @@ Game.prototype.initializeTitleScreen = function() {
   left_player.scale.set(-4,4);
   left_player.anchor.set(0.5,0.5);
   left_player.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  left_player.position.set(this.width / 2 - 250 - 64, this.height - 130 - adjust - 32);
+  left_player.position.set(this.width / 2 - 314, this.height - 192);
   this.scenes["title"].addChild(left_player);
 
-  let size = 80;
-  for (var i = 0; i < 4; i++) {
-    let x = 240 + 80 * i + 40 - 32;
-    let y = 80 + 40 + 128;
-    //let parachute = this.makePixelatedParachute(this.scenes["title"], x, y - size, 2.5, 2.5);
-  }
+  // ! word
   let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/title_word_v5.png"));
   title_word.anchor.set(0,0);
-  title_word.position.set(320, 80 + 128);
+  title_word.position.set(320, 208);
   this.scenes["title"].addChild(title_word);
 
+  // ! rockets
   for (var i = 0; i < 7; i++) {
-    let x = 512 + 64 * i + 2 + 32;
-    let y = 370 + 128;
+    let x = 546 + 64 * i;
+    let y = 498;
     let fire = this.makeFire(this.scenes["title"], x - 2, y + 43, 0.32*1.25, 0.24*1.25);
     fire.animationSpeed = 0.2;
   }
   let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/title_rockets_v5.png"));
   title_rockets.anchor.set(0,0);
-  title_rockets.position.set(512, 320 - 112 + 128);
+  title_rockets.position.set(512, 336);
   this.scenes["title"].addChild(title_rockets);
 
-
-  // let tutorial_button = new PIXI.Sprite(PIXI.Texture.from("Art/tutorial_button.png"));
+  // ! buttons
   let tutorial_button = new PIXI.Text("TUTORIAL", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
   tutorial_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
   tutorial_button.anchor.set(0.5,0.5);
@@ -147,12 +104,10 @@ Game.prototype.initializeTitleScreen = function() {
   multi_button.interactive = true;
   multi_button.buttonMode = true;
   multi_button.on("pointerdown", function() {
-    // self.tutorial = false;
-    // self.initializeSetupSingleScene();
-    // self.animateSceneSwitch("title", "setup_single");
+    // TO DO: multiplayer
   });
 
-
+  // ! black bars
   let top_bar = PIXI.Sprite.from(PIXI.Texture.WHITE);
   top_bar.width = 1280;
   top_bar.height = 80;
@@ -165,32 +120,4 @@ Game.prototype.initializeTitleScreen = function() {
   bottom_bar.position.set(0,880);
   bottom_bar.tint = 0x000000;
   this.scenes["title"].addChild(bottom_bar);
-
-
-  // var spanky = new PIXI.Text("Spanky", {fontFamily: "Press Start 2P", fontSize: 48, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
-  // spanky.anchor.set(0.5,0.5);
-  // spanky.position.set(500,500);
-  // this.scenes["title"].addChild(spanky);
-
-  // this.makeButton(
-  //   this.scenes["title"],
-  //   this.width * 1/2, this.height * 12/16,
-  //   "TUTORIAL", 44, 6, 0x000000,
-  //   224, 80, 0x71d07d,
-  //   function() {
-  //     self.tutorial = true;
-  //     self.singlePlayerGame();
-  //   }
-  // );
-
-  // this.makeButton(
-  //   this.scenes["title"],
-  //   this.width * 1/2, this.height * 14/16,
-  //   "PLAY", 44, 6, 0xFFFFFF,
-  //   224, 80, 0xdb5858,
-  //   function() {
-  //     self.tutorial = false;
-  //     self.singlePlayerGame();
-  //   }
-  // );
 }

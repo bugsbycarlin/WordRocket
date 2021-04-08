@@ -95,14 +95,18 @@ class Launchpad {
 
   flashError = function(){
     this.game.soundEffect("negative");
-    this.error = Date.now();
+    // STEVE HOLT
+    // this.error = Date.now();
+    this.error = this.game.markTime();
     this.pad_mat.tint = 0xdb5858;
   }
 
 
   checkError = function(){
     if (this.error != null) {
-      if (Date.now() - this.error >= 150) {
+      // STEVE HOLT
+      //if (Date.now() - this.error >= 150) {
+      if (this.game.timeSince(this.error) >= 150) {
         this.error = null;
         this.pad_mat.tint = 0x000000; //0x2c3130;
       }
@@ -295,9 +299,18 @@ class Launchpad {
       this.underline_text.text = "TOO SHORT";
     }
 
-    if (word.length > 3 && !(word in game.legal_words)) {
-      this.can_play = false;
-      this.underline_text.text = "NOT A WORD";
+    if(this.game.level_type == "normal") {
+      if (word.length > 3 && !(word in game.legal_words)) {
+        this.can_play = false;
+        this.underline_text.text = "NOT A WORD";
+      }
+    } else if (this.game.level_type == "special") {
+      if (word.length > 3 && !(word in game.special_dictionaries[game.level_condition])) {
+        this.can_play = false;
+        let condition_text = "NOT A " + game.level_condition.substring(0, game.level_condition.length - 1).replace("S AND", " OR");
+        condition_text = condition_text.replace("A ANIM", "AN ANIM");
+        this.underline_text.text = condition_text;
+      }
     }
 
     if (word.length > 3 && (word in game.played_words)) {

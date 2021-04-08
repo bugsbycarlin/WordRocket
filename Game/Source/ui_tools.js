@@ -36,7 +36,9 @@ Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_num
 
   rocket_tile.fire_sprite = fire_sprite;
   rocket_tile.parachute_sprite = parachute_sprite;
-  rocket_tile.start_time = Date.now() - Math.floor(Math.random() * 300);
+  // STEVE HOLT
+  // rocket_tile.start_time = Date.now() - Math.floor(Math.random() * 300);
+  rocket_tile.start_time = this.markTime() - Math.floor(Math.random() * 300);
   rocket_tile.parent = parent;
   rocket_tile.value_text = tile.value_text;
 
@@ -73,6 +75,7 @@ Game.prototype.makeFire = function(parent, x, y, xScale, yScale) {
 
 
 Game.prototype.makeZappy = function(parent, x, y, xScale, yScale) {
+  var self = this;
   let zappy_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/zappy.png"));
   zappy_sprite.anchor.set(0.5, 0.5);
   zappy_sprite.scale.set(xScale, yScale);
@@ -81,7 +84,9 @@ Game.prototype.makeZappy = function(parent, x, y, xScale, yScale) {
   zappy_sprite.randomize = function() {
     this.angle = Math.floor(Math.random() * 360);
     this.tint = PIXI.utils.rgb2hex([0.4 + 0.6 * Math.random(), 1, 1]);
-    this.last_random = Date.now();
+    // STEVE HOLT
+    // this.last_random = Date.now();
+    this.last_random = self.markTime();
     this.next_random = 50 + 50 * Math.random();
   }
   zappy_sprite.randomize();
@@ -361,7 +366,9 @@ Game.prototype.makeTallQwertyPalette = function(options) {
 
   palette.flashError = function(){
     this.soundEffect("negative");
-    palette.error = Date.now();
+    // STEVE HOLT
+    // palette.error = Date.now();
+    palette.error = self.markTime();
     palette.mat.tint = 0xdb5858;
   }
 
@@ -469,6 +476,7 @@ Game.prototype.makeKeyboard = function(options) {
 }
 
 Game.prototype.makeNiceKey = function(parent, x, y, filename, size, action) {
+  var self = this;
   var key_button = new PIXI.Sprite(PIXI.Texture.from("Art/NiceKeys/" + filename + ".png"));
   key_button.anchor.set(0.5, 0.5);
   key_button.position.set(x, y);
@@ -483,7 +491,10 @@ Game.prototype.makeNiceKey = function(parent, x, y, filename, size, action) {
 
   key_button.disable = function() {
     this.interactive = false;
-    this.disable_time = Date.now();
+    // STEVE HOLT
+    // this.disable_time = Date.now();
+    this.disable_time = self.markTime();
+    console.log(this.disable_time);
   }
 
   key_button.enable = function() {
@@ -550,7 +561,9 @@ Game.prototype.makeQwertyPalette = function(options) {
 
   palette.flashError = function(){
     this.soundEffect("negative");
-    palette.error = Date.now();
+    // STEVE HOLT
+    // palette.error = Date.now();
+    palette.error = self.markTime();
     if (palette.mat != null) {
       palette.mat.tint = 0xdb5858;
     }

@@ -2,7 +2,7 @@
 
 var annoying = true;
 var use_scores = false;
-var silence = false;
+var silence = true;
 var log_performance = true;
 
 var performance_result = null;
@@ -49,7 +49,10 @@ class Game {
 
     this.multiplayer = new Multiplayer(this);
 
-    this.resetTitle();
+    this.paused = false;
+    this.pause_time = 0;
+
+    //this.resetTitle();
 
     this.initializeScenes();
     this.initializeAlertBox();
@@ -57,12 +60,12 @@ class Game {
 
     this.current_scene = "title";
 
-    window.addEventListener("unload", function(ev) {
-      if (self.game_code != "" && self.player > 0) {
-        self.multiplayer.leaveGame(self.game_code, self.player)
-        self.resetTitle();
-      }
-    })
+    // window.addEventListener("unload", function(ev) {
+    //   if (self.game_code != "" && self.player > 0) {
+    //     self.multiplayer.leaveGame(self.game_code, self.player)
+    //     self.resetTitle();
+    //   }
+    // })
   }
 
 
@@ -133,41 +136,6 @@ class Game {
     }
 
 
-
-    // setTimeout(function() {
-    //   // Game loop
-    //   while(true) {
-    //     let now = Date.now();
-    //     let time = now - game_loop_start;
-    //     if (now - last_frame >= 1000 / self.fps) {
-    //       fps_counter += 1;
-    //       last_frame = now;
-
-    //       self.trackStart("update");
-    //       self.update();
-    //       self.trackStop("update");
-
-    //       self.trackStart("tween");
-    //       TWEEN.update(time);
-    //       self.trackStop("tween");
-
-    //       self.trackStart("animate");
-    //       ticker.update(time);
-    //       pixi.renderer.render(pixi.stage);
-    //       self.trackStop("animate");
-
-    //       if (now - last_performance_update > 6000 && log_performance) {
-    //         // There were 6000 milliseconds, so divide FPS by 6
-    //         console.log("FPS: " + fps_counter / 6);
-    //         fps_counter = 0;
-    //         last_performance_update = now;
-    //         self.trackPrint(["update", "tween", "animate"]);
-    //       }
-    //     }
-    //   }
-    // }, 5000);
-
-
     // Set up rendering and tweening loop
     
     let ticker = PIXI.Ticker.shared;
@@ -180,14 +148,15 @@ class Game {
     let last_performance_update = 0;
 
     function animate(now) {
-      self.trackStart("tween");
-      TWEEN.update(now);
-      self.trackStop("tween");
+      
+      fps_counter += 1;
+      let diff = now - last_frame;
+      last_frame = now
 
-      //if (now - last_frame >= 1000 / self.fps) {
-        fps_counter += 1;
-        let diff = now - last_frame;
-        last_frame = now;
+      if (!self.paused == true) {
+        self.trackStart("tween");
+        TWEEN.update(now);
+        self.trackStop("tween");
 
         self.trackStart("update");
         self.update(diff);
@@ -200,12 +169,13 @@ class Game {
 
         if (now - last_performance_update > 3000 && log_performance) {
           // There were 3000 milliseconds, so divide fps_counter by 3
-          console.log("FPS: " + fps_counter / 3);
+          // console.log("FPS: " + fps_counter / 3);
+          // self.trackPrint(["update", "tween", "animate"]);
           fps_counter = 0;
           last_performance_update = now;
-          self.trackPrint(["update", "tween", "animate"]);
         }
-      //}
+      }
+
       requestAnimationFrame(animate);
     }
     animate(0);
@@ -277,29 +247,73 @@ class Game {
 
   loadWords() {
     var self = this;
+    let request;
+
+    this.special_dictionaries = {
+      "animals": {},
+      "plants": {},
+      "foods": {},
+      "colors": {},
+      "numbers_and_shapes": {},
+    };
+
+    for (const [special_key, special_dict] of Object.entries(this.special_dictionaries)) {
+      request = new XMLHttpRequest();
+      console.log(special_key);
+      request.open("GET", "Dada/" + special_key + "_words.txt.gz", true);
+      request.responseType = "arraybuffer";
+      request.onload = function(e) {
+        console.log("got here");
+        let word_list = new TextDecoder("utf-8").decode(
+          new Zlib.Gunzip(
+            new Uint8Array(this.response)
+          ).decompress()
+        );
+        word_list = word_list.split(/\n/);
+
+        for (let i = 0; i < word_list.length; i++) {
+          let word = word_list[i];
+
+          if (word != null && word.length >= 3) {
+            special_dict[word.toUpperCase()] = 1;
+          }
+        }
+      }
+      request.send();
+    }
+
+    this.special_dictionaries["verbs"] = {};
+
+    this.special_levels = Object.keys(this.special_dictionaries);
+    shuffleArray(this.special_levels);
+
     this.legal_words = {};
     let enemy_word_dict = {};
-    for (var i = 0; i <= board_width; i++) {
+    for (let i = 0; i <= board_width; i++) {
       enemy_word_dict[i] = {};
     }
 
-    var request = new XMLHttpRequest();
+    request = new XMLHttpRequest();
     request.open("GET", "Dada/legal_words.txt.gz", true);
     request.responseType = "arraybuffer";
     request.onload = function(e) {
 
-      var word_list = new TextDecoder("utf-8").decode(
+      let word_list = new TextDecoder("utf-8").decode(
         new Zlib.Gunzip(
           new Uint8Array(this.response)
         ).decompress()
       );
       word_list = word_list.split(/\n/);
-      for (var i = 0; i < word_list.length; i++) {
-        var thing = word_list[i].split(",");
-        var word = thing[0];
-        var common = thing[1];
+      for (let i = 0; i < word_list.length; i++) {
+        let thing = word_list[i].split(",");
+        let word = thing[0];
+        let common = thing[1];
+        let parts_of_speech = thing[2];
         if (word != null && word.length >= 3) {
           self.legal_words[word.toUpperCase()] = 1;
+          if (parts_of_speech.includes("v")) {
+            self.special_dictionaries["verbs"][word.toUpperCase()] = 1;
+          }
         }
         if (word != null && word.length <= board_width) {
           enemy_word_dict[word.length][word.toUpperCase()] = 1;
@@ -307,41 +321,32 @@ class Game {
       }
 
       self.enemy_words = {};
-      for (var i = 0; i <= board_width; i++) {
+      for (let i = 0; i <= board_width; i++) {
         self.enemy_words[i] = Object.keys(enemy_word_dict[i]);
       }
 
     };
     request.send();
+
+
+
   }
 
 
-  // singlePlayerGame() {
-  //   this.player = 1;
-
-  //   var self = this;
-
-  //   // self.initializeSinglePlayerScene();
-  //   // self.animateSceneSwitch("title", "game");
-  //   self.initializeSetupSingleScene();
-  //   self.animateSceneSwitch("title", "setup_single");
+  // resetTitle() {
+  //   this.player = 0;
+  //   this.state  = {};
+  //   this.choosers = {};
+  //   this.choices = {
+  //     "GAME_TYPE": -1,
+  //     "DIFFICULTY": -1,
+  //   };
+  //   this.choice_strings = {};
+  //   this.game_code = "";
+  //   this.start_time = Date.now();
+  //   this.game_code_letter_choice = 0;
+  //   this.multiplayer.stopWatch();
   // }
-
-
-  resetTitle() {
-    this.player = 0;
-    this.state  = {};
-    this.choosers = {};
-    this.choices = {
-      "GAME_TYPE": -1,
-      "DIFFICULTY": -1,
-    };
-    this.choice_strings = {};
-    this.game_code = "";
-    this.start_time = Date.now();
-    this.game_code_letter_choice = 0;
-    this.multiplayer.stopWatch();
-  }
 
 
   update(diff) {
@@ -388,5 +393,47 @@ class Game {
         setTimeout(function() {self.music.volume = (13 - i) / 20;}, delay + 50 * i);
       }
     }
+  }
+
+  pause() {
+    this.paused = true;
+    this.pause_moment = Date.now();
+    this.paused_tweens = [];
+    let tweens = TWEEN.getAll();
+    for (var i = 0; i < tweens.length; i++) {
+      var tween = tweens[i];
+      tween.pause();
+      this.paused_tweens.push(tween);
+    }
+    if (this.music != null) {
+      this.music.pause();
+    }
+    this.prev_announcement_text = this.announcement.text;
+    this.announcement.text = "PAUSED";
+    pauseAllDelays();
+
+  }
+
+  resume() {
+    this.paused = false;
+    this.pause_time += Date.now() - this.pause_moment;
+    for (var i = 0; i < this.paused_tweens.length; i++) {
+      var tween = this.paused_tweens[i];
+      tween.resume();
+    }
+    this.paused_tweens = [];
+    if (this.music != null) {
+      this.music.play();
+    }
+    this.announcement.text = this.prev_announcement_text;
+    resumeAllDelays();
+  }
+
+  markTime() {
+    return Date.now() - this.pause_time;
+  }
+
+  timeSince(mark) {
+    return this.markTime() - mark;
   }
 }

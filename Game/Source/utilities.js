@@ -35,6 +35,7 @@ for (i in letter_array) {
   shuffle_letters.push(letter_array[i]);
 }
 
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffleArray(array) {
   for (var i = array.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
@@ -59,6 +60,50 @@ function detectMobileBrowser() {
   return toMatch.some((toMatchItem) => {
       return navigator.userAgent.match(toMatchItem);
   });
+}
+
+
+// Wrap setTimeout so it has pause functionality.
+delays = {};
+unique = 0;
+function delay(callback, delay_time) {
+  var d = new Object();
+  d.fixed_id = unique;
+  unique += 1;
+  d.callback = callback;
+  d.delay_time = delay_time;
+  d.start_time = Date.now();
+  d.id = window.setTimeout(d.callback, d.delay_time);
+  d.delete_id = window.setTimeout(function() {delete delays[d.fixed_id]}, d.delay_time);
+  d.paused = false;
+  delays[d.fixed_id] = d;
+}
+
+
+function pauseAllDelays() {
+  console.log(delays);
+  for ([id, value] of Object.entries(delays)) {
+    let d = value;
+    if (d.paused == false) {
+      console.log("Pausing");
+      window.clearTimeout(d.id);
+      window.clearTimeout(d.delete_id);
+      d.delay_time -= Date.now() - d.start_time;
+      d.paused = true;
+    }
+  }
+}
+
+
+function resumeAllDelays() {
+  for ([id, value] of Object.entries(delays)) {
+    let d = value;
+    if (d.paused == true) {
+      d.start_time = Date.now();
+      d.id = window.setTimeout(d.callback, d.delay_time);
+      d.delete_id = window.setTimeout(function() {delete delays[d.fixed_id]}, d.delay_time);
+    }
+  }
 }
 
 

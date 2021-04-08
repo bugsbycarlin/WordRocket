@@ -142,65 +142,80 @@ Game.prototype.handleKeyDown = function(ev) {
   // Don't always need to do this.
   // ev.preventDefault();
 
+  if (ev.key == "Tab") {
+    ev.preventDefault();
+  }
+
   if(this.current_scene == "game") {
 
     let key = ev.key;
-    if (key == "Shift") {
-      if (ev.code == "ShiftLeft") key = "LShift";
-      if (ev.code == "ShiftRight") key = "RShift";
-    }
-    this.pressKey(key);
 
-    if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
-      this.tutorial2();
-    }
+    if (!this.paused) {
+      if (key == "Shift") {
+        if (ev.code == "ShiftLeft") key = "LShift";
+        if (ev.code == "ShiftRight") key = "RShift";
+      }
+      this.pressKey(key);
 
-    for (i in lower_array) {
-      if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
-        this.keyAction(letter_array[i]);
+      if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
+        this.tutorial2();
+      }
+
+      for (i in lower_array) {
+        if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
+          this.keyAction(letter_array[i]);
+        }
+      }
+
+      if (ev.key === "Backspace" || ev.key === "Delete") {
+        this.deleteAction();
+      }
+
+      if (ev.key === "ArrowRight") {
+        this.rightArrowAction();
+      }
+
+      if (ev.key === "ArrowLeft") {
+        this.leftArrowAction();
+      }
+
+      if (ev.code === "ShiftRight") {
+        this.rightShiftAction();
+      }
+
+      if (ev.code === "ShiftLeft") {
+        this.leftShiftAction();
+      }
+
+      if (ev.key === "Escape") {
+        this.clearAction();
+      }
+
+      if (ev.key === "Enter") {
+        this.enterAction();
       }
     }
 
-    if (ev.key === "Backspace" || ev.key === "Delete") {
-      this.deleteAction();
+    if (ev.key === "Tab" && this.game_phase == "active") {
+      if (this.paused) {
+        this.resume();
+      } else {
+        this.pause();
+      }
     }
 
-    if (ev.key === "ArrowRight") {
-      this.rightArrowAction();
-    }
-
-    if (ev.key === "ArrowLeft") {
-      this.leftArrowAction();
-    }
-
-    if (ev.code === "ShiftRight") {
-      this.rightShiftAction();
-    }
-
-    if (ev.code === "ShiftLeft") {
-      this.leftShiftAction();
-    }
-
-    if (ev.key === "Escape") {
-      this.clearAction();
-    }
-
-
-    if (ev.key === "Enter") {
-      this.enterAction();
-    }
   } else if (this.current_scene == "setup_single") {
     if (ev.key === "ArrowRight") {
       this.option_markers[this.option_choice].tint = 0xFFFFFF;
       this.option_choice = (this.option_choice + 1) % 4;
       this.option_markers[this.option_choice].tint = 0x75d3fe;
-      this.option_info.setPartial(this.option_info_values[this.option_choice]);
+      this.option_info.setPartial(this.option_info_values[this.option_choice].toUpperCase());
 
     } else if (ev.key === "ArrowLeft") {
       this.option_markers[this.option_choice].tint = 0xFFFFFF;
       this.option_choice = (this.option_choice + 3) % 4;
       this.option_markers[this.option_choice].tint = 0x75d3fe;
-      this.option_info.setPartial(this.option_info_values[this.option_choice]);
+      this.option_info.setPartial(this.option_info_values[this.option_choice].toUpperCase());
     } else if (ev.key === "Enter") {
       this.difficulty_level = this.option_values[this.option_choice];
       this.initializeSinglePlayerScene();

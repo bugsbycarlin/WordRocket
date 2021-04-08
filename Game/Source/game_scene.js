@@ -1,7 +1,7 @@
 
 
 Game.prototype.initializeSinglePlayerScene = function() {
-  this.level = 1;
+  this.level = 7;
   this.score = 0;
 
   console.log(this.difficulty_level);
@@ -35,8 +35,12 @@ Game.prototype.reset = function() {
   } else {
     this.game_phase = "pre_game";
 
-    setTimeout(function() {
-      self.start_time = Date.now();
+    delay(function() {
+      self.paused = false;
+      self.pause_time = 0;
+      // STEVE HOLT
+      // self.start_time = Date.now();
+      self.start_time = self.markTime();
       self.game_phase = "countdown";
       if (annoying) self.soundEffect("countdown");
     }, 1200);
@@ -63,36 +67,38 @@ Game.prototype.resetBoardBrowser = function() {
         self.tutorial_1_snide_clicks += 1
       }
 
-      if (letter_array.includes(letter)) {
-        self.keyAction(letter);
-      }
+      if (!self.paused) {
+        if (letter_array.includes(letter)) {
+          self.keyAction(letter);
+        }
 
-      if (letter === "RShift") {
-        self.rightShiftAction();
-      }
+        if (letter === "RShift") {
+          self.rightShiftAction();
+        }
 
-      if (letter === "LShift") {
-        self.leftShiftAction();
-      }
+        if (letter === "LShift") {
+          self.leftShiftAction();
+        }
 
-      if (letter === "Escape") {
-        self.clearAction();
-      }
+        if (letter === "Escape") {
+          self.clearAction();
+        }
 
-      if (letter === "Backspace") {
-        self.deleteAction();
-      }
+        if (letter === "Backspace") {
+          self.deleteAction();
+        }
 
-      if (letter === "ArrowRight") {
-        self.rightArrowAction();
-      }
+        if (letter === "ArrowRight") {
+          self.rightArrowAction();
+        }
 
-      if (letter === "ArrowLeft") {
-        self.leftArrowAction();
-      }
+        if (letter === "ArrowLeft") {
+          self.leftArrowAction();
+        }
 
-      if (letter === "Enter") {
-        self.enterAction();
+        if (letter === "Enter") {
+          self.enterAction();
+        }
       }
     }
   });
@@ -142,7 +148,7 @@ Game.prototype.resetBoardBrowser = function() {
       if (mouse_button.button_pressed != true) {
         mouse_button.button_pressed = true;
         mouse_button.position.y += 3;
-        setTimeout(function() {
+        delay(function() {
           mouse_button.button_pressed = false;
           mouse_button.position.y -= 3;
         }, 50);
@@ -237,7 +243,9 @@ Game.prototype.resetBoardBrowser = function() {
 
   this.setEnemyDifficulty(this.level, 2);
 
-  this.enemy_last_action = Date.now();
+  // STEVE HOLT
+  // this.enemy_last_action = Date.now();
+  this.enemy_last_action = this.markTime();
 
   this.gravity = 3.8;
   this.boost = 0.18;
@@ -249,11 +257,19 @@ Game.prototype.resetBoardBrowser = function() {
     this.launchpad.cursors[i].visible = false;
   }
 
-  this.countdown_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
-  this.countdown_text.anchor.set(0.5,0.5);
-  this.countdown_text.position.set(470, 203);
-  this.countdown_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  scene.addChild(this.countdown_text);
+  this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.announcement.anchor.set(0.5,0.5);
+  this.announcement.position.set(470, 203);
+  this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.announcement.style.lineHeight = 36;
+  scene.addChild(this.announcement);
+
+  // this.press_enter_text = new PIXI.Text("TRY AGAIN?", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  // this.press_enter_text.anchor.set(0.5,0.5);
+  // this.press_enter_text.position.set(470, 403);
+  // this.press_enter_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  // scene.addChild(this.press_enter_text);
+  // this.press_enter_text.visible = false;
 
   // let player_sheen = new PIXI.Sprite(PIXI.Texture.from("Art/sheen.png"));
   // player_sheen.anchor.set(0, 0);
@@ -286,7 +302,14 @@ Game.prototype.setEnemyDifficulty = function(level, scale) {
   this.enemy_wpm = 10 + 1.25 * scale * level;
   this.enemy_rerolls = 4 + scale * level;
   this.enemy_short_word = Math.min(6,4 + Math.floor(level / 4));
-  this.enemy_long_word = Math.min(4,5 + Math.floor(level / 3));
+  this.enemy_long_word = Math.max(4,5 + Math.floor(level / 3));
+
+  this.level_type = "normal";
+  if ((level + 1) % 4 == 0) {
+    this.level_type = "special";
+    this.level_condition = this.special_levels[Math.floor((level % 24) / 4)]
+
+  }
 }
 
 
@@ -334,21 +357,50 @@ Game.prototype.disabledTime = function(letter) {
 }
 
 
-Game.prototype.updateCountdown = function() {
+Game.prototype.updateAnnouncement = function() {
+  var self = this;
+  var scene = this.scenes["game"];
+
   if (this.game_phase == "countdown") {
-    let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
-    this.countdown_text.text = Math.ceil(time_remaining).toString();
+    // STEVE HOLT
+    // let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
+    let time_remaining = (2400 - (this.timeSince(this.start_time))) / 800;
+    this.announcement.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
-      this.countdown_text.text = "GO";
+      
       this.game_phase = "active";
-      setTimeout(function() {self.countdown_text.text = "";}, 1600);
+
+      if (this.level_type == "special") {
+        this.special_level_time = this.markTime();
+        let text = this.level_condition.replace("numbers_and_shapes", "numbers\nand shapes").toUpperCase();
+        this.announcement.text = "ONLY " + text + "!";
+        this.announcement.style.fontSize = 24;
+      } else {
+        this.announcement.text = "GO";
+        delay(function() {self.announcement.text = "";}, 1600);
+      }
+
+      
       for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;
       }
       if (annoying) this.setMusic("action_song");
     }
   }
+
+  if (this.game_phase == "active" && this.level_type == "special") {
+    let time_remaining = (30000 - (this.timeSince(this.special_level_time))) / 1000;
+    let text = this.level_condition.replace("numbers_and_shapes", "numbers\nand shapes").toUpperCase();
+    this.announcement.text = "ONLY " + text + "!\n" + Math.ceil(time_remaining).toString();
+    if (time_remaining <= 0) {
+      this.level_type = "normal";
+      this.announcement.text = "";
+      this.announcement.style.fontSize = 36;
+    }
+  }
 }
+
+
 
 
 Game.prototype.shakeDamage = function() {
@@ -360,8 +412,9 @@ Game.prototype.shakeDamage = function() {
       if (item.permanent_x == null) item.permanent_x = item.position.x;
       if (item.permanent_y == null) item.permanent_y = item.position.y;
       item.position.set(item.permanent_x - 3 + Math.random() * 6, item.permanent_y - 3 + Math.random() * 6)
-      //item.shake -= 1;
-      if (Date.now() - item.shake >= 150) {
+      // STEVE HOLT
+      //if (Date.now() - item.shake >= 150) {
+      if (this.timeSince(item.shake) >= 150) {
         item.shake = null;
         item.position.set(item.permanent_x, item.permanent_y)
       }
@@ -413,7 +466,18 @@ Game.prototype.coolHotKeys = function() {
     let letter = letter_array[i];
     let key = this.player_palette.letters[letter];
     if (key.playable == false && !this.player_defense.includes(letter)) {
-      let v = Date.now() - key.disable_time - this.disabledTime(letter);
+      // STEVE HOLD
+      //let v = Date.now() - key.disable_time - this.disabledTime(letter);
+      let v = this.timeSince(key.disable_time + this.disabledTime(letter));
+      if (v > -500) {
+        let portion = Math.min(1,(v + 500) / 500);
+        key.tint = PIXI.utils.rgb2hex([portion * 0.7 + 0.3, portion * 0.7 + 0.3, portion * 0.7 + 0.3]);
+      }      
+    }
+
+    key = this.enemy_palette.letters[letter];
+    if (key.playable == false && !this.enemy_defense.includes(letter)) {
+      let v = this.timeSince(key.disable_time + this.disabledTime(letter));
       if (v > -500) {
         let portion = Math.min(1,(v + 500) / 500);
         key.tint = PIXI.utils.rgb2hex([portion * 0.7 + 0.3, portion * 0.7 + 0.3, portion * 0.7 + 0.3]);
@@ -429,39 +493,65 @@ Game.prototype.enemyAction = function() {
     return;
   }
 
-  if (Date.now() - this.enemy_last_action <= 60000/this.enemy_wpm) {
+  // STEVE HOLD
+  // if (Date.now() - this.enemy_last_action <= 60000/this.enemy_wpm) {
+  if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_wpm) {
     return;
   } else {
-    this.enemy_last_action = Date.now() - 0.2 * (60000/this.enemy_wpm) + 0.4 * Math.random() * 60000/this.enemy_wpm;
+    this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_wpm) - 0.4 * Math.random() * 60000/this.enemy_wpm);
+  }
+
+  if (this.game_phase == "active" && this.level_type == "special") {
+    let probability = Math.min(1, (10 + 0.5 * this.level) / 25);
+    if (Math.random() > probability) {
+      let words = Object.keys(this.special_dictionaries[this.level_condition]);
+      let best_word = null;
+      for (var i = 0; i < this.enemy_rerolls / 2; i++) {
+        let candidate_word = words[Math.floor(Math.random() * words.length)];
+        if (candidate_word.length <= this.enemy_long_word) {
+          if (best_word == null) best_word = candidate_word;
+          for (let j = 0; j < this.player_defense.length; j++) {
+            if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].playable == true) {
+              best_word = candidate_word;
+            }
+          }
+        }
+      }
+      if (best_word != null) {
+        let shift = Math.floor(Math.random() * (board_width + 1 - best_word.length));
+        this.addEnemyWord(best_word, shift);
+      }
+    }
+
+    // don't do the other thing
+    return;
   }
 
   let targeting = this.game_phase != "tutorial";
   let rerolls = this.enemy_rerolls;
 
-  var best_word = null;
-  var best_shift = null;
+  let best_word = null;
+  let best_shift = null;
 
-  for (var i = 0; i < rerolls; i++) {
-    var word_size = this.enemy_short_word + Math.floor(Math.random() * (1 + this.enemy_long_word - this.enemy_short_word));
-    var word_list = this.enemy_words[word_size];
-    var candidate_word = word_list[Math.floor(Math.random() * word_list.length)];
-    var candidate_shift = Math.floor(Math.random() *(board_width + 1 - candidate_word.length));
+  for (let i = 0; i < rerolls; i++) {
+    let word_size = this.enemy_short_word + Math.floor(Math.random() * (1 + this.enemy_long_word - this.enemy_short_word));
+    let word_list = this.enemy_words[word_size];
+    let candidate_word = word_list[Math.floor(Math.random() * word_list.length)];
 
-    var legal_keys = true;
-    for (var j = 0; j < candidate_word.length; j++) {
+    let legal_keys = true;
+    for (let j = 0; j < candidate_word.length; j++) {
       if (this.enemy_palette.letters[candidate_word[j]].playable == false) legal_keys = false;
     }
 
-    var legit = (legal_keys && !(candidate_word in this.played_words));
+    let legit = (legal_keys && !(candidate_word in this.played_words));
 
     if (legit) {
       if (best_word == null) {
         best_word = candidate_word;
-        best_shift = candidate_shift;
       }
 
-      var targeted = false;
-      for (var j = 0; j < this.player_defense.length; j++) {
+      let targeted = false;
+      for (let j = 0; j < this.player_defense.length; j++) {
         if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].playable == true) {
           targeted = true;
         }
@@ -469,14 +559,14 @@ Game.prototype.enemyAction = function() {
 
       if (targeting && targeted) {
         best_word = candidate_word;
-        best_shift = candidate_shift;
         break;
       }
     }
   }
 
   if (best_word != null) {
-    this.addEnemyWord(best_word, best_shift);
+    let shift = Math.floor(Math.random() * (board_width + 1 - best_word.length));
+    this.addEnemyWord(best_word, shift);
     if (this.game_phase == "tutorial" && this.tutorial_number == 8) {
       this.tutorial9();
     }
@@ -517,14 +607,20 @@ Game.prototype.checkEndCondition = function() {
 
 
     if (enemy_dead === true || player_dead === true) {
+      this.announcement.style.fontSize = 36;
       if (player_dead == true) { //regardless of whether enemy is dead
-        this.countdown_text.text = "GAME OVER";
+        this.announcement.text = "GAME OVER";
+        // this.press_enter_text.visible = true;
         this.stopMusic();
         this.soundEffect("game_over");
+        delay(function() {
+          self.initializeSetupSingleScene();
+          self.animateSceneSwitch("game", "setup_single");
+        }, 4000);
       } else if (enemy_dead == true) {
-        this.countdown_text.text = "VICTORY!";
+        this.announcement.text = "VICTORY!";
         this.level += 1;
-        setTimeout(function() {self.reset()}, 4000);
+        delay(function() {self.reset();}, 4000);
       }
 
       this.game_phase = "gameover";
@@ -678,9 +774,13 @@ Game.prototype.checkRocketCollisions = function() {
           }
 
           if (rocket_1.player == 1) {
-            this.player_area.shake = Date.now();
+            // STEVE HOLT
+            //this.player_area.shake = Date.now();
+            this.player_area.shake = this.markTime();
           } else if (rocket_1.player == 2) {
-            this.enemy_area.shake = Date.now();
+            // STEVE HOLT
+            //this.enemy_area.shake = Date.now();
+            this.enemy_area.shake = this.markTime();
           }
         }
       }
@@ -730,7 +830,7 @@ Game.prototype.checkRocketAttacks = function() {
         .onComplete(function() {rocket.fire_sprite.visible = true; self.soundEffect("rocket");})
         .chain(new TWEEN.Tween(rocket.position)
           .to({y: target_y, x: target_x})
-          .duration(300)
+          .duration(200)
           .easing(TWEEN.Easing.Quadratic.In)
           .onComplete(function() {
 
@@ -760,7 +860,7 @@ Game.prototype.checkRocketAttacks = function() {
                   if (!self.enemy_defense.includes(disabled_letter)) {
                     self.score += rocket.score_value;
                     self.score_text_box.text = self.score;
-                    setTimeout(function() {
+                    delay(function() {
                       self.enemy_live_area.removeChild(electric);
                       self.enemy_palette.letters[disabled_letter].enable();
                       self.enemy_palette.letters[disabled_letter].playable = true;
@@ -777,7 +877,9 @@ Game.prototype.checkRocketAttacks = function() {
                 if (self.player_palette.letters[disabled_letter].playable === true) {
                   self.player_palette.letters[disabled_letter].disable();
                   self.player_palette.letters[disabled_letter].playable = false;
-                  scene.shake = Date.now();
+                  // STEVE HOLT
+                  // scene.shake = Date.now();
+                  scene.shake = self.markTime();
                   self.soundEffect("explosion_3");
 
                   let electric = self.makeElectric(self.player_palette.letters[disabled_letter], 
@@ -794,7 +896,7 @@ Game.prototype.checkRocketAttacks = function() {
                   1, 1, function() {electric.visible = true; self.player_palette.removeChild(explosion);});
 
                   if (!self.player_defense.includes(disabled_letter)) {
-                      setTimeout(function() {
+                    delay(function() {
                       self.player_palette.letters[disabled_letter].enable()
                       self.player_palette.letters[disabled_letter].playable = true;
                       self.player_palette.letters[disabled_letter].tint = 0xFFFFFF;
@@ -841,7 +943,7 @@ Game.prototype.singlePlayerUpdate = function(diff) {
     this.tutorial_screen.tutorial_text.hover();
   }
 
-  this.updateCountdown();
+  this.updateAnnouncement();
   this.shakeDamage();
   this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);

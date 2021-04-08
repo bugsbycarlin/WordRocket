@@ -1,6 +1,8 @@
 
 
 Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box_top, box_right, box_bottom, text, text_x, text_y) {
+  var self = this;
+  var scene = this.scenes["game"];
 
   let tutorial_screen = new PIXI.Container();
   parent.addChild(tutorial_screen);
@@ -63,10 +65,14 @@ Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box
   tutorial_screen.addChild(tutorial_text);
   tutorial_text.permanent_x = text_x;
   tutorial_text.permanent_y = text_y;
-  tutorial_text.start_time = Date.now();
+  // STEVE HOLT
+  // tutorial_text.start_time = Date.now();
+  tutorial_text.start_time = this.markTime();
   tutorial_text.alpha = 0
   tutorial_text.hover = function() {
-    tutorial_text.position.set(tutorial_text.permanent_x, tutorial_text.permanent_y + 20 * Math.sin((Date.now() - tutorial_text.start_time) / 400))
+    // STEVE HOLT
+    // tutorial_text.position.set(tutorial_text.permanent_x, tutorial_text.permanent_y + 20 * Math.sin((Date.now() - tutorial_text.start_time) / 400))
+    tutorial_text.position.set(tutorial_text.permanent_x, tutorial_text.permanent_y + 20 * Math.sin((self.timeSince(tutorial_text.start_time)) / 400));
   }
   tutorial_screen.tutorial_text = tutorial_text;
   new TWEEN.Tween(tutorial_text)
@@ -130,18 +136,18 @@ Game.prototype.tutorial2 = function() {
   this.tutorial_number = 1.5;
   this.tutorial_screen.tutorial_text.text = "GOOD.";
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(500);
     self.tutorial_number = 2;
     self.tutorial_screen = self.makeTutorialScreen(scene, 500, 264, 479, 675, 535, "THIS IS THE LAUNCHPAD.", self.width / 2, 600);
   }, 2000);
 
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.tutorial_text.text = "A WORD APPEARS HERE AS YOU TYPE.";
   }, 5000);
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_conditions = {};
     self.tutorial_number = 2.5;
     self.tutorial_screen.tutorial_text.text = "PRESS THE LEFT AND RIGHT KEYS TO MOVE YOUR WORD A BIT.";
@@ -184,20 +190,20 @@ Game.prototype.tutorial4 = function() {
   this.tutorial_number = 4;
   this.tutorial_screen.tutorial_text.text = "YOUR WORD MUST BE IN THE ENGLISH DICTIONARY.";
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.tutorial_text.text = "IT CAN'T BE TOO SHORT, AND YOU CAN'T PLAY A WORD TWICE.";
   }, 4000);
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.tutorial_text.text = "IF YOUR WORD IS INVALID, A RED MARKER WILL APPEAR UNDERNEATH.";
   }, 8000);
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_number = 4.2;
     self.tutorial_screen.tutorial_text.text = "IF YOUR WORD IS VALID, YOU CAN LAUNCH IT AT THE SOVIET COMPUTER.";
   }, 12000);
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial5();
   }, 16000);
 }
@@ -218,7 +224,7 @@ Game.prototype.tutorial6 = function() {
   
   this.tutorial_number = 6;
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(250);
     self.tutorial_screen = self.makeTutorialScreen(scene, 250, 260, 30, 671, 531, "IT FLIES UP HERE...", 480, 275);
   }, 500);
@@ -243,7 +249,9 @@ Game.prototype.tutorial8 = function() {
   console.log("I am in tutorial 8");
   
   this.tutorial_number = 8;
-  this.enemy_last_action = Date.now();
+  // STEVE HOLT
+  // this.enemy_last_action = Date.now();
+  this.enemy_last_action = this.markTime();
 
   self.tutorial_screen.fade(250);
   self.tutorial_screen = self.makeTutorialScreen(scene, 250, 867, 394, 1259, 548, "AND CRASHES INTO THE SOVIET'S KEYBOARD,\nTEMPORARILY DISABLING SOME KEYS.", 430+520, 500+66);
@@ -268,7 +276,7 @@ Game.prototype.tutorial10 = function() {
   
   this.tutorial_number = 10;
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(250);
     self.tutorial_screen = self.makeTutorialScreen(scene, 250, 260, 30, 671, 531, "WHICH COME DOWN ON YOU!", 470, 275);
   }, 500);
@@ -281,12 +289,12 @@ Game.prototype.tutorial11 = function() {
   
   this.tutorial_number = 11;
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(250);
     self.tutorial_screen = self.makeTutorialScreen(scene, 250, 80, 656, 856, 953, "WHEN KEYS ARE DAMAGED, THEY'RE TEMPORARILY UNABLE TO MAKE ROCKETS.", self.width / 2, 620);
   }, 500);
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial12();
   }, 4000);
 }
@@ -301,41 +309,41 @@ Game.prototype.tutorial12 = function() {
 
   self.tutorial_screen.tutorial_text.text = "YOU HAVE 3 BLUE KEYS TO DEFEND.";
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(250);
     self.tutorial_screen = self.makeTutorialScreen(scene, 250, 867, 394, 1259, 548, "AND SO DOES THE SOVIET.", self.width / 2 + 50, 580);
   }, 4000);
 
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(250);
     self.tutorial_screen = self.makeTutorialScreen(scene, 250, 80, 656, 856, 953, "WHEN BLUE KEYS ARE HIT, THEY'RE PERMANENTLY DAMAGED.", self.width / 2, 620);
   }, 8000);
 
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(250);
     self.tutorial_screen = self.makeTutorialScreen(scene, 250, 264, 479, 675, 535, "HEY, GO GO GO! MAKE SOME WORDS!", self.width / 2, 600);
   }, 12000);
 
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.tutorial_text.text = "DESTROY THE SOVIET'S BLUE KEYS BEFORE THEY DESTROY YOURS!";
   }, 16000); 
 
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.fade(250);
     self.tutorial_screen = self.makeTutorialScreen(scene, 250, 0, 0, 0, 0, "OKAY. YOU GET THE IDEA, RIGHT?", self.width / 2, 600);
   }, 20000);
 
 
-  setTimeout(function() {
+  delay(function() {
     self.tutorial_screen.tutorial_text.text = "TIME TO RESET AND PLAY FOR REAL. READY?";
   }, 24000);
 
 
-  setTimeout(function() {
+  delay(function() {
     // for (var i = 0; i < letter_array.length; i++) {
     //   var letter = letter_array[i];
     //   self.player_palette.letters[letter].enable();

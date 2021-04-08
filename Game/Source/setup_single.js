@@ -13,6 +13,7 @@ Game.prototype.initializeSetupSingleScene = function() {
   // The stunned keys just make gaps in the rocket volley.
   // There are no special phases.
   // Difficulty ramps up slower than what I've been doing.
+  // There is spelling help.
   // Jin or Joey should be able to beat it, or else I should re-tune.
   //
   // MEDIUM difficulty means I can beat it without trying harder than current.
@@ -36,10 +37,10 @@ Game.prototype.initializeSetupSingleScene = function() {
   //
 
   this.option_info_values = [
-    "Things are easy. Very easy.",
-    "Eh, so, a little harder.",
-    "This is pretty hard.",
-    "Congrats, you skilled and amazing typist.\nBut this game is going to rip you a new one."
+    "Spelling aid on. Special levels off. Stunned keys don't fire rockets. For novice typists.",
+    "Spelling aid off. Special levels on. Stunned keys don't fire rockets. For seasoned typists.",
+    "Spelling aid off. Special levels on. Stunned keys don't fire rockets. Much faster enemy. For very good typists.",
+    "Pure speed. Stunned keys don't work. We are not responsible for the pain."
   ];
 
   let background = new PIXI.Sprite(PIXI.Texture.from("Art/setup_background_v2.png"));
@@ -53,7 +54,7 @@ Game.prototype.initializeSetupSingleScene = function() {
   difficulty_label.position.set(center_x,125);
   scene.addChild(difficulty_label);
 
-  this.option_info = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  this.option_info = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left", wordWrap: true, wordWrapWidth: 900});
   this.option_info.anchor.set(0,0);
   this.option_info.position.set(180,265);
   this.option_info.partial_value = 0;
@@ -84,7 +85,7 @@ Game.prototype.initializeSetupSingleScene = function() {
     this.option_markers[i].position.set(center_x - 400 + 250 * i,200);
     if (i == this.option_choice) {
       this.option_markers[i].tint = 0x75d3fe;
-      this.option_info.setPartial(this.option_info_values[i]);
+      this.option_info.setPartial(this.option_info_values[i].toUpperCase());
     }
     this.option_markers[i].interactive = true;
     this.option_markers[i].buttonMode = true;
@@ -92,7 +93,7 @@ Game.prototype.initializeSetupSingleScene = function() {
       self.option_markers[self.option_choice].tint = 0xFFFFFF;
       self.option_choice = i;
       self.option_markers[self.option_choice].tint = 0x75d3fe;
-      self.option_info.setPartial(self.option_info_values[self.option_choice]);
+      self.option_info.setPartial(self.option_info_values[self.option_choice].toUpperCase());
     });
     scene.addChild(this.option_markers[i]);
   }

@@ -1,7 +1,7 @@
 
 
 Game.prototype.initializeSinglePlayerScene = function() {
-  this.level = 7;
+  this.level = 14;
   this.score = 0;
 
   console.log(this.difficulty_level);
@@ -133,6 +133,14 @@ Game.prototype.resetBoardBrowser = function() {
   // the player's launchpad
   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 32, 32, false);
 
+  this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
+  this.spelling_help.position.set(6, -64);
+  this.spelling_help.alpha = 0.4;
+  if (this.difficulty_level != "EASY") {
+    this.spelling_help.visible = false;
+  }
+  this.player_area.addChild(this.spelling_help);
+
   // silly mouse buttons
   for (let i = 0; i < 3; i++) {
     let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
@@ -241,7 +249,7 @@ Game.prototype.resetBoardBrowser = function() {
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   scene.addChild(this.score_text_box);
 
-  this.setEnemyDifficulty(this.level, 2);
+  this.setEnemyDifficulty(this.level);
 
   // STEVE HOLT
   // this.enemy_last_action = Date.now();
@@ -298,17 +306,47 @@ Game.prototype.resetBoardBrowser = function() {
 }
 
 
-Game.prototype.setEnemyDifficulty = function(level, scale) {
-  this.enemy_wpm = 10 + 1.25 * scale * level;
-  this.enemy_rerolls = 4 + scale * level;
-  this.enemy_short_word = Math.min(6,4 + Math.floor(level / 4));
-  this.enemy_long_word = Math.max(4,5 + Math.floor(level / 3));
+Game.prototype.setEnemyDifficulty = function(level) {
+  let capped_level = Math.min(level, 26);
+  let scale;
+  let min_word;
+  let med_word;
+  let max_word;
+  if (this.difficulty_level == "EASY") {
+    scale = 0.7;
+    min_word = 4;
+    med_word = 5;
+    max_word = 8;
+  } else if (this.difficulty_level == "MEDIUM") {
+    // scale = 1.25;
+    scale = 0.9;
+    min_word = 4;
+    med_word = 7;
+    max_word = 9;
+    console.log("medium");
+  } else if (this.difficulty_level == "HARD") {
+    scale = 1.2;
+    min_word = 4;
+    med_word = 9;
+    max_word = 12;
+  } else if (this.difficulty_level == "BEACON") {
+    scale = 2;
+    min_word = 4;
+    med_word = 10;
+    max_word = 12;
+  }
+  this.enemy_wpm = 10 + 1.25 * scale * capped_level;
+  this.enemy_rerolls = 4 + scale * capped_level / 2;
+
+  console.log("WPM is " + this.enemy_wpm);
+
+  this.enemy_short_word = min_word
+  this.enemy_long_word = Math.min(max_word, med_word + Math.floor((max_word - med_word) * capped_level / 17));
 
   this.level_type = "normal";
-  if ((level + 1) % 4 == 0) {
+  if (this.difficulty_level != "EASY" &&(level + 1) % 4 == 0) {
     this.level_type = "special";
     this.level_condition = this.special_levels[Math.floor((level % 24) / 4)]
-
   }
 }
 
@@ -353,6 +391,23 @@ Game.prototype.disabledTime = function(letter) {
     } else {
       return 2000;
     }
+  }
+}
+
+
+Game.prototype.spellingHelp = function() {
+  var self = this;
+  var scene = this.scenes["game"];
+
+  if (this.difficulty_level == "EASY") {
+    this.spelling_help.position.set(this.launchpad.cursors[0].x - 10, -64);
+    let word = this.launchpad.word();
+    if (word in this.spelling_prediction) {
+      this.spelling_help.text = this.spelling_prediction[word].slice(0, board_width - this.launchpad.shift);
+    } else {
+      this.spelling_help.text = "";
+    }
+    // this.spelling_help.visible = true;
   }
 }
 
@@ -493,11 +548,10 @@ Game.prototype.enemyAction = function() {
     return;
   }
 
-  // STEVE HOLD
-  // if (Date.now() - this.enemy_last_action <= 60000/this.enemy_wpm) {
   if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_wpm) {
     return;
   } else {
+    console.log(this.timeSince(this.enemy_last_action));
     this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_wpm) - 0.4 * Math.random() * 60000/this.enemy_wpm);
   }
 
@@ -943,6 +997,7 @@ Game.prototype.singlePlayerUpdate = function(diff) {
     this.tutorial_screen.tutorial_text.hover();
   }
 
+  this.spellingHelp();
   this.updateAnnouncement();
   this.shakeDamage();
   this.launchpad.checkError();

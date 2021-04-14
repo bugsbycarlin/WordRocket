@@ -37,10 +37,10 @@ Game.prototype.initializeSetupSingleScene = function() {
   //
 
   this.option_info_values = [
-    "Spelling aid on. Special levels off. Stunned keys don't fire rockets. For novice typists.",
-    "Spelling aid off. Special levels on. Stunned keys don't fire rockets. For seasoned typists.",
-    "Spelling aid off. Special levels on. Stunned keys don't fire rockets. Much faster enemy. For very good typists.",
-    "Pure speed. Stunned keys don't work. We are not responsible for the pain."
+    "Spelling aid on. Special levels off. 13 levels. Stunned keys don't launch rockets. For novice typists.",
+    "Spelling aid off. Special levels on. 26 levels. Stunned keys don't launch rockets. For seasoned typists.",
+    "Spelling aid off. Special levels on. 26 levels. Stunned keys don't launch rockets. Much faster enemy. For very good typists.",
+    "So fast. 26 levels. Stunned keys stop working temporarily. Whoever you are, this is more than you can handle."
   ];
 
   let background = new PIXI.Sprite(PIXI.Texture.from("Art/setup_background_v2.png"));
@@ -73,7 +73,6 @@ Game.prototype.initializeSetupSingleScene = function() {
   }
   scene.addChild(this.option_info);
 
-  this.option_choice = 0;
   console.log(this.option_values.length);
   this.option_markers = [];
   for (let i = 0; i < this.option_values.length; i++) {
@@ -83,17 +82,17 @@ Game.prototype.initializeSetupSingleScene = function() {
     this.option_markers[i] = new PIXI.Text(option, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
     this.option_markers[i].anchor.set(0.5,0.5);
     this.option_markers[i].position.set(center_x - 400 + 250 * i,200);
-    if (i == this.option_choice) {
+    if (i == this.difficulty_choice) {
       this.option_markers[i].tint = 0x75d3fe;
       this.option_info.setPartial(this.option_info_values[i].toUpperCase());
     }
     this.option_markers[i].interactive = true;
     this.option_markers[i].buttonMode = true;
     this.option_markers[i].on("pointertap", function() {
-      self.option_markers[self.option_choice].tint = 0xFFFFFF;
-      self.option_choice = i;
-      self.option_markers[self.option_choice].tint = 0x75d3fe;
-      self.option_info.setPartial(self.option_info_values[self.option_choice].toUpperCase());
+      self.option_markers[self.difficulty_choice].tint = 0xFFFFFF;
+      self.difficulty_choice = i;
+      self.option_markers[self.difficulty_choice].tint = 0x75d3fe;
+      self.option_info.setPartial(self.option_info_values[self.difficulty_choice].toUpperCase());
     });
     scene.addChild(this.option_markers[i]);
   }
@@ -131,7 +130,7 @@ Game.prototype.initializeSetupSingleScene = function() {
   go_button.interactive = true;
   go_button.buttonMode = true;
   go_button.on("pointertap", function() {
-    self.difficulty_level = self.option_values[self.option_choice];
+    self.difficulty_level = self.option_values[self.difficulty_choice];
     self.initializeSinglePlayerScene();
     self.animateSceneSwitch("setup_single", "game");
   });

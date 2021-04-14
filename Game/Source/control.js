@@ -206,18 +206,18 @@ Game.prototype.handleKeyDown = function(ev) {
 
   } else if (this.current_scene == "setup_single") {
     if (ev.key === "ArrowRight") {
-      this.option_markers[this.option_choice].tint = 0xFFFFFF;
-      this.option_choice = (this.option_choice + 1) % 4;
-      this.option_markers[this.option_choice].tint = 0x75d3fe;
-      this.option_info.setPartial(this.option_info_values[this.option_choice].toUpperCase());
+      this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
+      this.difficulty_choice = (this.difficulty_choice + 1) % 4;
+      this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
+      this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
 
     } else if (ev.key === "ArrowLeft") {
-      this.option_markers[this.option_choice].tint = 0xFFFFFF;
-      this.option_choice = (this.option_choice + 3) % 4;
-      this.option_markers[this.option_choice].tint = 0x75d3fe;
-      this.option_info.setPartial(this.option_info_values[this.option_choice].toUpperCase());
+      this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
+      this.difficulty_choice = (this.difficulty_choice + 3) % 4;
+      this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
+      this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
     } else if (ev.key === "Enter") {
-      this.difficulty_level = this.option_values[this.option_choice];
+      this.difficulty_level = this.option_values[this.difficulty_choice];
       this.initializeSinglePlayerScene();
       this.animateSceneSwitch("setup_single", "game");
     }

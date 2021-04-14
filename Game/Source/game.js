@@ -2,7 +2,7 @@
 
 var annoying = true;
 var use_scores = false;
-var silence = true;
+var silence = false;
 var log_performance = true;
 
 var performance_result = null;
@@ -51,6 +51,8 @@ class Game {
 
     this.paused = false;
     this.pause_time = 0;
+
+    this.difficulty_choice = 0;
 
     //this.resetTitle();
 
@@ -293,6 +295,8 @@ class Game {
       enemy_word_dict[i] = {};
     }
 
+    this.spelling_prediction = {};
+
     request = new XMLHttpRequest();
     request.open("GET", "Dada/legal_words.txt.gz", true);
     request.responseType = "arraybuffer";
@@ -310,6 +314,7 @@ class Game {
         let common = thing[1];
         let parts_of_speech = thing[2];
         if (word != null && word.length >= 3) {
+          self.addPredictiveSpelling(word.toUpperCase());
           self.legal_words[word.toUpperCase()] = 1;
           if (parts_of_speech.includes("v")) {
             self.special_dictionaries["verbs"][word.toUpperCase()] = 1;
@@ -327,9 +332,16 @@ class Game {
 
     };
     request.send();
+  }
 
 
-
+  addPredictiveSpelling(word) {
+    for (var i = 0; i < word.length; i++) {
+      let slice = word.slice(0, i+1);
+      if (!(slice in this.spelling_prediction) || word.length < this.spelling_prediction[slice].length) {
+        this.spelling_prediction[slice] = word;
+      }
+    }
   }
 
 

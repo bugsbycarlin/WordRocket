@@ -92,8 +92,10 @@ Game.prototype.initializeTitleScreen = function() {
   new_game_button.buttonMode = true;
   new_game_button.on("pointerdown", function() {
     self.tutorial = false;
-    self.initializeSetupSingleScene();
-    self.animateSceneSwitch("title", "setup_single");
+    // self.initializeSetupSingleScene();
+    // self.animateSceneSwitch("title", "setup_single");
+    self.initializeCutscene();
+    self.animateSceneSwitch("title", "cutscene");
   });
 
   let multi_button = new PIXI.Text("INTERNET", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});

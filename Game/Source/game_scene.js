@@ -1,7 +1,7 @@
 
 
 Game.prototype.initializeSinglePlayerScene = function() {
-  this.level = 14;
+  this.level = 1;
   this.score = 0;
 
   console.log(this.difficulty_level);
@@ -319,7 +319,7 @@ Game.prototype.setEnemyDifficulty = function(level) {
     max_word = 8;
   } else if (this.difficulty_level == "MEDIUM") {
     // scale = 1.25;
-    scale = 0.9;
+    scale = 0.8;
     min_word = 4;
     med_word = 7;
     max_word = 9;
@@ -444,7 +444,7 @@ Game.prototype.updateAnnouncement = function() {
   }
 
   if (this.game_phase == "active" && this.level_type == "special") {
-    let time_remaining = (30000 - (this.timeSince(this.special_level_time))) / 1000;
+    let time_remaining = (special_level_duration - (this.timeSince(this.special_level_time))) / 1000;
     let text = this.level_condition.replace("numbers_and_shapes", "numbers\nand shapes").toUpperCase();
     this.announcement.text = "ONLY " + text + "!\n" + Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
@@ -556,11 +556,11 @@ Game.prototype.enemyAction = function() {
   }
 
   if (this.game_phase == "active" && this.level_type == "special") {
-    let probability = Math.min(1, (10 + 0.5 * this.level) / 25);
-    if (Math.random() > probability) {
+    let probability = Math.min(1, (13 + 0.5 * this.level) / 25);
+    if (Math.random() < probability) {
       let words = Object.keys(this.special_dictionaries[this.level_condition]);
       let best_word = null;
-      for (var i = 0; i < this.enemy_rerolls / 2; i++) {
+      for (var i = 0; i < this.enemy_rerolls; i++) {
         let candidate_word = words[Math.floor(Math.random() * words.length)];
         if (candidate_word.length <= this.enemy_long_word) {
           if (best_word == null) best_word = candidate_word;

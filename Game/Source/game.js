@@ -16,7 +16,7 @@ function initialize() {
 
 WebFont.load({
   google: {
-    families: ['Bebas Neue', 'Press Start 2P']
+    families: ['Bebas Neue', 'Press Start 2P', 'Bangers']
   }
 });
 
@@ -366,6 +366,8 @@ class Game {
       this.singlePlayerUpdate(diff);
     } else if(this.current_scene == "setup_single") {
       this.setupSingleUpdate(diff);
+    } else if (this.current_scene == "cutscene") {
+      this.cutsceneUpdate(diff);
     }
   }
 

@@ -666,6 +666,7 @@ Game.prototype.initializeScenes = function() {
 
   this.makeScene("title");
   this.makeScene("setup_single");
+  this.makeScene("cutscene");
   this.makeScene("game");
   this.scenes["title"].position.x = 0;
 
@@ -795,6 +796,31 @@ Game.prototype.showAlert = function(text, action) {
     .yoyo(true)
     .repeat(3)
     .start()
+}
+
+
+Game.prototype.comicBubble = function(parent, text, x, y) {
+  let comic_text = new PIXI.Text(" " + text + " ", {fontFamily: "Bangers", fontSize: 36, fill: 0x000000, letterSpacing: 6, align: "center"});
+  comic_text.anchor.set(0.5,0.53);
+  comic_text.position.set(x, y);
+
+  let black_fill = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  black_fill.width = comic_text.width + 16;
+  black_fill.height = comic_text.height + 16;
+  black_fill.anchor.set(0.5, 0.5);
+  black_fill.position.set(x, y);
+  black_fill.tint = 0x000000;
+  parent.addChild(black_fill); 
+
+  let white_fill = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  white_fill.width = comic_text.width + 10;
+  white_fill.height = comic_text.height + 10;
+  white_fill.anchor.set(0.5, 0.5);
+  white_fill.position.set(x, y);
+  white_fill.tint = 0xFFFFFF;
+  parent.addChild(white_fill);
+
+  parent.addChild(comic_text);
 }
 
 

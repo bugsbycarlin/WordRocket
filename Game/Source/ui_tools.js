@@ -145,6 +145,17 @@ Game.prototype.makePixelatedParachute = function(parent, x, y, xScale, yScale) {
 }
 
 
+Game.prototype.makeBomb = function(parent, x, y, xScale, yScale) {
+  let bomb_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/bomb.png"));
+  bomb_sprite.anchor.set(0.5, 0.5);
+  bomb_sprite.scale.set(xScale, yScale);
+  bomb_sprite.position.set(x, y);
+  bomb_sprite.angle = 10;
+  parent.addChild(bomb_sprite);
+  return bomb_sprite;
+}
+
+
 Game.prototype.makeExplosion = function(parent, x, y, xScale, yScale, action) {
   let sheet = PIXI.Loader.shared.resources["Art/explosion.json"].spritesheet;
   let explosion_sprite = new PIXI.AnimatedSprite(sheet.animations["explosion"]);
@@ -423,11 +434,19 @@ Game.prototype.makeKeyboard = function(options) {
   keyboard.error = 0;
 
   let keys = [];
-  keys[0] = ["Escape_1_esc", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-_1_minus", "=_1_equals", "Backspace_2_backspace"];
-  keys[1] = ["Tab_1.5_tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[_1_leftbracket", "]_1_rightbracket", "\\_1.5_backslash"];
-  keys[2] = ["CapsLock_2_capslock", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";_1_semicolon", "'_1_quote", "Enter_2_enter"];
-  keys[3] = ["LShift_2.5_shift", "Z", "X", "C", "V", "B", "N", "M", ",_1_comma", "._1_period", "/_1_forwardslash", "RShift_2.5_shift"];
-  keys[4] = ["Control_1.5_ctrl", "Alt_1_alt", "Meta_1.5_cmd", " _6_spacebar", "Fn_1_fn", "ArrowLeft_1_left", "ArrowUp_1_up", "ArrowDown_1_down", "ArrowRight_1_right"];
+  if (this.keyboard_mode == "QWERTY") {
+    keys[0] = ["Escape_1_esc", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-_1_minus", "=_1_equals", "Backspace_2_backspace"];
+    keys[1] = ["Tab_1.5_tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[_1_leftbracket", "]_1_rightbracket", "\\_1.5_backslash"];
+    keys[2] = ["CapsLock_2_capslock", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";_1_semicolon", "'_1_quote", "Enter_2_enter"];
+    keys[3] = ["LShift_2.5_shift", "Z", "X", "C", "V", "B", "N", "M", ",_1_comma", "._1_period", "/_1_forwardslash", "RShift_2.5_shift"];
+    keys[4] = ["Control_1.5_ctrl", "Alt_1_alt", "Meta_1.5_cmd", " _6_spacebar", "Fn_1_fn", "ArrowLeft_1_left", "ArrowUp_1_up", "ArrowDown_1_down", "ArrowRight_1_right"];
+  } else if (this.keyboard_mode == "DVORAK") {
+    keys[0] = ["Escape_1_esc", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "[_1_leftbracket", "]_1_rightbracket", "Backspace_2_backspace"];
+    keys[1] = ["Tab_1.5_tab", "'_1_quote", ",_1_comma", "._1_period", "P", "Y", "F", "G", "C", "R", "L", "/_1_forwardslash", "=_1_equals", "\\_1.5_backslash"];
+    keys[2] = ["CapsLock_2_capslock", "A", "O", "E", "U", "I", "D", "H", "T", "N", "S", "-_1_minus", "Enter_2_enter"];
+    keys[3] = ["LShift_2.5_shift", ";_1_semicolon", "Q", "J", "K", "X", "B", "M", "W", "V", "Z", "RShift_2.5_shift"];
+    keys[4] = ["Control_1.5_ctrl", "Alt_1_alt", "Meta_1.5_cmd", " _6_spacebar", "Fn_1_fn", "ArrowLeft_1_left", "ArrowUp_1_up", "ArrowDown_1_down", "ArrowRight_1_right"];
+  }
 
   let background = new PIXI.Sprite(PIXI.Texture.from("Art/keyboard_background.png"));
   background.anchor.set(0.5, 0.5);
@@ -472,15 +491,36 @@ Game.prototype.makeKeyboard = function(options) {
     }
   }
 
+  keyboard.setBombs = function (number){
+    console.log("Setting " + number + " bombs");
+    let spacekey = this.keys[" "];
+
+    if(spacekey.bombs != null) {
+      for (let i = 0; i < spacekey.bombs.length; i++) {
+        let bomb = spacekey.bombs[i];
+        let x = spacekey.removeChild(bomb);
+        x.destroy();
+      }
+    }
+    spacekey.bombs = [];
+    for (let i = 0; i < number; i++) {
+      let bomb = self.makeBomb(spacekey, 54 * i - 27 * (number - 1), 0, 0.8, 0.8);
+      bomb.alpha = 0.6;
+      spacekey.bombs.push(bomb);
+    }
+  }
+
   return keyboard;
 }
 
 Game.prototype.makeNiceKey = function(parent, x, y, filename, size, action) {
   var self = this;
-  var key_button = new PIXI.Sprite(PIXI.Texture.from("Art/NiceKeys/" + filename + ".png"));
-  key_button.anchor.set(0.5, 0.5);
+  var key_button = new PIXI.Container();
+  var key_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/NiceKeys/" + filename + ".png"));
+  key_sprite.anchor.set(0.5, 0.5);
   key_button.position.set(x, y);
   parent.addChild(key_button);
+  key_button.addChild(key_sprite);
 
   key_button.playable = true;
   key_button.interactive = true;
@@ -668,6 +708,7 @@ Game.prototype.initializeScenes = function() {
   this.makeScene("setup_single");
   this.makeScene("cutscene");
   this.makeScene("game");
+  this.makeScene("credits");
   this.scenes["title"].position.x = 0;
 
   this.alertMask = new PIXI.Container();

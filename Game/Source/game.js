@@ -1,8 +1,10 @@
 'use strict';
 
-var annoying = true;
+// var annoying = true;
+// var silence = true;
+var use_music = false;
+var use_sound = true;
 var use_scores = false;
-var silence = false;
 var log_performance = true;
 
 var performance_result = null;
@@ -49,6 +51,8 @@ class Game {
 
     this.multiplayer = new Multiplayer(this);
 
+    this.keyboard_mode = "QWERTY";
+
     this.paused = false;
     this.pause_time = 0;
 
@@ -81,7 +85,7 @@ class Game {
       this.width = 1280;
       this.height = 960;
       this.device_type = "browser";
-      this.keyboard_sounds = true;
+      // this.keyboard_sounds = true;
       this.fps = 30;
       //  document.getElementById("mainDiv").style.width = 1024;
       // document.getElementById("mainDiv").style.marginLeft = -512;
@@ -100,12 +104,12 @@ class Game {
         this.width = physicalScreenWidth;
         this.height = physicalScreenHeight;
         this.device_type = "iPhone";
-        this.keyboard_sounds = true;
+        // this.keyboard_sounds = true;
       } else if (navigator.userAgent.indexOf("iPad") > 0) {
         this.width = 768;
         this.height = 1024;
         this.device_type = "iPad";
-        this.keyboard_sounds = true;
+        // this.keyboard_sounds = true;
       } else {
         // this.width = 768;
         // this.height = 1024;
@@ -113,7 +117,7 @@ class Game {
         this.width = 640;
         this.height = 1136;
         this.device_type = "iPhone";
-        this.keyboard_sounds = true;
+        // this.keyboard_sounds = true;
       }
       
       
@@ -265,7 +269,6 @@ class Game {
       request.open("GET", "Dada/" + special_key + "_words.txt.gz", true);
       request.responseType = "arraybuffer";
       request.onload = function(e) {
-        console.log("got here");
         let word_list = new TextDecoder("utf-8").decode(
           new Zlib.Gunzip(
             new Uint8Array(this.response)
@@ -373,7 +376,7 @@ class Game {
 
 
   soundEffect(effect_name, volume = 0.6) {
-    if (!silence) {
+    if (use_sound) {
       var sound_effect = document.getElementById(effect_name);
       sound_effect.volume = volume;
       sound_effect.play();
@@ -382,7 +385,7 @@ class Game {
 
 
   setMusic(music_name) {
-    if (!silence) {
+    if (use_music) {
       var self = this;
       this.music = document.getElementById(music_name);
       this.music.loop = true;
@@ -422,8 +425,14 @@ class Game {
     if (this.music != null) {
       this.music.pause();
     }
+    let countdown_sound = document.getElementById("countdown");
+    if (countdown_sound.paused == false) {
+      countdown_sound.hold_up = true;
+      countdown_sound.pause();
+    }
     this.prev_announcement_text = this.announcement.text;
     this.announcement.text = "PAUSED";
+    this.escape_to_quit.visible = true;
     pauseAllDelays();
 
   }
@@ -439,7 +448,13 @@ class Game {
     if (this.music != null) {
       this.music.play();
     }
+    let countdown_sound = document.getElementById("countdown");
+    if (countdown_sound.hold_up == true) {
+      countdown_sound.hold_up = null;
+      countdown_sound.play();
+    }
     this.announcement.text = this.prev_announcement_text;
+    this.escape_to_quit.visible = false;
     resumeAllDelays();
   }
 

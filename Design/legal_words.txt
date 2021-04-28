@@ -101334,15 +101334,6 @@ niftinesses,0,
 nifty,0,a
 nigella,0,n
 nigellas,0,n
-niggard,0,n
-niggarded,0,
-niggarding,0,
-niggardliness,0,n
-niggardlinesses,0,n
-niggardly,0,a
-niggards,0,n
-nigger,1,n
-niggers,1,n
 niggle,0,v
 niggled,0,v
 niggler,0,n

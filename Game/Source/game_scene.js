@@ -4,6 +4,9 @@ Game.prototype.initializeSinglePlayerScene = function() {
   this.level = 1;
   this.score = 0;
 
+  this.player_bombs = 0;
+  this.enemy_bombs = 0;
+
   console.log(this.difficulty_level);
 
   this.reset();
@@ -17,10 +20,14 @@ Game.prototype.reset = function() {
   this.freefalling = [];
   this.pickers = [];
   this.played_words = {};
+  this.bombs = [];
 
   this.rocket_letters = [];
 
   this.pickDefense(6, 10);
+
+  this.bomb_spawn_last = self.markTime();
+  this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
 
   if (this.device_type == "browser") {
     this.resetBoardBrowser();
@@ -42,7 +49,7 @@ Game.prototype.reset = function() {
       // self.start_time = Date.now();
       self.start_time = self.markTime();
       self.game_phase = "countdown";
-      if (annoying) self.soundEffect("countdown");
+      self.soundEffect("countdown");
     }, 1200);
   }
 }
@@ -84,6 +91,10 @@ Game.prototype.resetBoardBrowser = function() {
           self.clearAction();
         }
 
+        if (letter == " ") {
+          self.bombAction();
+        }
+
         if (letter === "Backspace") {
           self.deleteAction();
         }
@@ -100,6 +111,22 @@ Game.prototype.resetBoardBrowser = function() {
           self.enterAction();
         }
       }
+
+      if (letter === "Tab" && (self.game_phase == "active" || self.game_phase == "countdown")) {
+        if (self.paused) {
+          self.resume();
+        } else {
+          self.pause();
+        }
+      }
+
+      if (self.paused && letter === "Escape") {
+        document.getElementById("countdown").hold_up = null;
+        self.game_phase = "none";
+        self.resume();
+        self.initializeSetupSingleScene();
+        self.animateSceneSwitch("game", "setup_single");
+      }
     }
   });
 
@@ -111,6 +138,9 @@ Game.prototype.resetBoardBrowser = function() {
     }
   });
   this.enemy_palette.scale.set(0.3125, 0.3125);
+
+  this.player_palette.setBombs(this.player_bombs);
+  this.enemy_palette.setBombs(this.enemy_bombs);
 
   // the player's board
   this.player_area = new PIXI.Container();
@@ -152,7 +182,7 @@ Game.prototype.resetBoardBrowser = function() {
     mouse_button.buttonMode = true;
     mouse_button.button_pressed = false;
     mouse_button.on("pointerdown", function() {
-      if (self.keyboard_sounds) self.soundEffect("keyboard_click_1", 1.0);
+      self.soundEffect("keyboard_click_1", 1.0);
       if (mouse_button.button_pressed != true) {
         mouse_button.button_pressed = true;
         mouse_button.position.y += 3;
@@ -271,6 +301,16 @@ Game.prototype.resetBoardBrowser = function() {
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.announcement.style.lineHeight = 36;
   scene.addChild(this.announcement);
+
+
+  this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.escape_to_quit.anchor.set(0.5,0.5);
+  this.escape_to_quit.position.set(470, 303);
+  this.escape_to_quit.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.escape_to_quit.style.lineHeight = 36;
+  this.escape_to_quit.visible = false;
+  scene.addChild(this.escape_to_quit);
+
 
   // this.press_enter_text = new PIXI.Text("TRY AGAIN?", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   // this.press_enter_text.anchor.set(0.5,0.5);
@@ -416,7 +456,7 @@ Game.prototype.updateAnnouncement = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  if (this.game_phase == "countdown") {
+  if (this.game_phase == "countdown" && !this.paused) {
     // STEVE HOLT
     // let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
     let time_remaining = (2400 - (this.timeSince(this.start_time))) / 800;
@@ -439,7 +479,7 @@ Game.prototype.updateAnnouncement = function() {
       for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;
       }
-      if (annoying) this.setMusic("action_song");
+      this.setMusic("action_song");
     }
   }
 
@@ -555,6 +595,32 @@ Game.prototype.enemyAction = function() {
     this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_wpm) - 0.4 * Math.random() * 60000/this.enemy_wpm);
   }
 
+  if (this.game_phase == "active" && this.enemy_bombs > 0) {
+    // count items in the play area and pull a panic bomb if there are lots
+    // or if the closest one is darned close.
+    let closest_player_rocket_y = -1000;
+    let enemy_rocket_count = 0;
+    let player_rocket_count = 0;
+    for (var i = 0; i < this.rocket_letters.length; i++) {
+      var rocket = this.rocket_letters[i];
+      if (rocket.player == 1 && rocket.parent == this.enemy_area) {
+        player_rocket_count += 1;
+        if (rocket.status == "descent" && rocket.y > closest_player_rocket_y) {
+          closest_player_rocket_y = rocket.y;
+        }
+      } else if (rocket.player == 2 && rocket.parent == this.enemy_area) {
+        enemy_rocket_count += 1;
+      }
+    }
+    if (player_rocket_count > 15) {
+      if (enemy_rocket_count / player_rocket_count < 0.5 || closest_player_rocket_y > -50) {
+        this.enemy_bombs -= 1;
+        this.explodeArea(this.enemy_area, 1);
+        this.enemy_palette.setBombs(this.enemy_bombs);
+      }
+    }
+  }
+
   if (this.game_phase == "active" && this.level_type == "special") {
     let probability = Math.min(1, (13 + 0.5 * this.level) / 25);
     if (Math.random() < probability) {
@@ -636,6 +702,52 @@ Game.prototype.addEnemyWord = function(word, shift) {
     let rocket_tile = this.makeRocketTile(this.enemy_area, letter, word.length, i, shift, 2, 32, 32);
 
     this.rocket_letters.push(rocket_tile);
+  }
+}
+
+
+Game.prototype.spawnBomb = function() {
+  if (this.timeSince(this.bomb_spawn_last) > this.bomb_spawn_next) {
+    console.log("spawning bomb");
+    this.bomb_spawn_last = this.markTime();
+    this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
+    let area = this.player_area;
+    if (Math.random() > 0.7) area = this.enemy_area;
+    let column = Math.floor(Math.random() * board_width);
+    let bomb = this.makeBomb(area, 32 * column + 16, -1 * (80 + 32 * Math.floor(Math.random() * 8)), 0.5, 0.5);
+    bomb.column = column;
+    bomb.status = "available";
+    this.bombs.push(bomb);
+  }
+}
+
+
+Game.prototype.explodeArea = function(area, player_number) {
+  var self = this;
+  var scene = this.scenes["game"];
+
+  for (var i = 0; i < this.rocket_letters.length; i++) {
+    var rocket = this.rocket_letters[i];
+    if (rocket.player == player_number && rocket.parent == area) {
+      if (Math.random() * 100 < 50) {
+        this.soundEffect("explosion_1");
+      } else {
+        this.soundEffect("explosion_2");
+      }
+      
+      rocket.status = "falling";
+      rocket.vx = -10 + Math.random() * 20;
+      rocket.vy = -4 - Math.random() * 14;
+      this.freefalling.push(rocket);
+
+      for (var j = 0; j < 5; j++) {
+        let explosion = self.makeExplosion(area, 
+        rocket.x - 100 + 200 * Math.random(), rocket.y - 100 + 200 * Math.random(),
+        1, 1, function() {area.removeChild(explosion)});
+      }
+          
+      area.shake = this.markTime();
+    }
   }
 }
 
@@ -733,6 +845,47 @@ Game.prototype.boostRockets = function(fractional) {
     }
   }
 }
+
+
+Game.prototype.checkBombCollisions = function() {
+  var self = this;
+  var scene = this.scenes["game"];
+
+  for (var i = 0; i < this.rocket_letters.length; i++) {
+    var rocket = this.rocket_letters[i];
+    for (var j = 0; j < this.bombs.length; j++) {
+      var bomb = this.bombs[j];
+      if (rocket.column == bomb.column && rocket.parent == bomb.parent && bomb.status != "taken") {
+        if ((rocket.status == "rocket" && rocket.position.y < bomb.position.y) 
+         || (rocket.status == "descent" && rocket.position.y > bomb.position.y))
+        {
+          // gatcha
+          bomb.status = "taken";
+          if (rocket.player == 1) {
+            this.player_bombs = Math.min(3, this.player_bombs + 1);
+            this.player_palette.setBombs(this.player_bombs);
+          } else if (rocket.player == 2) {
+            this.enemy_bombs = Math.min(3, this.enemy_bombs + 1);
+            this.enemy_palette.setBombs(this.enemy_bombs);
+          }
+        }
+      }
+    }
+  }
+
+  let new_bombs = [];
+  for (var i = 0; i < this.bombs.length; i++) {
+    var bomb = this.bombs[i];
+
+    if (bomb.status != "taken") {
+      new_bombs.push(bomb);
+    } else {
+      bomb.parent.removeChild(bomb);
+    }
+  }
+  this.bombs = new_bombs;
+
+  }
 
 
 Game.prototype.checkRocketScreenChange = function() {
@@ -975,7 +1128,7 @@ Game.prototype.cleanRockets = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  var new_rocket_letters = [];
+  let new_rocket_letters = [];
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
 
@@ -1010,7 +1163,9 @@ Game.prototype.singlePlayerUpdate = function(diff) {
   }
 
   this.enemyAction();  
+  this.spawnBomb();
   this.boostRockets(fractional);
+  this.checkBombCollisions();
   this.checkRocketScreenChange();
   this.checkRocketCollisions();
   this.checkRocketAttacks();

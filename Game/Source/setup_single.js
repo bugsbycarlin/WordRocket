@@ -134,6 +134,17 @@ Game.prototype.initializeSetupSingleScene = function() {
     self.initializeSinglePlayerScene();
     self.animateSceneSwitch("setup_single", "game");
   });
+
+  let back_button = new PIXI.Text("<", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  back_button.anchor.set(0.5,0.5);
+  back_button.position.set(185, 125);
+  scene.addChild(back_button);
+  back_button.interactive = true;
+  back_button.buttonMode = true;
+  back_button.on("pointertap", function() {
+    self.initializeTitleScreen();
+    self.animateSceneSwitch("setup_single", "title");
+  });
 }
 
 

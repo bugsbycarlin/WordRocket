@@ -24,7 +24,7 @@ Game.prototype.keyAction = function(letter) {
 
 Game.prototype.deleteAction = function() {
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
-    if (this.keyboard_sounds) this.soundEffect("keyboard_click_1", 1.0);
+    this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.pop();
     if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
       this.tutorial35();
@@ -95,7 +95,7 @@ Game.prototype.leftShiftAction = function() {
 
 Game.prototype.clearAction = function() {
   if (this.game_phase == "active" || this.game_phase == "tutorial") {
-    if (this.keyboard_sounds) this.soundEffect("keyboard_click_1", 1.0);
+    this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.clear();
     if (this.game_phase == "tutorial" && this.tutorial_number == 3.5) {
       this.tutorial4();
@@ -116,11 +116,20 @@ Game.prototype.enterAction = function() {
 }
 
 
+Game.prototype.bombAction = function() {
+  if (this.game_phase == "active" && this.player_bombs > 0) {
+    this.player_bombs -= 1;
+    this.explodeArea(this.player_area, 2);
+    this.player_palette.setBombs(this.player_bombs);
+  }
+}
+
+
 Game.prototype.pressKey = function(key) {
   if (key in this.player_palette.keys) {
     let keyboard_key = this.player_palette.keys[key];
     let click_sound = "keyboard_click_" + ((key.charCodeAt(0) % 5)+1).toString();
-    if (this.keyboard_sounds) this.soundEffect(click_sound, 1.0);
+    this.soundEffect(click_sound, 1.0);
     if (keyboard_key.key_pressed != true) {
       keyboard_key.key_pressed = true;
       // let old_y = keyboard_key.position.y;
@@ -191,17 +200,29 @@ Game.prototype.handleKeyDown = function(ev) {
         this.clearAction();
       }
 
+      if (ev.key === " ") {
+        this.bombAction();
+      }
+
       if (ev.key === "Enter") {
         this.enterAction();
       }
     }
 
-    if (ev.key === "Tab" && this.game_phase == "active") {
+    if (ev.key === "Tab" && (this.game_phase == "active" || this.game_phase == "countdown")) {
       if (this.paused) {
         this.resume();
       } else {
         this.pause();
       }
+    }
+
+    if (this.paused && ev.key === "Escape") {
+      document.getElementById("countdown").hold_up = null;
+      this.game_phase = "none";
+      this.resume();
+      this.initializeSetupSingleScene();
+      this.animateSceneSwitch("game", "setup_single");
     }
 
   } else if (this.current_scene == "setup_single") {
@@ -220,6 +241,16 @@ Game.prototype.handleKeyDown = function(ev) {
       this.difficulty_level = this.option_values[this.difficulty_choice];
       this.initializeSinglePlayerScene();
       this.animateSceneSwitch("setup_single", "game");
+    } else if (ev.key == "Escape") {
+      this.initializeTitleScreen();
+      this.animateSceneSwitch("setup_single", "title");
+    }
+  } else if (this.current_scene == "credits") {
+    if (ev.key == "Escape") {
+      this.left_shark_tween.stop();
+      this.right_shark_tween.stop();
+      this.initializeTitleScreen();
+      this.animateSceneSwitch("credits", "title");
     }
   }
 }

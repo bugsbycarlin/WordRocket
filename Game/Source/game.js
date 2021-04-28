@@ -24,14 +24,14 @@ WebFont.load({
 
 
 var firebaseConfig = {
-  apiKey: "AIzaSyBlhNihmc39kLoWKY-MlG49ItSGJcpXSfQ",
-  authDomain: "wordvolley-ccdb6.firebaseapp.com",
-  projectId: "wordvolley-ccdb6",
-  databaseURL: "https://wordvolley-ccdb6-default-rtdb.firebaseio.com",
-  storageBucket: "wordvolley-ccdb6.appspot.com",
-  messagingSenderId: "591926001792",
-  appId: "1:591926001792:web:d6078dc492a6156604e665",
-  measurementId: "G-FB1JPHYKJN",
+  apiKey: "AIzaSyCMdtQRBtOTeljFIiQs6ehicZXG8i-pk84",
+  authDomain: "word-rockets.firebaseapp.com",
+  databaseURL: "https://word-rockets-default-rtdb.firebaseio.com",
+  projectId: "word-rockets",
+  storageBucket: "word-rockets.appspot.com",
+  messagingSenderId: "648323787326",
+  appId: "1:648323787326:web:730fc5295f830f1fab7f6f",
+  measurementId: "G-K6HHV5T2WN"
 };
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
@@ -49,6 +49,7 @@ class Game {
     document.addEventListener("keydown", function(ev) {self.handleKeyDown(ev)}, false);
     this.loadWords();
 
+    this.auth_user = null;
     this.multiplayer = new Multiplayer(this);
 
     this.keyboard_mode = "QWERTY";

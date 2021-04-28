@@ -108,6 +108,7 @@ Game.prototype.initializeTitleScreen = function() {
   multi_button.buttonMode = true;
   multi_button.on("pointerdown", function() {
     // TO DO: multiplayer
+    self.multiplayer.testCall();
   });
 
   // ! black bars
@@ -259,18 +260,29 @@ Game.prototype.initializeTitleScreen = function() {
     self.animateSceneSwitch("title", "credits");
   });
 
-  let bar_three = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  bar_three.width = 1;
-  bar_three.height = 50;
-  bar_three.position.set(537,0);
-  bar_three.tint = 0x404040;
-  settings_panel.addChild(bar_three);
+  // let bar_three = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  // bar_three.width = 1;
+  // bar_three.height = 50;
+  // bar_three.position.set(537,0);
+  // bar_three.tint = 0x404040;
+  // settings_panel.addChild(bar_three);
 
 
-  let sign_in_button = new PIXI.Text("SIGN-IN", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
-  sign_in_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  sign_in_button.anchor.set(0,0);
-  sign_in_button.position.set(557, 15);
-  settings_panel.addChild(sign_in_button);
+  // putting this off to the right so it's always there.
+  this.sign_in_button = new PIXI.Text(this.auth_user == null ? "SIGN-IN" : "SIGN-OUT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
+  this.sign_in_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.sign_in_button.anchor.set(0,0);
+  this.sign_in_button.position.set(this.width - 180, this.height - 50);
+  scene.addChild(this.sign_in_button);
+
+  this.sign_in_button.interactive = true;
+  this.sign_in_button.buttonMode = true;
+  this.sign_in_button.on("pointerdown", function() {
+    if (self.auth_user == null) {
+      self.multiplayer.googleSignIn();
+    } else {
+      self.multiplayer.signOut();
+    }
+  });
 
 }

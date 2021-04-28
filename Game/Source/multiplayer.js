@@ -7,6 +7,48 @@ class Multiplayer {
     this.game = game;
   }
 
+  testCall() {
+    if (this.uid == null) {
+      console.log("can't make call if not signed in");
+      return;
+    }
+
+    // let difficulty = "beacon";
+    // let high_scores = {}
+    // high_scores["1"] = {
+    //   "name": "STEVE",
+    //   "score": 44020,
+    // };
+    // high_scores["2"] = {
+    //   "name": "JAMES",
+    //   "score": 43400,
+    // };
+    // high_scores["3"] = {
+    //   "name": "JIMBO",
+    //   "score": 12000,
+    // };
+    // this.database.ref("high_scores/local/" + this.uid + "/" + difficulty).update(high_scores);
+
+    let difficulty = "hard";
+    let high_scores = {}
+    high_scores["1"] = {
+      "name": "STEVE",
+      "score": 44020,
+      "uid": "stenbord-steinsteen",
+    };
+    high_scores["2"] = {
+      "name": "JAMES",
+      "score": 43400,
+      "uid": this.uid,
+    };
+    high_scores["3"] = {
+      "name": "JIMBO",
+      "score": 12000,
+      "uid": this.uid,
+    };
+    this.database.ref("high_scores/global/" + difficulty).update(high_scores);
+  }
+
 
   generateGameCode() {
     
@@ -114,12 +156,9 @@ class Multiplayer {
         var user = result.user;
 
         self.game.auth_user = user;
+        self.uid = user.uid;
 
-        self.game.sign_in_button.disable();
-        self.game.sign_in_button.visible = false;
-        self.game.sign_out_button.enable();
-        self.game.sign_out_button.visible = true;
-        // ...
+        self.game.sign_in_button.text = "SIGN-OUT";
       }).catch((error) => {
         console.log("Error with google sign in!")
         console.log(error);
@@ -143,11 +182,9 @@ class Multiplayer {
   signOut() {
     var self = this;
     firebase.auth().signOut().then(() => {
-      self.game.sign_out_button.disable();
-      self.game.sign_out_button.visible = false;
-      self.game.sign_in_button.enable();
-      self.game.sign_in_button.visible = true;
+      self.game.sign_in_button.text = "SIGN-IN";
       self.game.auth_user = null;
+      self.uid = null;
     }).catch((error) => {
       console.log("Error signing out!");
       console.log(error);

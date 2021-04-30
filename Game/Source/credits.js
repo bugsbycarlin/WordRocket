@@ -42,7 +42,7 @@ Game.prototype.initializeCreditsScene = function() {
   scene.addChild(fes_thang);
 
 
-  var left_shark = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_super_pixelated_finless_american_large_2.png"));
+  var left_shark = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_american.png"));
   // left_shark.anchor.set(0.5, 0.5);
   left_shark.position.set(this.width * 1/8, this.height / 2);
   left_shark.angle = -20;
@@ -59,8 +59,7 @@ Game.prototype.initializeCreditsScene = function() {
     .start()
 
 
-  var right_shark = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_super_pixelated_finless_large.png"));
-  // right_shark.anchor.set(0.5, 0.5);
+  var right_shark = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_soviet.png"));
   right_shark.position.set(this.width * 7/8, this.height / 2);
   right_shark.anchor.set(0.5, 0.5);
   right_shark.scale.set(2, 2);

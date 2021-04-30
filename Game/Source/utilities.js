@@ -1,5 +1,5 @@
 
-// My colors
+// Some colors
 // Blue: 0x3cb0f3
 // Yellow: 0xf3db3c
 // Red: 0xdb5858
@@ -127,14 +127,3 @@ function addDedupeSort(some_list, other_list) {
     })
   });
 }
-
-
-// randomCode() {
-//   var characters = "abcdefghijklmnopqrstuvwxyz";
-//   var word = "";
-//   for (var i = 0; i < 4; i++) {
-//     word += characters.charAt(Math.floor(Math.random() * characters.length));
-
-//   }
-//   return word;
-// }

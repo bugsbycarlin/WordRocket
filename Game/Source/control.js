@@ -179,9 +179,6 @@ Game.prototype.pressKey = function(palette, key) {
 
 
 Game.prototype.handleKeyDown = function(ev) {
-  // Don't always need to do this.
-  // ev.preventDefault();
-
   if (ev.key == "Tab") {
     ev.preventDefault();
   }
@@ -246,7 +243,7 @@ Game.prototype.handleKeyDown = function(ev) {
       } else {
         this.pause();
       }
-      // this.checkEndCondition(true);
+      // this.checkEndCondition(true); // for testing, switch to this to make tab force gameovers.
     }
 
     if (this.paused && ev.key === "Escape") {
@@ -298,18 +295,15 @@ Game.prototype.handleKeyDown = function(ev) {
     if (this.high_score_state == "entry") {
       for (i in lower_array) {
         if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
-          //this.keyAction(letter_array[i]);
           this.highScoreKey(letter_array[i]);
         }
       }
 
       if (ev.key === "Backspace" || ev.key === "Delete") {
-        //this.deleteAction();
         this.highScoreDelete();
       }
 
       if (ev.key === "Enter") {
-        //this.enterAction();
         this.highScoreEnter();
       }
     }

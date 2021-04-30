@@ -163,7 +163,6 @@ class Game {
       pixi.stage.scale.set(1/window.devicePixelRatio, 1/window.devicePixelRatio);
     }
 
-
     // Set up rendering and tweening loop
     
     let ticker = PIXI.Ticker.shared;
@@ -244,30 +243,17 @@ class Game {
 
   intializeAnimations() {
     var self = this;
-    if (!PIXI.Loader.shared.resources["Art/fire_draft_6.json"]) {
-      PIXI.Loader.shared.add("Art/fire_draft_6.json").load(function() {
-    // if (!PIXI.Loader.shared.resources["Art/pixelated_fire_2.json"]) {
-    //   PIXI.Loader.shared.add("Art/pixelated_fire_2.json").load(function() {
-    // if (!PIXI.Loader.shared.resources["Art/fire_pixelated.json"]) {
-      // PIXI.Loader.shared.add("Art/fire_pixelated.json").load(function() {
-
-        
-        if (!PIXI.Loader.shared.resources["Art/vertical_flame.json"]) {
-          PIXI.Loader.shared.add("Art/vertical_flame.json").load(function() {
-        // if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
-        //   PIXI.Loader.shared.add("Art/fire.json").load(function() {
-            self.initializeTitleScreen();
-            if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
-              PIXI.Loader.shared.add("Art/explosion.json").load(function() {
-                if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
-                  PIXI.Loader.shared.add("Art/electric.json").load(function() {
-                  });
-                }
+    if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
+      PIXI.Loader.shared.add("Art/fire.json").load(function() {
+        self.initializeTitleScreen();
+        if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
+          PIXI.Loader.shared.add("Art/explosion.json").load(function() {
+            if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
+              PIXI.Loader.shared.add("Art/electric.json").load(function() {
               });
             }
-            
           });
-        }
+        }  
       });
     }
   }
@@ -368,22 +354,6 @@ class Game {
       }
     }
   }
-
-
-  // resetTitle() {
-  //   this.player = 0;
-  //   this.state  = {};
-  //   this.choosers = {};
-  //   this.choices = {
-  //     "GAME_TYPE": -1,
-  //     "DIFFICULTY": -1,
-  //   };
-  //   this.choice_strings = {};
-  //   this.game_code = "";
-  //   this.start_time = Date.now();
-  //   this.game_code_letter_choice = 0;
-  //   this.multiplayer.stopWatch();
-  // }
 
 
   update(diff) {

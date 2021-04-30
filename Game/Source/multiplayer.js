@@ -7,6 +7,59 @@ class Multiplayer {
     this.game = game;
   }
 
+
+  googleSignIn() {
+    var self = this;
+    var provider = new firebase.auth.GoogleAuthProvider();
+    console.log(provider);
+    firebase.auth()
+      .signInWithPopup(provider)
+      .then((result) => {
+        /** @type {firebase.auth.OAuthCredential} */
+
+        var credential = result.credential;
+        var token = credential.accessToken;
+        var user = result.user;
+
+        self.game.auth_user = user;
+        self.uid = user.uid;
+
+        self.game.sign_in_button.text = "SIGN-OUT";
+      }).catch((error) => {
+        console.log("Error with google sign in!")
+        console.log(error);
+      });
+  }
+
+
+  anonymousSignIn(callback) {
+    console.log("Using anonymous sign in");
+    var self = this;
+    firebase.auth().signInAnonymously()
+      .then(() => {
+        callback();
+      })
+      .catch((error) => {
+        console.log("Error with anonymous sign in!")
+        console.log(error);
+      });
+
+  }
+
+
+  signOut() {
+    var self = this;
+    firebase.auth().signOut().then(() => {
+      self.game.sign_in_button.text = "SIGN-IN";
+      self.game.auth_user = null;
+      self.uid = null;
+    }).catch((error) => {
+      console.log("Error signing out!");
+      console.log(error);
+    });
+  }
+
+
   getGlobalHighScores(yes_callback) {
     var self = this;
     this.database.ref("/high_scores/global").once("value").then((result) => {
@@ -92,32 +145,32 @@ class Multiplayer {
     });
   }
 
+  // I used this to seed the global high scores.
+  // testCall() {
+  //   var self = this;
 
-  testCall() {
-    var self = this;
+  //   if (this.uid == null) {
+  //     console.log("can't make call if not signed in");
+  //     return;
+  //   }
 
-    if (this.uid == null) {
-      console.log("can't make call if not signed in");
-      return;
-    }
-
-    ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
-      let high_scores = {}
-      for (var i = 0; i < 50; i++) {
-        let name = ""
-        for(var j = 0; j < 8; j++) {
-          let t = namez[Math.floor(Math.random() * namez.length)].split(" ")[0];
-          if(t.length <= 6) name = t.toUpperCase();
-        }
-        high_scores[i] = {
-          name: name,
-          score: 5500 - 100 * i - Math.floor(Math.random() * 30),
-          uid: self.generateGameCode() + self.generateGameCode() + self.generateGameCode() + self.generateGameCode(),
-        }
-      }
-      this.database.ref("high_scores/global/" + difficulty).update(high_scores);
-    });
-  }
+  //   ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
+  //     let high_scores = {}
+  //     for (var i = 0; i < 50; i++) {
+  //       let name = ""
+  //       for(var j = 0; j < 8; j++) {
+  //         let t = namez[Math.floor(Math.random() * namez.length)].split(" ")[0];
+  //         if(t.length <= 6) name = t.toUpperCase();
+  //       }
+  //       high_scores[i] = {
+  //         name: name,
+  //         score: 5500 - 100 * i - Math.floor(Math.random() * 30),
+  //         uid: self.generateGameCode() + self.generateGameCode() + self.generateGameCode() + self.generateGameCode(),
+  //       }
+  //     }
+  //     this.database.ref("high_scores/global/" + difficulty).update(high_scores);
+  //   });
+  // }
 
 
   generateGameCode() {
@@ -210,55 +263,6 @@ class Multiplayer {
 
   update(sheet) {
     this.database.ref("games/" + this.game.game_code).update(sheet);
-  }
-
-  googleSignIn() {
-    var self = this;
-    var provider = new firebase.auth.GoogleAuthProvider();
-    console.log(provider);
-    firebase.auth()
-      .signInWithPopup(provider)
-      .then((result) => {
-        /** @type {firebase.auth.OAuthCredential} */
-
-        var credential = result.credential;
-        var token = credential.accessToken;
-        var user = result.user;
-
-        self.game.auth_user = user;
-        self.uid = user.uid;
-
-        self.game.sign_in_button.text = "SIGN-OUT";
-      }).catch((error) => {
-        console.log("Error with google sign in!")
-        console.log(error);
-      });
-  }
-
-  anonymousSignIn(callback) {
-    console.log("Using anonymous sign in");
-    var self = this;
-    firebase.auth().signInAnonymously()
-      .then(() => {
-        callback();
-      })
-      .catch((error) => {
-        console.log("Error with anonymous sign in!")
-        console.log(error);
-      });
-
-  }
-
-  signOut() {
-    var self = this;
-    firebase.auth().signOut().then(() => {
-      self.game.sign_in_button.text = "SIGN-IN";
-      self.game.auth_user = null;
-      self.uid = null;
-    }).catch((error) => {
-      console.log("Error signing out!");
-      console.log(error);
-    });
   }
 }
 

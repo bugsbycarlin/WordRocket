@@ -65,13 +65,9 @@ Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box
   tutorial_screen.addChild(tutorial_text);
   tutorial_text.permanent_x = text_x;
   tutorial_text.permanent_y = text_y;
-  // STEVE HOLT
-  // tutorial_text.start_time = Date.now();
   tutorial_text.start_time = this.markTime();
   tutorial_text.alpha = 0
   tutorial_text.hover = function() {
-    // STEVE HOLT
-    // tutorial_text.position.set(tutorial_text.permanent_x, tutorial_text.permanent_y + 20 * Math.sin((Date.now() - tutorial_text.start_time) / 400))
     tutorial_text.position.set(tutorial_text.permanent_x, tutorial_text.permanent_y + 20 * Math.sin((self.timeSince(tutorial_text.start_time)) / 400));
   }
   tutorial_screen.tutorial_text = tutorial_text;
@@ -94,7 +90,6 @@ Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box
 }
 
 
-
 Game.prototype.tutorial1 = function() {
   var self = this;
   var scene = this.scenes["game"];
@@ -113,15 +108,6 @@ Game.prototype.tutorial1 = function() {
     "PRESS K. JUST DO IT.",
     "FINE, I GIVE UP.",
   ]
-
-  // for (var i = 0; i < 26; i++) {
-  //   this.player_palette.letters[letter_array[i]].inner_action = function(letter) {
-  //     if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
-  //       self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
-  //       self.tutorial_1_snide_clicks += 1
-  //     }
-  //   }
-  // }
 
   for (var i = 0; i < 10; i++) {
     this.launchpad.cursors[i].visible = true;
@@ -249,8 +235,6 @@ Game.prototype.tutorial8 = function() {
   console.log("I am in tutorial 8");
   
   this.tutorial_number = 8;
-  // STEVE HOLT
-  // this.enemy_last_action = Date.now();
   this.enemy_last_action = this.markTime();
 
   self.tutorial_screen.fade(250);
@@ -344,15 +328,6 @@ Game.prototype.tutorial12 = function() {
 
 
   delay(function() {
-    // for (var i = 0; i < letter_array.length; i++) {
-    //   var letter = letter_array[i];
-    //   self.player_palette.letters[letter].enable();
-    //   self.enemy_palette.letters[letter].enable();
-    // }
-    // self.tutorial_screen.fade()
-    // self.start_time = Date.now();
-    // self.game_phase = "countdown";
-    // if (annoying) self.soundEffect("countdown");
     self.tutorial = false;
     self.reset();
   }, 28000); 

@@ -11,14 +11,14 @@ Game.prototype.initializeTitleScreen = function() {
   scene.addChild(blue_bg);
 
   // ! flags
-  let right_flag = new PIXI.Sprite(PIXI.Texture.from("Art/flag_soviet_first_draft_pixelated_v3.png"));
+  let right_flag = new PIXI.Sprite(PIXI.Texture.from("Art/Title/flag_soviet.png"));
   right_flag.anchor.set(0.5,0.5);
   right_flag.scale.set(3,3);
   right_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   right_flag.position.set(790, this.height - 710);
   scene.addChild(right_flag);
 
-  let left_flag = new PIXI.Sprite(PIXI.Texture.from("Art/flag_american_first_draft_pixelated_v3.png"));
+  let left_flag = new PIXI.Sprite(PIXI.Texture.from("Art/Title/flag_american.png"));
   left_flag.anchor.set(0.5,0.5);
   left_flag.scale.set(-3,3);
   left_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
@@ -26,7 +26,7 @@ Game.prototype.initializeTitleScreen = function() {
   scene.addChild(left_flag);
 
   // ! brandenburg
-  let brandenburg = new PIXI.Sprite(PIXI.Texture.from("Art/pixelated_bbg.png"));
+  let brandenburg = new PIXI.Sprite(PIXI.Texture.from("Art/Title/brandenburg.png"));
   brandenburg.tint = 0x212b67;
   brandenburg.scale.set(6,6);
   brandenburg.anchor.set(0.5,0.5);
@@ -35,7 +35,7 @@ Game.prototype.initializeTitleScreen = function() {
   scene.addChild(brandenburg);
 
   // ! players
-  let right_player = new PIXI.Sprite(PIXI.Texture.from("Art/player_pixelated_v2.png"));
+  let right_player = new PIXI.Sprite(PIXI.Texture.from("Art/Title/player.png"));
   right_player.tint = 0x111b57;
   right_player.scale.set(4,4);
   right_player.anchor.set(0.5,0.5);
@@ -43,7 +43,7 @@ Game.prototype.initializeTitleScreen = function() {
   right_player.position.set(this.width / 2 + 314, this.height - 192);
   scene.addChild(right_player);
 
-  let left_player = new PIXI.Sprite(PIXI.Texture.from("Art/player_pixelated_v2.png"));
+  let left_player = new PIXI.Sprite(PIXI.Texture.from("Art/Title/player.png"));
   left_player.tint = 0x111b57;
   left_player.scale.set(-4,4);
   left_player.anchor.set(0.5,0.5);
@@ -52,7 +52,7 @@ Game.prototype.initializeTitleScreen = function() {
   scene.addChild(left_player);
 
   // ! word
-  let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/title_word_v5.png"));
+  let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_word.png"));
   title_word.anchor.set(0,0);
   title_word.position.set(320, 208);
   scene.addChild(title_word);
@@ -64,7 +64,7 @@ Game.prototype.initializeTitleScreen = function() {
     let fire = this.makeFire(scene, x - 2, y + 43, 0.32*1.25, 0.24*1.25);
     fire.animationSpeed = 0.2;
   }
-  let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/title_rockets_v5.png"));
+  let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_rockets.png"));
   title_rockets.anchor.set(0,0);
   title_rockets.position.set(512, 336);
   scene.addChild(title_rockets);
@@ -137,7 +137,7 @@ Game.prototype.initializeTitleScreen = function() {
 
   // all settings.
   // music on/off, sound on/off, keyboard layout, credits, sign in/out
-  let gear_button = new PIXI.Sprite(PIXI.Texture.from("Art/gear_button.png"));
+  let gear_button = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/gear_button.png"));
   gear_button.tint = 0x404040;
   gear_button.position.set(15, this.height - 65);
   gear_button.scale.set(0.5, 0.5);
@@ -182,11 +182,11 @@ Game.prototype.initializeTitleScreen = function() {
   music_button_container.scale.set(0.5, 0.5);
   settings_panel.addChild(music_button_container);
 
-  let music_button = new PIXI.Sprite(PIXI.Texture.from("Art/music_button.png"));
+  let music_button = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/music_button.png"));
   music_button.tint = 0x404040;
   music_button_container.addChild(music_button);
 
-  let music_button_no_bar = new PIXI.Sprite(PIXI.Texture.from("Art/no_bar.png"));
+  let music_button_no_bar = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/no_bar.png"));
   music_button_no_bar.tint = 0x404040;
   music_button_no_bar.visible = !use_music;
   music_button_container.addChild(music_button_no_bar);
@@ -204,11 +204,11 @@ Game.prototype.initializeTitleScreen = function() {
   sound_button_container.scale.set(0.5, 0.5);
   settings_panel.addChild(sound_button_container);
 
-  let sound_button = new PIXI.Sprite(PIXI.Texture.from("Art/sound_button.png"));
+  let sound_button = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/sound_button.png"));
   sound_button.tint = 0x404040;
   sound_button_container.addChild(sound_button);
 
-  let sound_button_no_bar = new PIXI.Sprite(PIXI.Texture.from("Art/no_bar.png"));
+  let sound_button_no_bar = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/no_bar.png"));
   sound_button_no_bar.tint = 0x404040;
   sound_button_no_bar.visible = !use_sound;
   sound_button_container.addChild(sound_button_no_bar);
@@ -231,7 +231,7 @@ Game.prototype.initializeTitleScreen = function() {
   keyboard_button_container.position.set(122, 0);
   settings_panel.addChild(keyboard_button_container);
 
-  let keyboard_icon = new PIXI.Sprite(PIXI.Texture.from("Art/keyboard_icon.png"));
+  let keyboard_icon = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/keyboard_icon.png"));
   keyboard_icon.scale.set(0.5, 0.5);
   keyboard_icon.anchor.set(0, 0);
   keyboard_icon.tint = 0x404040;
@@ -270,15 +270,7 @@ Game.prototype.initializeTitleScreen = function() {
     self.animateSceneSwitch("title", "credits");
   });
 
-  // let bar_three = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // bar_three.width = 1;
-  // bar_three.height = 50;
-  // bar_three.position.set(537,0);
-  // bar_three.tint = 0x404040;
-  // settings_panel.addChild(bar_three);
-
-
-  // putting this off to the right so it's always there.
+  // sign-in is off to the right so it's always visible.
   let mu = firebase.auth().currentUser;
   if (mu != null && mu.uid != null) {
     this.auth_user = mu;

@@ -45,8 +45,6 @@ Game.prototype.reset = function() {
     delay(function() {
       self.paused = false;
       self.pause_time = 0;
-      // STEVE HOLT
-      // self.start_time = Date.now();
       self.start_time = self.markTime();
       self.game_phase = "countdown";
       self.soundEffect("countdown");
@@ -59,7 +57,7 @@ Game.prototype.resetBoardBrowser = function() {
   var self = this;
   var scene = this.scenes["game"];
 
-  var background = new PIXI.Sprite(PIXI.Texture.from("Art/background_fourth_draft_1280.png"));
+  var background = new PIXI.Sprite(PIXI.Texture.from("Art/game_background.png"));
   background.anchor.set(0, 0);
   scene.addChild(background);
 
@@ -200,7 +198,6 @@ Game.prototype.resetBoardBrowser = function() {
   this.enemy_area.position.set(this.width * 1/2 + 325,340);
   this.enemy_area.scale.set(0.5,0.5);
 
-
   this.enemy_live_area = new PIXI.Container();
   scene.addChild(this.enemy_live_area);
   this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
@@ -281,8 +278,6 @@ Game.prototype.resetBoardBrowser = function() {
 
   this.setEnemyDifficulty(this.level);
 
-  // STEVE HOLT
-  // this.enemy_last_action = Date.now();
   this.enemy_last_action = this.markTime();
 
   this.gravity = 3.8;
@@ -311,32 +306,11 @@ Game.prototype.resetBoardBrowser = function() {
   this.escape_to_quit.visible = false;
   scene.addChild(this.escape_to_quit);
 
-
-  // this.press_enter_text = new PIXI.Text("TRY AGAIN?", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
-  // this.press_enter_text.anchor.set(0.5,0.5);
-  // this.press_enter_text.position.set(470, 403);
-  // this.press_enter_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  // scene.addChild(this.press_enter_text);
-  // this.press_enter_text.visible = false;
-
-  // let player_sheen = new PIXI.Sprite(PIXI.Texture.from("Art/sheen.png"));
-  // player_sheen.anchor.set(0, 0);
-  // player_sheen.position.set(129, 39);
-  // player_sheen.alpha = 0.15;
-  // scene.addChild(player_sheen);
-
   let player_monitor_mask = new PIXI.Graphics();
   player_monitor_mask.beginFill(0xFF3300);
   player_monitor_mask.drawRect(129, 39, 669, 504);
   player_monitor_mask.endFill();
   this.player_area.mask = player_monitor_mask;
-
-  // let enemy_sheen = new PIXI.Sprite(PIXI.Texture.from("Art/sheen.png"));
-  // enemy_sheen.anchor.set(0, 0);
-  // enemy_sheen.position.set(894, 98);
-  // enemy_sheen.scale.set(0.5, 0.5);
-  // enemy_sheen.alpha = 0.15;
-  // scene.addChild(enemy_sheen);
 
   let enemy_monitor_mask = new PIXI.Graphics();
   enemy_monitor_mask.beginFill(0xFF3300);
@@ -358,7 +332,6 @@ Game.prototype.setEnemyDifficulty = function(level) {
     med_word = 5;
     max_word = 8;
   } else if (this.difficulty_level == "MEDIUM") {
-    // scale = 1.25;
     scale = 0.8;
     min_word = 4;
     med_word = 7;
@@ -447,7 +420,6 @@ Game.prototype.spellingHelp = function() {
     } else {
       this.spelling_help.text = "";
     }
-    // this.spelling_help.visible = true;
   }
 }
 
@@ -457,8 +429,6 @@ Game.prototype.updateAnnouncement = function() {
   var scene = this.scenes["game"];
 
   if (this.game_phase == "countdown" && !this.paused) {
-    // STEVE HOLT
-    // let time_remaining = (2400 - (Date.now() - this.start_time)) / 800;
     let time_remaining = (2400 - (this.timeSince(this.start_time))) / 800;
     this.announcement.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
@@ -507,8 +477,6 @@ Game.prototype.shakeDamage = function() {
       if (item.permanent_x == null) item.permanent_x = item.position.x;
       if (item.permanent_y == null) item.permanent_y = item.position.y;
       item.position.set(item.permanent_x - 3 + Math.random() * 6, item.permanent_y - 3 + Math.random() * 6)
-      // STEVE HOLT
-      //if (Date.now() - item.shake >= 150) {
       if (this.timeSince(item.shake) >= 150) {
         item.shake = null;
         item.position.set(item.permanent_x, item.permanent_y)
@@ -561,8 +529,6 @@ Game.prototype.coolHotKeys = function() {
     let letter = letter_array[i];
     let key = this.player_palette.letters[letter];
     if (key.playable == false && !this.player_defense.includes(letter)) {
-      // STEVE HOLD
-      //let v = Date.now() - key.disable_time - this.disabledTime(letter);
       let v = this.timeSince(key.disable_time + this.disabledTime(letter));
       if (v > -500) {
         let portion = Math.min(1,(v + 500) / 500);
@@ -598,8 +564,6 @@ Game.prototype.enemyAction = function() {
   }
 
   if (this.game_phase == "active" && this.enemy_bombs > 0) {
-    // count items in the play area and pull a panic bomb if there are lots
-    // or if the closest one is darned close.
     let closest_player_rocket_y = -1000;
     let enemy_rocket_count = 0;
     let player_rocket_count = 0;
@@ -779,7 +743,6 @@ Game.prototype.checkEndCondition = function(bypass = false) {
       this.announcement.style.fontSize = 36;
       if (player_dead === true || bypass === true) { //regardless of whether enemy is dead
         this.announcement.text = "GAME OVER";
-        // this.press_enter_text.visible = true;
         this.stopMusic();
         this.soundEffect("game_over");
         delay(function() {
@@ -938,8 +901,6 @@ Game.prototype.checkRocketCollisions = function() {
       if (rocket_1.column == rocket_2.column && rocket_1.parent == rocket_2.parent) {
         if ((rocket_1.status == "rocket" || rocket_1.status == "load") && rocket_2.status == "descent"
           && rocket_1.position.y < rocket_2.position.y) {
-          // blooie
-          // this.soundEffect("fart");
           if (Math.random() * 100 < 50) {
             this.soundEffect("explosion_1");
           } else {
@@ -990,12 +951,8 @@ Game.prototype.checkRocketCollisions = function() {
           }
 
           if (rocket_1.player == 1) {
-            // STEVE HOLT
-            //this.player_area.shake = Date.now();
             this.player_area.shake = this.markTime();
           } else if (rocket_1.player == 2) {
-            // STEVE HOLT
-            //this.enemy_area.shake = Date.now();
             this.enemy_area.shake = this.markTime();
           }
         }
@@ -1093,8 +1050,6 @@ Game.prototype.checkRocketAttacks = function() {
                 if (self.player_palette.letters[disabled_letter].playable === true) {
                   self.player_palette.letters[disabled_letter].disable();
                   self.player_palette.letters[disabled_letter].playable = false;
-                  // STEVE HOLT
-                  // scene.shake = Date.now();
                   scene.shake = self.markTime();
                   self.soundEffect("explosion_3");
 

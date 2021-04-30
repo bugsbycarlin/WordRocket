@@ -1,6 +1,6 @@
 
 class Launchpad {
-  constructor(game, parent, player, x, y, outer_size, inner_size, use_picker = false) {
+  constructor(game, parent, player, x, y, outer_size, inner_size) {
     this.tiles = [];
     this.cursor = 0;
     this.shift = 0;
@@ -15,8 +15,6 @@ class Launchpad {
     this.outer_size = outer_size;
     this.inner_size = inner_size;
     this.gap = this.outer_size - this.inner_size;
-
-    this.use_picker = use_picker;
 
     this.x = x;
     this.y = y;
@@ -56,25 +54,12 @@ class Launchpad {
     launchpad_mask.endFill();
     this.pad.mask = launchpad_mask;
 
-
-    // red underline of course
-    // this.red_underlines = [];
-    // for (var i = 0; i < board_width; i++) {
-    //   this.red_underlines[i] = new PIXI.Sprite(PIXI.Texture.from("Art/underline.png"));
-    //   this.red_underlines[i].anchor.set(0.5, 0.5);
-    //   this.red_underlines[i].scale.set(0.625,0.3125);
-    //   this.red_underlines[i].position.set(this.xi(this.cursor + this.shift + i), 6)
-    //   this.pad.addChild(this.red_underlines[i]);
-    //   this.red_underlines[i].visible = false;
-    // }
-
     this.underline_text = new PIXI.Text("TOO SHORT", {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xc16363, letterSpacing: 6, align: "center"});
     this.underline_text.position.set(5 * this.outer_size, 16);
     this.underline_text.anchor.set(0.5,0.5);
     this.pad.addChild(this.underline_text);
     this.underline_text.visible = false;
 
-    //this.shiftSet(board_width / 2 - 2);
   }
 
 
@@ -86,7 +71,6 @@ class Launchpad {
   word() {
     var word = "";
     for (var i = 0; i < this.tiles.length; i++) {
-      //word += this.tiles[i].text.text;
       word += this.tiles[i].text;
     }
     return word;
@@ -95,8 +79,6 @@ class Launchpad {
 
   flashError = function(){
     this.game.soundEffect("negative");
-    // STEVE HOLT
-    // this.error = Date.now();
     this.error = this.game.markTime();
     this.pad_mat.tint = 0xdb5858;
   }
@@ -104,8 +86,6 @@ class Launchpad {
 
   checkError = function(){
     if (this.error != null) {
-      // STEVE HOLT
-      //if (Date.now() - this.error >= 150) {
       if (this.game.timeSince(this.error) >= 150) {
         this.error = null;
         this.pad_mat.tint = 0x000000; //0x2c3130;
@@ -115,13 +95,11 @@ class Launchpad {
 
 
   full() {
-    // return this.wordSize() + this.shift >= board_width;
     return this.wordSize() >= board_width;
   }
 
 
   xi(number) {
-    //return this.x + this.gap / 2 + this.outer_size * (number) + this.inner_size / 2;
     return this.gap / 2 + this.outer_size * (number) + this.inner_size / 2;
   }
 
@@ -130,11 +108,9 @@ class Launchpad {
     var target_x = this.xi(this.cursor + this.shift);
     var target_y = this.y - this.outer_size + this.inner_size / 2;
 
-    // these will be wrong
     var start_x = (palette.letters[letter].position.x + palette.position.x - this.parent.position.x) / this.parent.scale.x;
     var start_y = (palette.letters[letter].position.y + palette.position.y - this.parent.position.y) / this.parent.scale.y;
 
-    //var tile = game.makePixelatedTile(this.parent, start_x, start_y, letter, this.inner_size, this.inner_size, this.inner_size, 0xFFFFFF, "", function() {});
     var tile = game.makePixelatedLetterTile(this.parent, letter, "white");
     tile.text = letter;
     tile.parent = this.parent;
@@ -145,54 +121,11 @@ class Launchpad {
 
     this.checkWord();
 
-    if (!this.use_picker) {
-      tile.position.set(-100, target_y);
-      new TWEEN.Tween(tile.position)
-        .to({x: target_x})
-        .duration(this.picker_speed)
-        .start()
-    } else {
-      var picker = new PIXI.Sprite(PIXI.Texture.from("Art/picker_v1.png"));
-      picker.position.set(24, 0);
-      picker.anchor.set(1, 0.5);
-      tile.addChild(picker);
-
-      if (Math.abs(target_x - start_x) < Math.abs(target_y - start_y)) {
-        var diff = start_y - Math.abs(start_x - target_x);
-        var first = Math.sqrt(2)*Math.abs(start_x - target_x);
-        var second = Math.abs(diff - target_y);
-        new TWEEN.Tween(tile.position)
-          .to({x: target_x, y: diff})
-          .duration(this.picker_speed * first / (first + second))
-          .chain(new TWEEN.Tween(tile.position)
-            .to({y: target_y})
-            .duration(this.picker_speed * second / (first + second))
-            .chain(new TWEEN.Tween(picker.position)
-              .to({x: -1 * target_x})
-              .duration(100)
-              .onComplete(function() {tile.removeChild(picker)})
-            )
-          )
-          .start()
-      } else {
-        var diff = start_x - Math.abs(start_y - target_y) * (target_x < start_x ? 1 : -1);
-        var first = Math.sqrt(2)*Math.abs(start_y - target_y);
-        var second = Math.abs(diff - target_x);
-        new TWEEN.Tween(tile.position)
-          .to({x: diff, y: target_y})
-          .duration(this.picker_speed * first / (first + second))
-          .chain(new TWEEN.Tween(tile.position)
-            .to({x: target_x})
-            .duration(this.picker_speed * second / (first + second))
-            .chain(new TWEEN.Tween(picker.position)
-              .to({x: -1 * target_x})
-              .duration(100)
-              .onComplete(function() {tile.removeChild(picker)})
-            )
-          )
-          .start()
-      }
-    }
+    tile.position.set(-100, target_y);
+    new TWEEN.Tween(tile.position)
+      .to({x: target_x})
+      .duration(this.picker_speed)
+      .start()
 
     if (this.wordSize() + this.shift > board_width) {
       this.smallShiftLeft();
@@ -340,7 +273,6 @@ class Launchpad {
       game.played_words[word] = 1;
       for (var i = 0; i < this.tiles.length; i++) {
         var pad_item = this.tiles[i];
-        // var letter = pad_item.text.text;
         var letter = pad_item.text;
 
         if (pad_item.broken === false) {
@@ -353,7 +285,6 @@ class Launchpad {
 
       this.tiles = [];
       this.cursor = 0;
-      //this.shiftSet(board_width / 2 - 2);
     } else {
       this.flashError();
     }

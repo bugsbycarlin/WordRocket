@@ -593,6 +593,8 @@ Game.prototype.enemyAction = function() {
   } else {
     console.log(this.timeSince(this.enemy_last_action));
     this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_wpm) - 0.4 * Math.random() * 60000/this.enemy_wpm);
+    this.score += 1;
+    this.score_text_box.text = this.score;
   }
 
   if (this.game_phase == "active" && this.enemy_bombs > 0) {
@@ -752,7 +754,7 @@ Game.prototype.explodeArea = function(area, player_number) {
 }
 
 
-Game.prototype.checkEndCondition = function() {
+Game.prototype.checkEndCondition = function(bypass = false) {
   var self = this;
   if (this.game_phase == "active") {
     let player_dead = true;
@@ -772,16 +774,23 @@ Game.prototype.checkEndCondition = function() {
     if (this.enemy_defense.length == 0) enemy_dead = false;
 
 
-    if (enemy_dead === true || player_dead === true) {
+    if (enemy_dead === true || player_dead === true || bypass === true) {
+      console.log("we ded");
       this.announcement.style.fontSize = 36;
-      if (player_dead == true) { //regardless of whether enemy is dead
+      if (player_dead === true || bypass === true) { //regardless of whether enemy is dead
         this.announcement.text = "GAME OVER";
         // this.press_enter_text.visible = true;
         this.stopMusic();
         this.soundEffect("game_over");
         delay(function() {
-          self.initializeSetupSingleScene();
-          self.animateSceneSwitch("game", "setup_single");
+          let low_high = self.high_scores["individual"][self.difficulty_level.toLowerCase()][9];
+          if (low_high == null || low_high.score < self.score) {
+            self.initializeHighScoreScene(self.score);
+            self.animateSceneSwitch("game", "high_score_scene");
+          } else {
+            self.initializeSetupSingleScene();
+            self.animateSceneSwitch("game", "setup_single");
+          }
         }, 4000);
       } else if (enemy_dead == true) {
         this.announcement.text = "VICTORY!";

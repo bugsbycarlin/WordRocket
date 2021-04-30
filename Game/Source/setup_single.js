@@ -93,35 +93,23 @@ Game.prototype.initializeSetupSingleScene = function() {
       self.difficulty_choice = i;
       self.option_markers[self.difficulty_choice].tint = 0x75d3fe;
       self.option_info.setPartial(self.option_info_values[self.difficulty_choice].toUpperCase());
+      self.updateHighScoreDisplay();
     });
     scene.addChild(this.option_markers[i]);
   }
 
 
-  let local_high_scores_label = new PIXI.Text("Local Best", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  let local_high_scores_label = new PIXI.Text("Local High Scores", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   local_high_scores_label.anchor.set(0,0.5);
-  local_high_scores_label.position.set(228,450);
+  local_high_scores_label.position.set(180,420);
   scene.addChild(local_high_scores_label);
 
-  for (let i = 1; i <= 9; i++) {
-    let lhs = new PIXI.Text(i + ".------ --------", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
-    lhs.anchor.set(0,0.5);
-    lhs.position.set(180,490 + 24*(i-1));
-    scene.addChild(lhs);
-  }
-
-
-  let global_high_scores_label = new PIXI.Text("Global Best", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
-  global_high_scores_label.anchor.set(1,0.5);
-  global_high_scores_label.position.set(1074,450);
+  let global_high_scores_label = new PIXI.Text("Global High Scores", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  global_high_scores_label.anchor.set(0,0.5);
+  global_high_scores_label.position.set(703,420);
   scene.addChild(global_high_scores_label);
 
-  for (let i = 1; i <= 9; i++) {
-    let ghs = new PIXI.Text(i + ".------ --------", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
-    ghs.anchor.set(0,0.5);
-    ghs.position.set(703,490 + 24*(i-1));
-    scene.addChild(ghs);
-  }
+  this.updateHighScoreDisplay();
 
   let go_button = new PIXI.Text("GO?", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   go_button.anchor.set(0.5,0.5);
@@ -131,6 +119,7 @@ Game.prototype.initializeSetupSingleScene = function() {
   go_button.buttonMode = true;
   go_button.on("pointertap", function() {
     self.difficulty_level = self.option_values[self.difficulty_choice];
+    localStorage.setItem("word_rockets_difficulty_level", self.difficulty_level);
     self.initializeSinglePlayerScene();
     self.animateSceneSwitch("setup_single", "game");
   });
@@ -153,4 +142,48 @@ Game.prototype.setupSingleUpdate = function(diff) {
   var scene = this.scenes["setup_single"];
 
   this.option_info.updatePartial();
+}
+
+Game.prototype.updateHighScoreDisplay = function() {
+  console.log("updating high score display");
+  var self = this;
+  var scene = this.scenes["setup_single"];
+
+  for (let i = 0; i <= this.lhs.length; i++) {
+    scene.removeChild(this.lhs[i]);
+  }
+  for (let i = 0; i <= this.ghs.length; i++) {
+    scene.removeChild(this.ghs[i]);
+  }
+
+  let difficulty = this.option_values[this.difficulty_choice].toLowerCase();
+
+  this.lhs = [];
+  for (let i = 0; i <= 9; i++) {
+    let text = (i+1) + ".------ --------";
+    let entry = this.high_scores["individual"][difficulty][i]
+    if (entry != null) {
+      console.log(entry);
+      text = (i+1) + "." + entry.name.padEnd(6) + " " + entry.score;
+    }
+    let lhs = new PIXI.Text(text, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+    lhs.anchor.set(0,0.5);
+    lhs.position.set(180,460 + 24*i);
+    scene.addChild(lhs);
+    this.lhs.push(lhs);
+  }
+
+  this.ghs = [];
+  for (let i = 0; i <= 9; i++) {
+    let text = (i+1) + ".------ --------";
+    let entry = this.high_scores["global"][difficulty][i]
+    if (entry != null) {
+      text = (i+1) + "." + entry.name.padEnd(6) + " " + entry.score;
+    }
+    let ghs = new PIXI.Text(text, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+    ghs.anchor.set(0,0.5);
+    ghs.position.set(703,460 + 24*i);
+    scene.addChild(ghs);
+    this.ghs.push(ghs);
+  }
 }

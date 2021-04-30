@@ -36,6 +36,17 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
 
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    // User is signed in.
+    console.log("I AM USARIO");
+    console.log(user);
+  } else {
+    // No user is signed in.
+    console.log("i am nobs");
+  }
+});
+
 
 class Game {
   constructor() {
@@ -57,7 +68,17 @@ class Game {
     this.paused = false;
     this.pause_time = 0;
 
-    this.difficulty_choice = 0;
+    this.difficulty_level = localStorage.getItem("word_rockets_difficulty_level");
+    if (this.difficulty_level == null) {
+      this.difficulty_level = "EASY";
+      this.difficulty_choice = 0;
+    } else {
+      this.difficulty_choice = Math.max(0, ["EASY", "MEDIUM", "HARD", "BEACON"].indexOf(this.difficulty_level));
+    }
+
+    this.loadLocalHighScores();
+    this.lhs = [];
+    this.ghs = [];
 
     //this.resetTitle();
 
@@ -465,5 +486,76 @@ class Game {
 
   timeSince(mark) {
     return this.markTime() - mark;
+  }
+
+
+  loadLocalHighScores() {
+    var self = this;
+    this.high_scores = JSON.parse(localStorage.getItem("word_rockets_high_scores"));
+    if (this.high_scores == null) this.high_scores = {};
+
+    ["individual", "global"].forEach((val) => {
+      if (self.high_scores[val] == null) self.high_scores[val] = {};
+      ["easy", "medium", "hard", "beacon"].forEach((val2) => {
+        if (self.high_scores[val][val2] == null) self.high_scores[val][val2] = [];
+      });
+    })
+  }
+
+
+  blendHighScores(callback) {
+    var self = this;
+    // load in cloud
+    this.cloud_high_scores = {};
+    this.multiplayer.getGlobalHighScores(function(value) {
+      self.cloud_high_scores["global"] = value
+      self.multiplayer.getIndividualHighScores(function(value) {
+        self.cloud_high_scores["individual"] = value
+
+        console.log(self.cloud_high_scores["global"]);
+        console.log(self.cloud_high_scores["individual"]);
+
+        ["individual", "global"].forEach((val) => {
+          if (self.cloud_high_scores[val] == null) self.cloud_high_scores[val] = {};
+          ["easy", "medium", "hard", "beacon"].forEach((val2) => {
+            if (self.cloud_high_scores[val][val2] == null) self.cloud_high_scores[val][val2] = [];
+          });
+        })
+
+        // blend scores
+        // I think I can skip global blending, just straight overwriting.
+        self.high_scores["global"] = self.cloud_high_scores["global"];
+        ["easy", "medium", "hard", "beacon"].forEach((val) => {
+          addDedupeSort(self.high_scores["individual"][val], self.cloud_high_scores["individual"][val]);
+        });
+
+        // save all scores locally, and save individual scores to the cloud
+        localStorage.setItem("word_rockets_high_scores", JSON.stringify(this.high_scores));
+        self.multiplayer.saveIndividualHighScores(self.high_scores["individual"], function() {});
+
+        callback();
+
+        console.log("done blending local and cloud high scores");
+      })
+    });
+  }
+
+ 
+  addHighScore(name, score, callback) {
+    console.log(name);
+    console.log(score);
+    let diff = this.difficulty_level.toLowerCase();
+    addDedupeSort(this.high_scores["individual"][diff], [{name: name, score: score}]);
+    localStorage.setItem("word_rockets_high_scores", JSON.stringify(this.high_scores));
+
+    // let low_high = self.high_scores["global"][diff][9];
+    //       console.log(self.difficulty_level.toLowerCase());
+    //       console.log(self.high_scores["individual"][self.difficulty_level.toLowerCase()]);
+    //       console.log(low_high);
+    //       if (low_high == null || low_high.score < self.score) {
+
+    this.multiplayer.saveIndividualHighScores(this.high_scores["individual"], function() {
+      callback();
+    });
   }
 }

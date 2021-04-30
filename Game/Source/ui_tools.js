@@ -707,6 +707,7 @@ Game.prototype.initializeScenes = function() {
   this.makeScene("title");
   this.makeScene("setup_single");
   this.makeScene("cutscene");
+  this.makeScene("high_score_scene");
   this.makeScene("game");
   this.makeScene("credits");
   this.scenes["title"].position.x = 0;

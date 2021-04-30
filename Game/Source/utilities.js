@@ -111,6 +111,24 @@ function resumeAllDelays() {
 }
 
 
+function addDedupeSort(some_list, other_list) {
+  other_list.forEach((score) => {
+    let dupe = false;
+    some_list.forEach((score2) => {
+      if (score.name == score2.name && score.score == score2.score) {
+        dupe = true;
+      }
+    });
+    if (!dupe) {
+      some_list.push(score);
+    }
+    some_list.sort(function comp(a, b) {
+      return (a.score < b.score || a.score == b.score && b.name < a.name) ? 1 : -1;
+    })
+  });
+}
+
+
 // randomCode() {
 //   var characters = "abcdefghijklmnopqrstuvwxyz";
 //   var word = "";

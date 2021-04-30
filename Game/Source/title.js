@@ -80,7 +80,11 @@ Game.prototype.initializeTitleScreen = function() {
   tutorial_button.on("pointerdown", function() {
     self.tutorial = true;
     self.difficulty_level = "EASY";
+    if (self.multiplayer.uid == null) {
+      self.multiplayer.anonymousSignIn(function() {});
+    }
     self.initializeSinglePlayerScene();
+    self.blendHighScores(function() {});
     self.animateSceneSwitch("title", "game");
   });
 
@@ -93,7 +97,11 @@ Game.prototype.initializeTitleScreen = function() {
   new_game_button.buttonMode = true;
   new_game_button.on("pointerdown", function() {
     self.tutorial = false;
+    if (self.multiplayer.uid == null) {
+      self.multiplayer.anonymousSignIn(function() {});
+    }
     self.initializeSetupSingleScene();
+    self.blendHighScores(self.updateHighScoreDisplay());
     self.animateSceneSwitch("title", "setup_single");
     // self.initializeCutscene();
     // self.animateSceneSwitch("title", "cutscene");
@@ -108,7 +116,9 @@ Game.prototype.initializeTitleScreen = function() {
   multi_button.buttonMode = true;
   multi_button.on("pointerdown", function() {
     // TO DO: multiplayer
-    self.multiplayer.testCall();
+    self.blendHighScores(function() {});
+    self.initializeHighScoreScene(10300);
+    self.animateSceneSwitch("title", "high_score_scene");
   });
 
   // ! black bars
@@ -269,6 +279,12 @@ Game.prototype.initializeTitleScreen = function() {
 
 
   // putting this off to the right so it's always there.
+  let mu = firebase.auth().currentUser;
+  if (mu != null && mu.uid != null) {
+    this.auth_user = mu;
+    this.multiplayer.uid = mu.uid;
+  }
+
   this.sign_in_button = new PIXI.Text(this.auth_user == null ? "SIGN-IN" : "SIGN-OUT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
   this.sign_in_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.sign_in_button.anchor.set(0,0);

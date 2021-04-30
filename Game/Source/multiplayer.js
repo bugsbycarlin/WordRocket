@@ -7,46 +7,116 @@ class Multiplayer {
     this.game = game;
   }
 
+  getGlobalHighScores(yes_callback) {
+    var self = this;
+    this.database.ref("/high_scores/global").once("value").then((result) => {
+      if (result.exists()) {
+        console.log(result.val());
+        yes_callback(result.val());
+      } else {
+        console.log("Could not look up global high scores");
+      }
+    }).catch((error) => {
+      console.log("Error looking up global high scores.");
+      console.log(error);
+    });;
+  }
+
+
+  getIndividualHighScores(yes_callback) {
+    var self = this;
+    if (this.uid == null) {
+      console.log("Skipping getting individual high scores because not signed in");
+      let x = {}
+      yes_callback(x);
+      return;
+    }
+    this.database.ref("/high_scores/individual/" + this.uid).once("value").then((result) => {
+      if (result.exists()) {
+        console.log(result.val());
+        yes_callback(result.val());
+      } else {
+        console.log("Could not look up individual high scores");
+      }
+    }).catch((error) => {
+      console.log("Error looking up individual high scores.");
+      console.log(error);
+    });;
+  }
+
+
+  saveIndividualHighScores(scores, callback) {
+    var self = this;
+    if (this.uid == null) {
+      console.log("Skipping saving individual high scores because not signed in");
+      return;
+    }
+    
+    this.database.ref("high_scores/individual/" + this.uid).update(scores, (error) => {
+      if (error) {
+        console.log("Failed to save individual high scores to the cloud.");
+        console.log(error);
+      } else {
+        console.log("Saved individual high scores to the cloud.");
+        callback();
+      }
+    });
+  }
+
+
+  saveGlobalHighScores(scores, callback) {
+    var self = this;
+
+    let can_save = true;
+    ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
+      for (var i = 0; i < 50; i++) {
+        if (scores[difficulty][i] == null || scores[difficulty][i].score < 5000 - 100 * i) {
+          console.log("High scores does not have element " + i);
+          can_save = false;
+        }
+        
+      }
+    });
+    
+    if(!can_save) {
+      return;
+    }
+    this.database.ref("high_scores/global").update(scores, (error) => {
+      if (error) {
+        console.log("Failed to save global high scores to the cloud.");
+        console.log(error);
+      } else {
+        console.log("Saved global high scores to the cloud.");
+        callback();
+      }
+    });
+  }
+
+
   testCall() {
+    var self = this;
+
     if (this.uid == null) {
       console.log("can't make call if not signed in");
       return;
     }
 
-    // let difficulty = "beacon";
-    // let high_scores = {}
-    // high_scores["1"] = {
-    //   "name": "STEVE",
-    //   "score": 44020,
-    // };
-    // high_scores["2"] = {
-    //   "name": "JAMES",
-    //   "score": 43400,
-    // };
-    // high_scores["3"] = {
-    //   "name": "JIMBO",
-    //   "score": 12000,
-    // };
-    // this.database.ref("high_scores/local/" + this.uid + "/" + difficulty).update(high_scores);
-
-    let difficulty = "hard";
-    let high_scores = {}
-    high_scores["1"] = {
-      "name": "STEVE",
-      "score": 44020,
-      "uid": "stenbord-steinsteen",
-    };
-    high_scores["2"] = {
-      "name": "JAMES",
-      "score": 43400,
-      "uid": this.uid,
-    };
-    high_scores["3"] = {
-      "name": "JIMBO",
-      "score": 12000,
-      "uid": this.uid,
-    };
-    this.database.ref("high_scores/global/" + difficulty).update(high_scores);
+    ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
+      let high_scores = {}
+      for (var i = 0; i < 50; i++) {
+        let name = ""
+        for(var j = 0; j < 8; j++) {
+          let t = namez[Math.floor(Math.random() * namez.length)].split(" ")[0];
+          if(t.length <= 6) name = t.toUpperCase();
+        }
+        high_scores[i] = {
+          name: name,
+          score: 5500 - 100 * i - Math.floor(Math.random() * 30),
+          uid: self.generateGameCode() + self.generateGameCode() + self.generateGameCode() + self.generateGameCode(),
+        }
+      }
+      this.database.ref("high_scores/global/" + difficulty).update(high_scores);
+    });
   }
 
 

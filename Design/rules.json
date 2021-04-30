@@ -16,7 +16,7 @@
     "high_scores": {
       ".read": "auth != null",
       ".write": "!data.exists() && auth != null",
-      "local": {
+      "individual": {
         "$uid": {
           ".read": "$uid === auth.uid",
           ".write": "$uid === auth.uid",
@@ -40,7 +40,7 @@
         },
       },
       "global": {
-        ".read": "auth != null",
+        ".read": true,
         ".write": "auth != null",
         "$difficulty": {
           ".validate": "$difficulty === 'easy' || $difficulty === 'medium' || $difficulty === 'hard' || $difficulty === 'beacon'",

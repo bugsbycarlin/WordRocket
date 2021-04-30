@@ -125,9 +125,40 @@ Game.prototype.bombAction = function() {
 }
 
 
-Game.prototype.pressKey = function(key) {
-  if (key in this.player_palette.keys) {
-    let keyboard_key = this.player_palette.keys[key];
+Game.prototype.highScoreKey = function(letter) {
+  let self = this;
+  if (this.high_score_name_cursor <= 5) {
+    this.high_score_name[this.high_score_name_cursor].text = letter;
+    this.high_score_name_cursor += 1;
+  }
+}
+
+
+Game.prototype.highScoreDelete = function() {
+  if (this.high_score_name_cursor > 0) {
+    this.high_score_name_cursor -= 1;
+    this.high_score_name[this.high_score_name_cursor].text = "";
+  }
+}
+
+
+Game.prototype.highScoreEnter = function() {
+  var self = this;
+  this.high_score_state = "finished";
+  let name = "";
+  for (var i = 0; i < 6; i++) {
+    name += this.high_score_name[i].text;
+  }
+  this.addHighScore(name, this.new_high_score, function() {
+    self.initializeSetupSingleScene();
+    self.animateSceneSwitch("high_score_scene", "setup_single");
+  })
+}
+
+
+Game.prototype.pressKey = function(palette, key) {
+  if (key in palette.keys) {
+    let keyboard_key = palette.keys[key];
     let click_sound = "keyboard_click_" + ((key.charCodeAt(0) % 5)+1).toString();
     this.soundEffect(click_sound, 1.0);
     if (keyboard_key.key_pressed != true) {
@@ -164,7 +195,7 @@ Game.prototype.handleKeyDown = function(ev) {
         if (ev.code == "ShiftLeft") key = "LShift";
         if (ev.code == "ShiftRight") key = "RShift";
       }
-      this.pressKey(key);
+      this.pressKey(this.player_palette, key);
 
       if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
         this.tutorial2();
@@ -210,11 +241,12 @@ Game.prototype.handleKeyDown = function(ev) {
     }
 
     if (ev.key === "Tab" && (this.game_phase == "active" || this.game_phase == "countdown")) {
-      if (this.paused) {
-        this.resume();
-      } else {
-        this.pause();
-      }
+      // if (this.paused) {
+      //   this.resume();
+      // } else {
+      //   this.pause();
+      // }
+      this.checkEndCondition(true);
     }
 
     if (this.paused && ev.key === "Escape") {
@@ -231,14 +263,16 @@ Game.prototype.handleKeyDown = function(ev) {
       this.difficulty_choice = (this.difficulty_choice + 1) % 4;
       this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
       this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
-
+      this.updateHighScoreDisplay();
     } else if (ev.key === "ArrowLeft") {
       this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
       this.difficulty_choice = (this.difficulty_choice + 3) % 4;
       this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
       this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
+      this.updateHighScoreDisplay();
     } else if (ev.key === "Enter") {
       this.difficulty_level = this.option_values[this.difficulty_choice];
+      localStorage.setItem("word_rockets_difficulty_level", this.difficulty_level);
       this.initializeSinglePlayerScene();
       this.animateSceneSwitch("setup_single", "game");
     } else if (ev.key == "Escape") {
@@ -251,6 +285,33 @@ Game.prototype.handleKeyDown = function(ev) {
       this.right_shark_tween.stop();
       this.initializeTitleScreen();
       this.animateSceneSwitch("credits", "title");
+    }
+  } else if (this.current_scene == "high_score_scene") {
+    let key = ev.key;
+    if (key == "Shift") {
+      if (ev.code == "ShiftLeft") key = "LShift";
+      if (ev.code == "ShiftRight") key = "RShift";
+    }
+
+    this.pressKey(this.high_score_palette, key);
+
+    if (this.high_score_state == "entry") {
+      for (i in lower_array) {
+        if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
+          //this.keyAction(letter_array[i]);
+          this.highScoreKey(letter_array[i]);
+        }
+      }
+
+      if (ev.key === "Backspace" || ev.key === "Delete") {
+        //this.deleteAction();
+        this.highScoreDelete();
+      }
+
+      if (ev.key === "Enter") {
+        //this.enterAction();
+        this.highScoreEnter();
+      }
     }
   }
 }

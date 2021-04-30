@@ -163,7 +163,6 @@ Game.prototype.updateHighScoreDisplay = function() {
     let text = (i+1) + ".------ --------";
     let entry = this.high_scores["individual"][difficulty][i]
     if (entry != null) {
-      console.log(entry);
       text = (i+1) + "." + entry.name.padEnd(6) + " " + entry.score;
     }
     let lhs = new PIXI.Text(text, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});

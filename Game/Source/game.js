@@ -542,20 +542,30 @@ class Game {
 
  
   addHighScore(name, score, callback) {
+    var self = this;
     console.log(name);
     console.log(score);
     let diff = this.difficulty_level.toLowerCase();
     addDedupeSort(this.high_scores["individual"][diff], [{name: name, score: score}]);
     localStorage.setItem("word_rockets_high_scores", JSON.stringify(this.high_scores));
 
-    // let low_high = self.high_scores["global"][diff][9];
-    //       console.log(self.difficulty_level.toLowerCase());
-    //       console.log(self.high_scores["individual"][self.difficulty_level.toLowerCase()]);
-    //       console.log(low_high);
-    //       if (low_high == null || low_high.score < self.score) {
-
-    this.multiplayer.saveIndividualHighScores(this.high_scores["individual"], function() {
+    let low_high = this.high_scores["global"][diff][9];
+    console.log(low_high);
+    console.log(this.high_scores["global"][diff]);
+    console.log(this.high_scores["global"][diff][9]);
+    if (low_high == null || low_high.score < score) {
+      addDedupeSort(this.high_scores["global"][diff], [{name: name, score: score, uid: this.multiplayer.uid}]);
+      console.log("hoss");
+      console.log(this.high_scores);
+      this.multiplayer.saveGlobalHighScores(this.high_scores["global"], function() {
+        self.multiplayer.saveIndividualHighScores(self.high_scores["individual"], function() {
+          callback();
+        });
+      });
+    } else {
+      this.multiplayer.saveIndividualHighScores(this.high_scores["individual"], function() {
       callback();
     });
+    }
   }
 }

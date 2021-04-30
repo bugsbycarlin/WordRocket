@@ -241,12 +241,12 @@ Game.prototype.handleKeyDown = function(ev) {
     }
 
     if (ev.key === "Tab" && (this.game_phase == "active" || this.game_phase == "countdown")) {
-      // if (this.paused) {
-      //   this.resume();
-      // } else {
-      //   this.pause();
-      // }
-      this.checkEndCondition(true);
+      if (this.paused) {
+        this.resume();
+      } else {
+        this.pause();
+      }
+      // this.checkEndCondition(true);
     }
 
     if (this.paused && ev.key === "Escape") {

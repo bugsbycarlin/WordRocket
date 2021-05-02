@@ -2,7 +2,7 @@
 
 Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box_top, box_right, box_bottom, text, text_x, text_y) {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   let tutorial_screen = new PIXI.Container();
   parent.addChild(tutorial_screen);
@@ -92,11 +92,11 @@ Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box
 
 Game.prototype.tutorial1 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   this.game_phase = "tutorial";
   this.tutorial_number = 1;
 
-  this.tutorial_screen = this.makeTutorialScreen(scene, 2000, 80, 656, 856, 953, "HERE IS A KEYBOARD. PLEASE START TYPING.", this.width / 2, 620);
+  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 80, 656, 856, 953, "HERE IS A KEYBOARD. PLEASE START TYPING.", this.width / 2, 620);
 
   this.tutorial_1_snide_clicks = 0;
   this.tutorial_1_snide_click_responses = [
@@ -117,7 +117,7 @@ Game.prototype.tutorial1 = function() {
 
 Game.prototype.tutorial2 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 1.5;
   this.tutorial_screen.tutorial_text.text = "GOOD.";
@@ -125,7 +125,7 @@ Game.prototype.tutorial2 = function() {
   delay(function() {
     self.tutorial_screen.fade(500);
     self.tutorial_number = 2;
-    self.tutorial_screen = self.makeTutorialScreen(scene, 500, 264, 479, 675, 535, "THIS IS THE LAUNCHPAD.", self.width / 2, 600);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 500, 264, 479, 675, 535, "THIS IS THE LAUNCHPAD.", self.width / 2, 600);
   }, 2000);
 
 
@@ -143,7 +143,7 @@ Game.prototype.tutorial2 = function() {
 
 Game.prototype.tutorial275 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   this.tutorial_conditions = {};
   this.tutorial_number = 2.75;
@@ -153,7 +153,7 @@ Game.prototype.tutorial275 = function() {
 
 Game.prototype.tutorial3 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 3;
   this.tutorial_screen.tutorial_text.text = "PRESS DELETE OR BACKSPACE TO DELETE A LETTER.";
@@ -162,7 +162,7 @@ Game.prototype.tutorial3 = function() {
 
 Game.prototype.tutorial35 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 3.5;
   this.tutorial_screen.tutorial_text.text = "PRESS ESCAPE TO DELETE THE WHOLE WORD.";
@@ -171,7 +171,7 @@ Game.prototype.tutorial35 = function() {
 
 Game.prototype.tutorial4 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 4;
   this.tutorial_screen.tutorial_text.text = "YOUR WORD MUST BE IN THE ENGLISH DICTIONARY.";
@@ -197,7 +197,7 @@ Game.prototype.tutorial4 = function() {
 
 Game.prototype.tutorial5 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 5;
   this.tutorial_screen.tutorial_text.text = "GO AHEAD. MAKE A WORD AND PRESS ENTER TO LAUNCH IT.";
@@ -206,76 +206,76 @@ Game.prototype.tutorial5 = function() {
 
 Game.prototype.tutorial6 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 6;
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 260, 30, 671, 531, "IT FLIES UP HERE...", 480, 275);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 260, 30, 671, 531, "IT FLIES UP HERE...", 480, 275);
   }, 500);
 }
 
 
 Game.prototype.tutorial7 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   console.log("I am in tutorial 7");
   
   this.tutorial_number = 7;
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 958, 92, 1168, 348, "COMES DOWN HERE...", 700+350, 200+152);
+  self.tutorial_screen = self.makeTutorialScreen(screen, 250, 958, 92, 1168, 348, "COMES DOWN HERE...", 700+350, 200+152);
 }
 
 
 Game.prototype.tutorial8 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   console.log("I am in tutorial 8");
   
   this.tutorial_number = 8;
   this.enemy_last_action = this.markTime();
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 867, 394, 1259, 548, "AND CRASHES INTO THE SOVIET'S KEYBOARD,\nTEMPORARILY DISABLING SOME KEYS.", 430+520, 500+66);
+  self.tutorial_screen = self.makeTutorialScreen(screen, 250, 867, 394, 1259, 548, "AND CRASHES INTO THE SOVIET'S KEYBOARD,\nTEMPORARILY DISABLING SOME KEYS.", 430+520, 500+66);
 }
 
 
 Game.prototype.tutorial9 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   console.log("I am in tutorial 9");
   
   this.tutorial_number = 9;
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(scene, 250, 958, 92, 1168, 348, "THE SOVIET WILL FIRE ROCKETS...", 700+250, 200+152);
+  self.tutorial_screen = self.makeTutorialScreen(screen, 250, 958, 92, 1168, 348, "THE SOVIET WILL FIRE ROCKETS...", 700+250, 200+152);
 }
 
 
 Game.prototype.tutorial10 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 10;
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 260, 30, 671, 531, "WHICH COME DOWN ON YOU!", 470, 275);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 260, 30, 671, 531, "WHICH COME DOWN ON YOU!", 470, 275);
   }, 500);
 }
 
 
 Game.prototype.tutorial11 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   
   this.tutorial_number = 11;
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 80, 656, 856, 953, "WHEN KEYS ARE DAMAGED, THEY'RE TEMPORARILY UNABLE TO MAKE ROCKETS.", self.width / 2, 620);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 80, 656, 856, 953, "WHEN KEYS ARE DAMAGED, THEY'RE TEMPORARILY UNABLE TO MAKE ROCKETS.", self.width / 2, 620);
   }, 500);
 
   delay(function() {
@@ -286,7 +286,7 @@ Game.prototype.tutorial11 = function() {
 
 Game.prototype.tutorial12 = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
   console.log("I am in tutorial 12");
   
   this.tutorial_number = 12;
@@ -295,19 +295,19 @@ Game.prototype.tutorial12 = function() {
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 867, 394, 1259, 548, "AND SO DOES THE SOVIET.", self.width / 2 + 50, 580);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 867, 394, 1259, 548, "AND SO DOES THE SOVIET.", self.width / 2 + 50, 580);
   }, 4000);
 
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 80, 656, 856, 953, "WHEN BLUE KEYS ARE HIT, THEY'RE PERMANENTLY DAMAGED.", self.width / 2, 620);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 80, 656, 856, 953, "WHEN BLUE KEYS ARE HIT, THEY'RE PERMANENTLY DAMAGED.", self.width / 2, 620);
   }, 8000);
 
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 264, 479, 675, 535, "HEY, GO GO GO! MAKE SOME WORDS!", self.width / 2, 600);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 264, 479, 675, 535, "HEY, GO GO GO! MAKE SOME WORDS!", self.width / 2, 600);
   }, 12000);
 
 
@@ -318,7 +318,7 @@ Game.prototype.tutorial12 = function() {
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(scene, 250, 0, 0, 0, 0, "OKAY. YOU GET THE IDEA, RIGHT?", self.width / 2, 600);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 0, 0, 0, 0, "OKAY. YOU GET THE IDEA, RIGHT?", self.width / 2, 600);
   }, 20000);
 
 

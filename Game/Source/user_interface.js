@@ -203,7 +203,7 @@ Game.prototype.makeKeyboard = function(options) {
         keyboard,
         k_x + size * 40, k_y, filename, size, function() { 
           if (player == 1) {
-            self.pressKey(letter);
+            self.pressKey(keyboard, letter);
             action(letter);
           }
         },
@@ -279,17 +279,17 @@ Game.prototype.makeKey = function(parent, x, y, filename, size, action) {
 //
 //
 
-Game.prototype.initializeScenes = function() {
+Game.prototype.initializeScreens = function() {
   var self = this;
-  this.scenes = [];
+  this.screens = [];
 
-  this.makeScene("title");
-  this.makeScene("setup_single");
-  this.makeScene("cutscene");
-  this.makeScene("high_score_scene");
-  this.makeScene("game");
-  this.makeScene("credits");
-  this.scenes["title"].position.x = 0;
+  this.makeScreen("title");
+  this.makeScreen("1p_lobby");
+  this.makeScreen("1p_game");
+  this.makeScreen("cutscene");
+  this.makeScreen("high_score");
+  this.makeScreen("credits");
+  this.screens["title"].position.x = 0;
 
   this.alertMask = new PIXI.Container();
   pixi.stage.addChild(this.alertMask);
@@ -298,49 +298,49 @@ Game.prototype.initializeScenes = function() {
 }
 
 
-Game.prototype.makeScene = function(name) {
-  this.scenes[name] = new PIXI.Container();
-  this.scenes[name].name = name;
-  this.scenes[name].position.x = this.width;
-  pixi.stage.addChild(this.scenes[name]);
+Game.prototype.makeScreen = function(name) {
+  this.screens[name] = new PIXI.Container();
+  this.screens[name].name = name;
+  this.screens[name].position.x = this.width;
+  pixi.stage.addChild(this.screens[name]);
 }
 
 
-Game.prototype.clearScene = function(scene) {
-  console.log("here i am cleaning " + scene.name);
-  while(scene.children[0]) {
-    let x = scene.removeChild(scene.children[0]);
+Game.prototype.clearScreen = function(screen) {
+  console.log("here i am cleaning " + screen.name);
+  while(screen.children[0]) {
+    let x = screen.removeChild(screen.children[0]);
     x.destroy();
   }
 }
 
 
-Game.prototype.animateSceneSwitch = function(old_scene, new_scene) {
+Game.prototype.switchScreens = function(old_screen, new_screen) {
   var self = this;
-  console.log("switching from " + old_scene + " to " + new_scene);
+  console.log("switching from " + old_screen + " to " + new_screen);
   var direction = -1;
-  if (new_scene == "title" || old_scene == "gameplay") direction = 1;
-  this.scenes[new_scene].position.x = direction * -1 * this.width;
-  for (var i = 0; i < this.scenes.length; i++) {
-    if (this.scenes[i] == new_scene || this.scenes[i] == old_scene) {
-      this.scenes[i].visible = true;
+  if (new_screen == "title") direction = 1;
+  this.screens[new_screen].position.x = direction * -1 * this.width;
+  for (var i = 0; i < this.screens.length; i++) {
+    if (this.screens[i] == new_screen || this.screens[i] == old_screen) {
+      this.screens[i].visible = true;
     } else {
-      this.scenes[i].visible = false;
-      this.clearScene(this.scenes[i]);
+      this.screens[i].visible = false;
+      this.clearScreen(this.screens[i]);
     }
   }
-  var tween_1 = new TWEEN.Tween(this.scenes[old_scene].position)
+  var tween_1 = new TWEEN.Tween(this.screens[old_screen].position)
     .to({x: direction * this.width})
     .duration(1000)
     .easing(TWEEN.Easing.Cubic.InOut)
-    .onComplete(function() {self.clearScene(self.scenes[old_scene]);})
+    .onComplete(function() {self.clearScreen(self.screens[old_screen]);})
     .start();
-  var tween_2 = new TWEEN.Tween(this.scenes[new_scene].position)
+  var tween_2 = new TWEEN.Tween(this.screens[new_screen].position)
     .to({x: 0})
     .duration(1000)
     .easing(TWEEN.Easing.Cubic.InOut)
     .start();
-  this.current_scene = new_scene;
+  this.current_screen = new_screen;
 }
 
 

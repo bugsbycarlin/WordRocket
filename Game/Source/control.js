@@ -150,8 +150,9 @@ Game.prototype.highScoreEnter = function() {
     name += this.high_score_name[i].text;
   }
   this.addHighScore(name, this.new_high_score, function() {
-    self.initializeSetupSingleScene();
-    self.animateSceneSwitch("high_score_scene", "setup_single");
+    console.log("hiyo");
+    self.initialize1pLobby();
+    self.switchScreens("high_score", "1p_lobby");
   })
 }
 
@@ -177,84 +178,88 @@ Game.prototype.pressKey = function(palette, key) {
 }
 
 
+Game.prototype.gameplayKeyDown = function(key) {
+  if (!this.paused) {
+    this.pressKey(this.player_palette, key);
+
+    if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
+      this.tutorial2();
+    }
+
+    for (i in lower_array) {
+      if (key === lower_array[i] || key === letter_array[i]) {
+        this.keyAction(letter_array[i]);
+      }
+    }
+
+    if (key === "Backspace" || key === "Delete") {
+      this.deleteAction();
+    }
+
+    if (key === "ArrowRight") {
+      this.rightArrowAction();
+    }
+
+    if (key === "ArrowLeft") {
+      this.leftArrowAction();
+    }
+
+    if (key === "RShift") {
+      this.rightShiftAction();
+    }
+
+    if (key === "LShift") {
+      this.leftShiftAction();
+    }
+
+    if (key === "Escape") {
+      this.clearAction();
+    }
+
+    if (key === " ") {
+      this.bombAction();
+    }
+
+    if (key === "Enter") {
+      this.enterAction();
+    }
+  }
+
+  if (key === "Tab" && (this.game_phase == "active" || this.game_phase == "countdown")) {
+    if (this.paused) {
+      this.resume();
+    } else {
+      this.pause();
+    }
+    // this.checkEndCondition(true); // for testing, switch to this to make tab force gameovers.
+  }
+
+  if (this.paused && key === "Escape") {
+    document.getElementById("countdown").hold_up = null;
+    this.game_phase = "none";
+    this.resume();
+    this.initialize1pLobby();
+    this.switchScreens("1p_game", "1p_lobby");
+  }
+}
+
 
 Game.prototype.handleKeyDown = function(ev) {
   if (ev.key == "Tab") {
     ev.preventDefault();
   }
 
-  if(this.current_scene == "game") {
+  if(this.current_screen == "1p_game") {
 
     let key = ev.key;
-
-    if (!this.paused) {
-      if (key == "Shift") {
-        if (ev.code == "ShiftLeft") key = "LShift";
-        if (ev.code == "ShiftRight") key = "RShift";
-      }
-      this.pressKey(this.player_palette, key);
-
-      if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
-        this.tutorial2();
-      }
-
-      for (i in lower_array) {
-        if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
-          this.keyAction(letter_array[i]);
-        }
-      }
-
-      if (ev.key === "Backspace" || ev.key === "Delete") {
-        this.deleteAction();
-      }
-
-      if (ev.key === "ArrowRight") {
-        this.rightArrowAction();
-      }
-
-      if (ev.key === "ArrowLeft") {
-        this.leftArrowAction();
-      }
-
-      if (ev.code === "ShiftRight") {
-        this.rightShiftAction();
-      }
-
-      if (ev.code === "ShiftLeft") {
-        this.leftShiftAction();
-      }
-
-      if (ev.key === "Escape") {
-        this.clearAction();
-      }
-
-      if (ev.key === " ") {
-        this.bombAction();
-      }
-
-      if (ev.key === "Enter") {
-        this.enterAction();
-      }
+    if (key == "Shift") {
+      if (ev.code == "ShiftLeft") key = "LShift";
+      if (ev.code == "ShiftRight") key = "RShift";
     }
 
-    if (ev.key === "Tab" && (this.game_phase == "active" || this.game_phase == "countdown")) {
-      if (this.paused) {
-        this.resume();
-      } else {
-        this.pause();
-      }
-      // this.checkEndCondition(true); // for testing, switch to this to make tab force gameovers.
-    }
+    this.gameplayKeyDown(key);
 
-    if (this.paused && ev.key === "Escape") {
-      document.getElementById("countdown").hold_up = null;
-      this.game_phase = "none";
-      this.resume();
-      this.initializeSetupSingleScene();
-      this.animateSceneSwitch("game", "setup_single");
-    }
-
-  } else if (this.current_scene == "setup_single") {
+  } else if (this.current_screen == "1p_lobby") {
     if (ev.key === "ArrowRight") {
       this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
       this.difficulty_choice = (this.difficulty_choice + 1) % 4;
@@ -270,20 +275,20 @@ Game.prototype.handleKeyDown = function(ev) {
     } else if (ev.key === "Enter") {
       this.difficulty_level = this.option_values[this.difficulty_choice];
       localStorage.setItem("word_rockets_difficulty_level", this.difficulty_level);
-      this.initializeSinglePlayerScene();
-      this.animateSceneSwitch("setup_single", "game");
+      this.initialize1pGame();
+      this.switchScreens("1p_lobby", "1p_game");
     } else if (ev.key == "Escape") {
-      this.initializeTitleScreen();
-      this.animateSceneSwitch("setup_single", "title");
+      this.initializeTitle();
+      this.switchScreens("1p_lobby", "title");
     }
-  } else if (this.current_scene == "credits") {
+  } else if (this.current_screen == "credits") {
     if (ev.key == "Escape") {
       this.left_shark_tween.stop();
       this.right_shark_tween.stop();
-      this.initializeTitleScreen();
-      this.animateSceneSwitch("credits", "title");
+      this.initializeTitle();
+      this.switchScreens("credits", "title");
     }
-  } else if (this.current_scene == "high_score_scene") {
+  } else if (this.current_screen == "high_score") {
     let key = ev.key;
     if (key == "Shift") {
       if (ev.code == "ShiftLeft") key = "LShift";

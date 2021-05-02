@@ -1,6 +1,6 @@
 
 
-Game.prototype.initializeSinglePlayerScene = function() {
+Game.prototype.initialize1pGame = function() {
   this.level = 1;
   this.score = 0;
 
@@ -14,8 +14,8 @@ Game.prototype.initializeSinglePlayerScene = function() {
 
 Game.prototype.reset = function() {
   var self = this;
-  var scene = this.scenes["game"];
-  this.clearScene(scene);
+  var screen = this.screens["1p_game"];
+  this.clearScreen(screen);
 
   this.freefalling = [];
   this.pickers = [];
@@ -29,13 +29,7 @@ Game.prototype.reset = function() {
   this.bomb_spawn_last = self.markTime();
   this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
 
-  if (this.device_type == "browser") {
-    this.resetBoardBrowser();
-  } else if (this.device_type == "iPad") {
-    this.resetBoardiPad();
-  } else if (this.device_type == "iPhone") {
-    this.resetBoardiPhone();
-  }
+  this.resetBoard();
 
   if (this.tutorial) {
     this.tutorial1();
@@ -53,17 +47,17 @@ Game.prototype.reset = function() {
 }
 
 
-Game.prototype.resetBoardBrowser = function() {
+Game.prototype.resetBoard = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   var background = new PIXI.Sprite(PIXI.Texture.from("Art/game_background.png"));
   background.anchor.set(0, 0);
-  scene.addChild(background);
+  screen.addChild(background);
 
   this.player_palette = this.makeKeyboard({
     player: 1,
-    parent: scene, x: 467, y: 807,
+    parent: screen, x: 467, y: 807,
     defense: this.player_defense, 
     action: function(letter) {
 
@@ -72,65 +66,13 @@ Game.prototype.resetBoardBrowser = function() {
         self.tutorial_1_snide_clicks += 1
       }
 
-      if (!self.paused) {
-        if (letter_array.includes(letter)) {
-          self.keyAction(letter);
-        }
-
-        if (letter === "RShift") {
-          self.rightShiftAction();
-        }
-
-        if (letter === "LShift") {
-          self.leftShiftAction();
-        }
-
-        if (letter === "Escape") {
-          self.clearAction();
-        }
-
-        if (letter == " ") {
-          self.bombAction();
-        }
-
-        if (letter === "Backspace") {
-          self.deleteAction();
-        }
-
-        if (letter === "ArrowRight") {
-          self.rightArrowAction();
-        }
-
-        if (letter === "ArrowLeft") {
-          self.leftArrowAction();
-        }
-
-        if (letter === "Enter") {
-          self.enterAction();
-        }
-      }
-
-      if (letter === "Tab" && (self.game_phase == "active" || self.game_phase == "countdown")) {
-        if (self.paused) {
-          self.resume();
-        } else {
-          self.pause();
-        }
-      }
-
-      if (self.paused && letter === "Escape") {
-        document.getElementById("countdown").hold_up = null;
-        self.game_phase = "none";
-        self.resume();
-        self.initializeSetupSingleScene();
-        self.animateSceneSwitch("game", "setup_single");
-      }
+      self.gameplayKeyDown(letter);
     }
   });
 
   this.enemy_palette = this.makeKeyboard({
     player: 2,
-    parent: scene, x: 1062.5, y: 472,
+    parent: screen, x: 1062.5, y: 472,
     defense: this.enemy_defense, 
     action: function(letter) {
     }
@@ -142,11 +84,11 @@ Game.prototype.resetBoardBrowser = function() {
 
   // the player's board
   this.player_area = new PIXI.Container();
-  scene.addChild(this.player_area);
+  screen.addChild(this.player_area);
   this.player_area.position.set(this.width * 1/2 - 370,520);
 
   this.player_live_area = new PIXI.Container();
-  scene.addChild(this.player_live_area);
+  screen.addChild(this.player_live_area);
   this.player_live_area.position.set(this.player_area.x, this.player_area.y);
   this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
 
@@ -174,7 +116,7 @@ Game.prototype.resetBoardBrowser = function() {
     let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
     mouse_button.anchor.set(0, 0);
     mouse_button.position.set(962.5 + 39.25*i, 741);
-    scene.addChild(mouse_button);
+    screen.addChild(mouse_button);
 
     mouse_button.interactive = true;
     mouse_button.buttonMode = true;
@@ -194,12 +136,12 @@ Game.prototype.resetBoardBrowser = function() {
 
   // the enemy board
   this.enemy_area = new PIXI.Container();
-  scene.addChild(this.enemy_area);
+  screen.addChild(this.enemy_area);
   this.enemy_area.position.set(this.width * 1/2 + 325,340);
   this.enemy_area.scale.set(0.5,0.5);
 
   this.enemy_live_area = new PIXI.Container();
-  scene.addChild(this.enemy_live_area);
+  screen.addChild(this.enemy_live_area);
   this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
   this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
 
@@ -256,25 +198,25 @@ Game.prototype.resetBoardBrowser = function() {
   this.level_label.anchor.set(0.5,0.5);
   this.level_label.position.set(203, 180);
   this.level_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  scene.addChild(this.level_label);
+  screen.addChild(this.level_label);
 
   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_text_box.anchor.set(0.5,0.5);
   this.level_text_box.position.set(203, 215);
   this.level_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  scene.addChild(this.level_text_box);
+  screen.addChild(this.level_text_box);
 
   this.score_label = new PIXI.Text("Score", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_label.anchor.set(0.5,0.5);
   this.score_label.position.set(720, 180);
   this.score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  scene.addChild(this.score_label);
+  screen.addChild(this.score_label);
 
   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_text_box.anchor.set(0.5,0.5);
   this.score_text_box.position.set(720, 215);
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  scene.addChild(this.score_text_box);
+  screen.addChild(this.score_text_box);
 
   this.setEnemyDifficulty(this.level);
 
@@ -295,7 +237,7 @@ Game.prototype.resetBoardBrowser = function() {
   this.announcement.position.set(470, 203);
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.announcement.style.lineHeight = 36;
-  scene.addChild(this.announcement);
+  screen.addChild(this.announcement);
 
 
   this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
@@ -304,7 +246,7 @@ Game.prototype.resetBoardBrowser = function() {
   this.escape_to_quit.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.escape_to_quit.style.lineHeight = 36;
   this.escape_to_quit.visible = false;
-  scene.addChild(this.escape_to_quit);
+  screen.addChild(this.escape_to_quit);
 
   let player_monitor_mask = new PIXI.Graphics();
   player_monitor_mask.beginFill(0xFF3300);
@@ -410,7 +352,7 @@ Game.prototype.disabledTime = function(letter) {
 
 Game.prototype.spellingHelp = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   if (this.difficulty_level == "EASY") {
     this.spelling_help.position.set(this.launchpad.cursors[0].x - 10, -64);
@@ -426,7 +368,7 @@ Game.prototype.spellingHelp = function() {
 
 Game.prototype.updateAnnouncement = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   if (this.game_phase == "countdown" && !this.paused) {
     let time_remaining = (2400 - (this.timeSince(this.start_time))) / 800;
@@ -470,9 +412,9 @@ Game.prototype.updateAnnouncement = function() {
 
 Game.prototype.shakeDamage = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
-  for (let item of [scene, this.player_area, this.enemy_area]) {
+  for (let item of [screen, this.player_area, this.enemy_area]) {
     if (item.shake != null) {
       if (item.permanent_x == null) item.permanent_x = item.position.x;
       if (item.permanent_y == null) item.permanent_y = item.position.y;
@@ -488,7 +430,7 @@ Game.prototype.shakeDamage = function() {
 
 Game.prototype.freeeeeFreeeeeFalling = function(fractional) {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (let i = 0; i < this.freefalling.length; i++) {
     let item = this.freefalling[i];
@@ -523,7 +465,7 @@ Game.prototype.freeeeeFreeeeeFalling = function(fractional) {
 
 Game.prototype.coolHotKeys = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (let i = 0; i < letter_array.length; i++) {
     let letter = letter_array[i];
@@ -690,7 +632,7 @@ Game.prototype.spawnBomb = function() {
 
 Game.prototype.explodeArea = function(area, player_number) {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
@@ -739,7 +681,6 @@ Game.prototype.checkEndCondition = function(bypass = false) {
 
 
     if (enemy_dead === true || player_dead === true || bypass === true) {
-      console.log("we ded");
       this.announcement.style.fontSize = 36;
       if (player_dead === true || bypass === true) { //regardless of whether enemy is dead
         this.announcement.text = "GAME OVER";
@@ -748,11 +689,11 @@ Game.prototype.checkEndCondition = function(bypass = false) {
         delay(function() {
           let low_high = self.high_scores["individual"][self.difficulty_level.toLowerCase()][9];
           if (low_high == null || low_high.score < self.score) {
-            self.initializeHighScoreScene(self.score);
-            self.animateSceneSwitch("game", "high_score_scene");
+            self.initializeHighScore(self.score);
+            self.switchScreens("1p_game", "high_score");
           } else {
-            self.initializeSetupSingleScene();
-            self.animateSceneSwitch("game", "setup_single");
+            self.initialize1pLobby();
+            self.switchScreens("1p_game", "1p_lobby");
           }
         }, 4000);
       } else if (enemy_dead == true) {
@@ -782,7 +723,7 @@ Game.prototype.checkEndCondition = function(bypass = false) {
 
 Game.prototype.boostRockets = function(fractional) {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
@@ -821,7 +762,7 @@ Game.prototype.boostRockets = function(fractional) {
 
 Game.prototype.checkBombCollisions = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
@@ -862,7 +803,7 @@ Game.prototype.checkBombCollisions = function() {
 
 Game.prototype.checkRocketScreenChange = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
@@ -892,7 +833,7 @@ Game.prototype.checkRocketScreenChange = function() {
 
 Game.prototype.checkRocketCollisions = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket_1 = this.rocket_letters[i];
@@ -964,7 +905,7 @@ Game.prototype.checkRocketCollisions = function() {
 
 Game.prototype.checkRocketAttacks = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   for (var i = 0; i < this.rocket_letters.length; i++) {
     let rocket = this.rocket_letters[i];
@@ -1050,7 +991,7 @@ Game.prototype.checkRocketAttacks = function() {
                 if (self.player_palette.letters[disabled_letter].playable === true) {
                   self.player_palette.letters[disabled_letter].disable();
                   self.player_palette.letters[disabled_letter].playable = false;
-                  scene.shake = self.markTime();
+                  screen.shake = self.markTime();
                   self.soundEffect("explosion_3");
 
                   let electric = self.makeElectric(self.player_palette.letters[disabled_letter], 
@@ -1090,7 +1031,7 @@ Game.prototype.checkRocketAttacks = function() {
 
 Game.prototype.cleanRockets = function() {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   let new_rocket_letters = [];
   for (var i = 0; i < this.rocket_letters.length; i++) {
@@ -1104,9 +1045,9 @@ Game.prototype.cleanRockets = function() {
 }
 
 
-Game.prototype.singlePlayerUpdate = function(diff) {
+Game.prototype.singlePlayerGameUpdate = function(diff) {
   var self = this;
-  var scene = this.scenes["game"];
+  var screen = this.screens["1p_game"];
 
   let fractional = diff / (1000/30.0);
 

@@ -55,13 +55,14 @@ class Game {
 
     this.tracking = {};
 
-    this.setDeviceAndFormat();
+    this.basicInit();
 
-    document.addEventListener("keydown", function(ev) {self.handleKeyDown(ev)}, false);
     this.loadWords();
 
     this.auth_user = null;
-    this.multiplayer = new Multiplayer(this);
+    this.network = new Network(this);
+
+    document.addEventListener("keydown", function(ev) {self.handleKeyDown(ev)}, false);
 
     this.keyboard_mode = "QWERTY";
 
@@ -77,80 +78,28 @@ class Game {
     }
 
     this.loadLocalHighScores();
-    this.lhs = [];
-    this.ghs = [];
 
-    //this.resetTitle();
-
-    this.initializeScenes();
+    this.initializeScreens();
     this.initializeAlertBox();
-    this.intializeAnimations();
+    this.initializeAnimations();
 
-    this.current_scene = "title";
+    this.current_screen = "title";
 
+    // This is how you add an event listener for multiplayer sudden quits
     // window.addEventListener("unload", function(ev) {
     //   if (self.game_code != "" && self.player > 0) {
-    //     self.multiplayer.leaveGame(self.game_code, self.player)
+    //     self.network.leaveGame(self.game_code, self.player)
     //     self.resetTitle();
     //   }
     // })
   }
 
 
-  setDeviceAndFormat() {
+  basicInit() {
     var self = this;
-    console.log("browser test device");
-    console.log(device);
-    if (device == null && detectMobileBrowser() == false) {
-      // Normal browser game. Proceed normally.
-      console.log("I am a normal browser device");
-      this.width = 1280;
-      this.height = 960;
-      this.device_type = "browser";
-      // this.keyboard_sounds = true;
-      this.fps = 30;
-      //  document.getElementById("mainDiv").style.width = 1024;
-      // document.getElementById("mainDiv").style.marginLeft = -512;
-    } else if (device != null && (device.platform == "iOS" || device.platform == "browser")) {
-      // iOS device. Must choose best aspect ratio.
-      if (device.platform != "browser") {
-        screen.orientation.lock("portrait-primary");
-      }
-      this.fps = 45;
-      if (navigator.userAgent.indexOf("iPhone") > 0) {
-        var physicalScreenWidth = window.screen.width * window.devicePixelRatio;
-        var physicalScreenHeight = window.screen.height * window.devicePixelRatio;
-        //alert("Width: " + window.screen.width + "*" + window.devicePixelRatio + "=" + physicalScreenWidth);
-        //alert("Height: " + window.screen.height + "*" + window.devicePixelRatio + "=" + physicalScreenHeight);
-        // this should work out to 1136x640 on my iphone 5s. I need to try one of mom's old devices though.
-        this.width = physicalScreenWidth;
-        this.height = physicalScreenHeight;
-        this.device_type = "iPhone";
-        // this.keyboard_sounds = true;
-      } else if (navigator.userAgent.indexOf("iPad") > 0) {
-        this.width = 768;
-        this.height = 1024;
-        this.device_type = "iPad";
-        // this.keyboard_sounds = true;
-      } else {
-        // this.width = 768;
-        // this.height = 1024;
-        // this.device_type = "iPad";
-        this.width = 640;
-        this.height = 1136;
-        this.device_type = "iPhone";
-        // this.keyboard_sounds = true;
-      }
-      
-      
-      // alert("Width: " + window.screen.width + "*" + window.devicePixelRatio + "=" + physicalScreenWidth);
-      // alert("Height: " + window.screen.height + "*" + window.devicePixelRatio + "=" + physicalScreenHeight);
-    } else if (detectMobileBrowser() == true) {
-      // Mobile browser. Warn that this game is not playable and offer a link to the app.
-      this.width = 768;
-      this.height = 1024;
-      this.device_type = "mobile_browser";
-    }
+
+    this.width = 1280;
+    this.height = 960;
 
     // Create the pixi application
     pixi = new PIXI.Application(this.width, this.height, {antialias: true});
@@ -159,18 +108,13 @@ class Game {
     pixi.renderer.resize(this.width,this.height);
     console.log("Renderer: " + PIXI.RENDERER_TYPE[pixi.renderer.type]);
 
-    if (this.device_type == "iPhone") {
-      pixi.stage.scale.set(1/window.devicePixelRatio, 1/window.devicePixelRatio);
-    }
 
     // Set up rendering and tweening loop
-    
     let ticker = PIXI.Ticker.shared;
     ticker.autoStart = false;
     ticker.stop();
 
     let fps_counter = 0;
-    // let game_loop_start = 0;
     let last_frame = 0;
     let last_performance_update = 0;
 
@@ -206,9 +150,12 @@ class Game {
       requestAnimationFrame(animate);
     }
     animate(0);
-
   }
 
+
+  //
+  // Tracking functions, useful for testing the timing of things.
+  //
   trackStart(label) {
     if (!(label in this.tracking)) {
       this.tracking[label] = {
@@ -241,11 +188,11 @@ class Game {
   }
 
 
-  intializeAnimations() {
+  initializeAnimations() {
     var self = this;
     if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
       PIXI.Loader.shared.add("Art/fire.json").load(function() {
-        self.initializeTitleScreen();
+        self.initializeTitle();
         if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
           PIXI.Loader.shared.add("Art/explosion.json").load(function() {
             if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
@@ -357,11 +304,11 @@ class Game {
 
 
   update(diff) {
-    if (this.current_scene == "game") {
-      this.singlePlayerUpdate(diff);
-    } else if(this.current_scene == "setup_single") {
-      this.setupSingleUpdate(diff);
-    } else if (this.current_scene == "cutscene") {
+    if (this.current_screen == "1p_game") {
+      this.singlePlayerGameUpdate(diff);
+    } else if(this.current_screen == "1p_lobby") {
+      this.singlePlayerLobbyUpdate(diff);
+    } else if (this.current_screen == "cutscene") {
       this.cutsceneUpdate(diff);
     }
   }
@@ -404,6 +351,7 @@ class Game {
     }
   }
 
+
   pause() {
     this.paused = true;
     this.pause_moment = Date.now();
@@ -429,6 +377,7 @@ class Game {
 
   }
 
+
   resume() {
     this.paused = false;
     this.pause_time += Date.now() - this.pause_moment;
@@ -450,9 +399,11 @@ class Game {
     resumeAllDelays();
   }
 
+
   markTime() {
     return Date.now() - this.pause_time;
   }
+
 
   timeSince(mark) {
     return this.markTime() - mark;
@@ -477,9 +428,9 @@ class Game {
     var self = this;
     // load in cloud
     this.cloud_high_scores = {};
-    this.multiplayer.getGlobalHighScores(function(value) {
+    this.network.getGlobalHighScores(function(value) {
       self.cloud_high_scores["global"] = value
-      self.multiplayer.getIndividualHighScores(function(value) {
+      self.network.getIndividualHighScores(function(value) {
         self.cloud_high_scores["individual"] = value
 
         console.log(self.cloud_high_scores["global"]);
@@ -501,7 +452,7 @@ class Game {
 
         // save all scores locally, and save individual scores to the cloud
         localStorage.setItem("word_rockets_high_scores", JSON.stringify(this.high_scores));
-        self.multiplayer.saveIndividualHighScores(self.high_scores["individual"], function() {});
+        self.network.saveIndividualHighScores(self.high_scores["individual"], function() {});
 
         callback();
 
@@ -524,16 +475,16 @@ class Game {
     console.log(this.high_scores["global"][diff]);
     console.log(this.high_scores["global"][diff][9]);
     if (low_high == null || low_high.score < score) {
-      addDedupeSort(this.high_scores["global"][diff], [{name: name, score: score, uid: this.multiplayer.uid}]);
+      addDedupeSort(this.high_scores["global"][diff], [{name: name, score: score, uid: this.network.uid}]);
       console.log("hoss");
       console.log(this.high_scores);
-      this.multiplayer.saveGlobalHighScores(this.high_scores["global"], function() {
-        self.multiplayer.saveIndividualHighScores(self.high_scores["individual"], function() {
+      this.network.saveGlobalHighScores(this.high_scores["global"], function() {
+        self.network.saveIndividualHighScores(self.high_scores["individual"], function() {
           callback();
         });
       });
     } else {
-      this.multiplayer.saveIndividualHighScores(this.high_scores["individual"], function() {
+      this.network.saveIndividualHighScores(this.high_scores["individual"], function() {
       callback();
     });
     }

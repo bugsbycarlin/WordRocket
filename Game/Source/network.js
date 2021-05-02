@@ -1,7 +1,7 @@
 
 var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-class Multiplayer {
+class Network {
   constructor(game) {
     this.database = firebase.database();
     this.game = game;

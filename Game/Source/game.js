@@ -83,7 +83,7 @@ class Game {
     this.initializeAlertBox();
     this.initializeAnimations();
 
-    this.current_screen = "title";
+    // this.current_screen = "cutscene";
 
     // This is how you add an event listener for multiplayer sudden quits
     // window.addEventListener("unload", function(ev) {
@@ -192,7 +192,7 @@ class Game {
     var self = this;
     if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
       PIXI.Loader.shared.add("Art/fire.json").load(function() {
-        self.initializeTitle();
+        // self.initializeTitle();
         if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
           PIXI.Loader.shared.add("Art/explosion.json").load(function() {
             if (!PIXI.Loader.shared.resources["Art/electric.json"]) {

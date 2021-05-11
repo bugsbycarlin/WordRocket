@@ -289,8 +289,7 @@ Game.prototype.initializeScreens = function() {
   this.makeScreen("cutscene");
   this.makeScreen("high_score");
   this.makeScreen("credits");
-  
-  this.initializeCutscene();
+
   this.screens["cutscene"].position.x = 0;
   this.current_screen = "cutscene";
 

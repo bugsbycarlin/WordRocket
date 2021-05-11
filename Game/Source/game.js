@@ -193,6 +193,7 @@ class Game {
     if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
       PIXI.Loader.shared.add("Art/fire.json").load(function() {
         // self.initializeTitle();
+        self.initializeCutscene();
         if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
           PIXI.Loader.shared.add("Art/explosion.json").load(function() {
             if (!PIXI.Loader.shared.resources["Art/electric.json"]) {

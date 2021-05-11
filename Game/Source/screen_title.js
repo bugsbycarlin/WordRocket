@@ -34,6 +34,21 @@ Game.prototype.initializeTitle = function() {
   brandenburg.position.set(this.width / 2, this.height - 520);
   screen.addChild(brandenburg);
 
+  // ! wall
+  // pure color
+  // let wall = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  // wall.width = 1280;
+  // wall.height = 150;
+  // wall.position.set(0,650);
+  // wall.tint = 0x2c3674;
+  // screen.addChild(wall);
+  // texture
+  // let wall = new PIXI.Sprite(PIXI.Texture.from("Art/Title/wall_texture_pixelated.png"));
+  // wall.position.set(0, 650);
+  // wall.scale.set(1,0.70);
+  // wall.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  // screen.addChild(wall);
+
   // ! players
   let right_player = new PIXI.Sprite(PIXI.Texture.from("Art/Title/player.png"));
   right_player.tint = 0x111b57;

@@ -1,5 +1,5 @@
 
-var cutscene_transition_speed = 1300;
+var cutscene_transition_speed = 1200;
 
 Game.prototype.initializeCutscene = function() {
   let self = this;
@@ -42,7 +42,7 @@ Game.prototype.initializeCutscene = function() {
       console.log(item);
       if (item[0] == "next") {
         // Speech bubble version
-        container.next = this.comicBubble(container, "Next", this.width - 90, this.height - 50);
+        container.next = this.comicBubble(container, item[1], this.width - 90, this.height - 50);
         
         // Arrow version
         // container.next = new PIXI.Container();
@@ -122,49 +122,62 @@ offscreen_height = 1152;
 scenes = {
   intro: [
     [
-      ["image", "1988_image.png", 500, 420, 720, 380],
+      ["image", "1988_v2_1080.png", 600, 440, 720, 380],
       ["text", "1988", 180, 160],
-      ["next", "Continue", 1, -1],
+      ["text", "Crazy time to live in Berlin.", 890, 720],
+      ["next", "Next", 1, -1],
     ],
     [
       ["image", "fight_image_v3.png", 690, 480, 1024, 620], // x, y, w, h
-      ["text", "Tensions are high at the first \nWorld Nerd Games\nin Berlin.", 360, 120],
-      ["next", "Continue", 0, 1],
+      ["text", "Tensions were high at the first \nWorld Nerd Games.", 360, 160],
+      ["text", "The opening ceremonies were chaos.", 810, 810],
+      ["next", "Next", 0, 1],
     ],
     [
       ["image", "lab_image.png", 640, 410, 1080, 410],
-      ["text", "The US and USSR flout the rules to \nassemble teams of elite players.", 630, 760],
-      ["next", "Continue", 1, 0],
+      ["text", "The US and USSR flouted the rules, fielding \nteams of elite professionals.", 630, 760],
+      ["next", "Next", 1, 0],
     ],
     [
       ["image", "games_image.png", 660, 510, 1080, 510],
-      ["text", "Mathletes and chess masters compete alongside \ncube solvers and tetris champions.", 590, 200],
-      ["text", "But one computer game has everyone in thrall.", 730, 790],
-      ["next", "Continue", -1, 1],
+      ["text", "Mathletes and chess masters competed alongside \ncube solvers and tetris champions.", 590, 200],
+      ["text", "But one computer game had us all in thrall.", 730, 790],
+      ["next", "Next", -1, 1],
     ],
     [
+
       ["image", "word_rockets_image_1280.png", 640, 480, 1280, 960],
-      ["text", "Using advanced LASER technology...", 420, 60],
-      ["text", "Word Rockets gives digital objects physical form.", 730, 830],
+      ["text", "Mavis Bennett's \"Word Rockets\" used \nadvanced LASER technology...", 420, 60],
+      ["text", "to give digital objects physical form.", 810, 460],
+      ["text", "My class was addicted.", 1000, 660],
+      //   ["text", "Using advanced LASER technology...", 420, 60],
+      //   ["text", "Word Rockets gives digital objects physical form.", 730, 830],
       // ["text", "Word Rockets gives digital objects physical form.", 690, 480],
       // ["text", "Players literally destroy each other's keyboards.", 780, 830],
-      ["next", "Continue", 1, 0],
+      ["next", "Next", 1, 0],
     ],
     [
-      ["text", "But just before the games begin...", 640, 480],
-      ["next", "Continue", 0, 1],
+      ["text", "But just before the games began...", 640, 480],
+      ["next", "Next", 0, 1],
     ],
     [
       ["image", "building_image.png", 660, 450, 1080, 620],
       ["text", "An accident!", 240, 120],
-      ["text", "The US team is killed in a training exercise \nwhen their computers launch streams of \nchemical names, causing an explosion.", 720, 760],
-      ["next", "Continue", 1, 0],
+      ["text", "The US team was killed in a training exercise \nwhen their computers launched streams of \nchemical names, causing an explosion.", 720, 760],
+      ["next", "Next", 1, 0],
     ],
     [
       ["image", "putzen_class_image.png", 660, 450, 1080, 620],
-      ["text", "west berlin high school teacher \nWaldemar Putzen emerges in the chaos...", 440, 120],
-      ["text", "and offers his class as last minute replacements.", 740, 800],
-      ["next", "Continue", 0, 1],
+      ["text", "Our teacher, Mr Putzen, brought our entire \nclass to the training facility...", 480, 120],
+      ["text", "and offered us as last minute replacements.", 800, 800],
+      ["next", "Next", 0, 1],
+    ],
+    [
+      ["image", "us_vs_them_v3.png", 620, 450, 1080, 620],
+      ["text", "So we went up against the Russians. \nThey were bigger, they were stronger, \nthey were really good typists...", 430, 120],
+      ["text", "But god damnit*, we were Americans.", 850, 750],
+      ["text", "*Sorry, Mom", 200, 900],
+      ["next", "Ready?", 0, 1],
     ],
   ]
 }

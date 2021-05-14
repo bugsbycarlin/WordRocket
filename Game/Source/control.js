@@ -275,8 +275,9 @@ Game.prototype.handleKeyDown = function(ev) {
     } else if (ev.key === "Enter") {
       this.difficulty_level = this.option_values[this.difficulty_choice];
       localStorage.setItem("word_rockets_difficulty_level", this.difficulty_level);
-      this.initialize1pGame();
-      this.switchScreens("1p_lobby", "1p_game");
+      this.reset1pGame();
+      this.initializeCutscene();
+      this.switchScreens("1p_lobby", "cutscene");
     } else if (ev.key == "Escape") {
       this.initializeTitle();
       this.switchScreens("1p_lobby", "title");
@@ -311,6 +312,19 @@ Game.prototype.handleKeyDown = function(ev) {
       if (ev.key === "Enter") {
         this.highScoreEnter();
       }
+    }
+  } else if (this.current_screen == "cutscene") {
+    if (ev.key === "Enter" || ev.key === " ") {
+      if (this.cutscene_pagenum < this.cutscene_items.length - 1) {
+        this.gotoCutscenePage(this.cutscene_pagenum + 1);
+      } else {
+        this.endCutscene();
+      }
+    }
+
+    if (ev.key == "Escape") {
+      this.endCutscene();
+      // TO DO: go to the next scene
     }
   }
 }

@@ -2,10 +2,11 @@
 
 // var annoying = true;
 // var silence = true;
-var use_music = false;
+var use_music = true;
 var use_sound = true;
 var use_scores = false;
 var log_performance = true;
+var use_intro = true;
 
 var performance_result = null;
 
@@ -106,6 +107,7 @@ class Game {
     document.getElementById("mainDiv").appendChild(pixi.view);
     pixi.renderer.backgroundColor = 0xFFFFFF;
     pixi.renderer.resize(this.width,this.height);
+    pixi.renderer.backgroundColor = 0x000000;
     console.log("Renderer: " + PIXI.RENDERER_TYPE[pixi.renderer.type]);
 
 
@@ -139,9 +141,9 @@ class Game {
         self.trackStop("animate");
 
         if (now - last_performance_update > 3000 && log_performance) {
-          // There were 3000 milliseconds, so divide fps_counter by 3
-          // console.log("FPS: " + fps_counter / 3);
-          // self.trackPrint(["update", "tween", "animate"]);
+          //There were 3000 milliseconds, so divide fps_counter by 3
+          //console.log("FPS: " + fps_counter / 3);
+          //self.trackPrint(["update", "tween", "animate"]);
           fps_counter = 0;
           last_performance_update = now;
         }
@@ -190,18 +192,25 @@ class Game {
 
   initializeAnimations() {
     var self = this;
-    if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
-      PIXI.Loader.shared.add("Art/fire.json").load(function() {
-        // self.initializeTitle();
-        self.initializeCutscene();
-        if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
-          PIXI.Loader.shared.add("Art/explosion.json").load(function() {
-            if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
-              PIXI.Loader.shared.add("Art/electric.json").load(function() {
-              });
+    if (!PIXI.Loader.shared.resources["Art/intro.png"]) {
+      PIXI.Loader.shared.add("Art/intro.png").load(function() {
+        if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
+          PIXI.Loader.shared.add("Art/fire.json").load(function() {
+            if (use_intro) {
+              self.initializeIntro();
+            } else {
+              self.initializeTitle();
             }
+            if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
+              PIXI.Loader.shared.add("Art/explosion.json").load(function() {
+                if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
+                  PIXI.Loader.shared.add("Art/electric.json").load(function() {
+                  });
+                }
+              });
+            }  
           });
-        }  
+        }
       });
     }
   }
@@ -311,6 +320,8 @@ class Game {
       this.singlePlayerLobbyUpdate(diff);
     } else if (this.current_screen == "cutscene") {
       this.cutsceneUpdate(diff);
+    } else if (this.current_screen == "intro") {
+      this.introUpdate(diff);
     }
   }
 

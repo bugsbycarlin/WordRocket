@@ -283,6 +283,7 @@ Game.prototype.initializeScreens = function() {
   var self = this;
   this.screens = [];
 
+  this.makeScreen("intro");
   this.makeScreen("title");
   this.makeScreen("1p_lobby");
   this.makeScreen("1p_game");
@@ -290,8 +291,13 @@ Game.prototype.initializeScreens = function() {
   this.makeScreen("high_score");
   this.makeScreen("credits");
 
-  this.screens["cutscene"].position.x = 0;
-  this.current_screen = "cutscene";
+  if (use_intro) {
+    this.screens["intro"].position.x = 0;
+    this.current_screen = "intro";
+  } else {
+    this.screens["title"].position.x = 0;
+    this.current_screen = "title";
+  }
 
   this.alertMask = new PIXI.Container();
   pixi.stage.addChild(this.alertMask);
@@ -319,7 +325,8 @@ Game.prototype.clearScreen = function(screen) {
 
 Game.prototype.switchScreens = function(old_screen, new_screen) {
   var self = this;
-  console.log("switching from " + old_screen + " to " + new_screen);
+  console.log("fading from " + old_screen + " to " + new_screen);
+
   var direction = -1;
   if (new_screen == "title") direction = 1;
   this.screens[new_screen].position.x = direction * -1 * this.width;
@@ -341,6 +348,33 @@ Game.prototype.switchScreens = function(old_screen, new_screen) {
     .to({x: 0})
     .duration(1000)
     .easing(TWEEN.Easing.Cubic.InOut)
+    .start();
+  this.current_screen = new_screen;
+}
+
+
+Game.prototype.fadeScreens = function(old_screen, new_screen) {
+  var self = this;
+  console.log("switching from " + old_screen + " to " + new_screen);
+  pixi.stage.removeChild(this.screens[old_screen]);
+  pixi.stage.removeChild(this.screens[new_screen]);
+  pixi.stage.addChild(this.screens[new_screen]);
+  pixi.stage.addChild(this.screens[old_screen]);
+  this.screens[old_screen].position.x = 0;
+  this.screens[new_screen].position.x = 0;
+  for (var i = 0; i < this.screens.length; i++) {
+    if (this.screens[i] == new_screen || this.screens[i] == old_screen) {
+      this.screens[i].visible = true;
+    } else {
+      this.screens[i].visible = false;
+      this.clearScreen(this.screens[i]);
+    }
+  }
+  var tween = new TWEEN.Tween(this.screens[old_screen])
+    .to({alpha: 0})
+    .duration(1000)
+    // .easing(TWEEN.Easing.Linear)
+    .onComplete(function() {self.clearScreen(self.screens[old_screen]);})
     .start();
   this.current_screen = new_screen;
 }

@@ -118,8 +118,9 @@ Game.prototype.initialize1pLobby = function() {
   go_button.on("pointertap", function() {
     self.difficulty_level = self.option_values[self.difficulty_choice];
     localStorage.setItem("word_rockets_difficulty_level", self.difficulty_level);
-    self.initialize1pLobby();
-    self.switchScreens("1p_lobby", "1p_game");
+    self.reset1pGame();
+    self.initializeCutscene();
+    self.switchScreens("1p_lobby", "cutscene");
   });
 
   let back_button = new PIXI.Text("<", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});

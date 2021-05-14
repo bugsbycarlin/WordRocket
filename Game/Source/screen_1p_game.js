@@ -1,6 +1,6 @@
 
 
-Game.prototype.initialize1pGame = function() {
+Game.prototype.reset1pGame = function() {
   this.level = 1;
   this.score = 0;
 
@@ -8,11 +8,9 @@ Game.prototype.initialize1pGame = function() {
   this.enemy_bombs = 0;
 
   console.log(this.difficulty_level);
-
-  this.reset();
 }
 
-Game.prototype.reset = function() {
+Game.prototype.initialize1pGame = function() {
   var self = this;
   var screen = this.screens["1p_game"];
   this.clearScreen(screen);
@@ -699,7 +697,7 @@ Game.prototype.checkEndCondition = function(bypass = false) {
       } else if (enemy_dead == true) {
         this.announcement.text = "VICTORY!";
         this.level += 1;
-        delay(function() {self.reset();}, 4000);
+        delay(function() {self.initialize1pGame();}, 4000);
       }
 
       this.game_phase = "gameover";

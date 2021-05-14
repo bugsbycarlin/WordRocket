@@ -329,7 +329,7 @@ Game.prototype.tutorial12 = function() {
 
   delay(function() {
     self.tutorial = false;
-    self.reset();
+    self.initialize1pGame();
   }, 28000); 
 }
 

@@ -98,6 +98,7 @@ Game.prototype.initializeTitle = function() {
     if (self.network.uid == null) {
       self.network.anonymousSignIn(function() {});
     }
+    self.reset1pGame();
     self.initialize1pGame();
     self.blendHighScores(function() {});
     self.switchScreens("title", "1p_game");
@@ -118,8 +119,6 @@ Game.prototype.initializeTitle = function() {
     self.initialize1pLobby();
     self.blendHighScores(self.updateHighScoreDisplay());
     self.switchScreens("title", "1p_lobby");
-    // self.initializeCutscene();
-    // self.switchScreens("title", "cutscene");
   });
 
   let multi_button = new PIXI.Text("INTERNET", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});

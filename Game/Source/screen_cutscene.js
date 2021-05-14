@@ -1,5 +1,7 @@
 
 var cutscene_transition_speed = 1200;
+var offscreen_width = 1536;
+var offscreen_height = 1152;
 
 Game.prototype.initializeCutscene = function() {
   let self = this;
@@ -12,82 +14,74 @@ Game.prototype.initializeCutscene = function() {
   background.tint = 0x000000;
   screen.addChild(background);
 
-  // let cutscene_test = new PIXI.Sprite(PIXI.Texture.from("Art/Cutscenes/cutscene_test.png"));
-  // cutscene_test.anchor.set(0,0);
-  // cutscene_test.position.set(0,0);
-  // screen.addChild(cutscene_test);
-
-  // this.comicBubble(screen, "Using advanced LASER technology...", 400, 50);
-  // this.comicBubble(screen, "game objects were given physical form.", 800, this.height - 150);
-
-  // this.comicBubble(screen, "Continue", this.width - 140, this.height - 50);
+  this.cutscene_pages = [];
   
-  let main_container = new PIXI.Container();
-  screen.addChild(main_container);
+  this.cutscene_container = new PIXI.Container();
+  screen.addChild(this.cutscene_container);
+
+  let cutscene_name = "intro";
+  this.cutscene_items = scenes[cutscene_name];
+
+  this.cutscene_state = "ready";
+  this.cutscene_pagenum = 0;
 
   let x = 0;
   let y = 0;
-  let scene_items = scenes["intro"];
-  let last_container = null;
-  let containers = [];
-  for (let i = 0; i < scene_items.length; i++) {
-    let container = new PIXI.Container();
-    container.position.set(x, y);
-    main_container.addChild(container);
-    containers.push(container);
+  let last_page = null;
+  for (let i = 0; i < this.cutscene_items.length; i++) {
+    let page = new PIXI.Container();
+    page.position.set(x, y);
+    this.cutscene_container.addChild(page);
+    this.cutscene_pages.push(page);
 
-    let items = scene_items[i];
-    for (var j = 0; j < items.length; j++) {
+    let items = this.cutscene_items[i];
+    for (let j = 0; j < items.length; j++) {
       let item = items[j];
       console.log(item);
       if (item[0] == "next") {
         // Speech bubble version
-        container.next = this.comicBubble(container, item[1], this.width - 90, this.height - 50);
+        page.next = this.comicBubble(page, item[1], this.width - 90, this.height - 50);
         
         // Arrow version
-        // container.next = new PIXI.Container();
+        // page.next = new PIXI.Container();
         // let outer_arrow = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/arrow2.png"));
         // outer_arrow.anchor.set(0.5, 0.5)
         // outer_arrow.scale.set(1.17, 1.22)
         // outer_arrow.tint = 0x000000;
         // outer_arrow.position.set(-2,0);
-        // container.next.addChild(outer_arrow);
+        // page.next.addChild(outer_arrow);
         // let inner_arrow = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/arrow2.png"));
         // inner_arrow.anchor.set(0.5, 0.5)
-        // container.next.addChild(inner_arrow);
-        // container.next.position.set(this.width - 65, this.height - 60);
-        // container.next.rotation = Math.atan2(item[3], item[2]);
-        // container.addChild(container.next);
+        // page.next.addChild(inner_arrow);
+        // page.next.position.set(this.width - 65, this.height - 60);
+        // page.next.rotation = Math.atan2(item[3], item[2]);
+        // page.addChild(page.next);
 
-        container.next.interactive = true;
-        container.next.buttonMode = true;
+        page.next.interactive = true;
+        page.next.buttonMode = true;
+
+        page.transition_x = -x;
+        page.transition_y = -y;
         
         x += item[2] * offscreen_width;
         y += item[3] * offscreen_height;
-        container.next.on("pointerdown", function() {
-          for (var p = 0; p < scene_items.length; p++) {
-            if (p != i && p != i + 1) {
-              containers[p].visible = false;
-            } else {
-              containers[p].visible = true;
-            }
-            containers[p].next.interactive = false;
-            containers[p].next.visible = false;
-          }
-          let m_x = main_container.x;
-          let m_y = main_container.y;
-          let tween = new TWEEN.Tween(main_container.position)
-            .to({x: m_x - item[2] * offscreen_width, y: m_y - item[3] * offscreen_height})
-            .duration(cutscene_transition_speed)
-            .easing(TWEEN.Easing.Cubic.InOut)
-            .onComplete(function() {
-              delay(function() {
-                for (var p = 0; p < scene_items.length; p++) {
-                  containers[p].next.interactive = true;
-                  containers[p].next.visible = true;
-                }
-              }, 200)})
-            .start();
+        page.next.on("pointerdown", function() {
+          self.gotoCutscenePage(i+1);
+        });
+      } else if (item[0] == "exit_to_game") {
+        // Speech bubble version
+        page.next = this.comicBubble(page, item[1], this.width - 120, this.height - 50);
+
+        page.next.interactive = true;
+        page.next.buttonMode = true;
+
+        page.transition_x = -x;
+        page.transition_y = -y;
+        
+        x += item[2] * offscreen_width;
+        y += item[3] * offscreen_height;
+        page.next.on("pointerdown", function() {
+          self.endCutscene();
         });
       } else if (item[0] == "square") {
         let square = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -95,19 +89,85 @@ Game.prototype.initializeCutscene = function() {
         square.position.set(item[1], item[2]);
         square.width = item[3];
         square.height = item[4];
-        container.addChild(square);
+        page.addChild(square);
       } else if (item[0] == "text") {
-        let text = this.comicBubble(container, item[1], item[2], item[3]);
+        let text = this.comicBubble(page, item[1], item[2], item[3]);
       } else if (item[0] == "image") {
         let image = new PIXI.Sprite(PIXI.Texture.from("Art/Cutscenes/" + item[1]));
         image.anchor.set(0.5, 0.5);
         image.position.set(item[2], item[3]);
-        container.addChild(image);
+        page.addChild(image);
       }
     }
 
-    last_container = container;
+    last_page = page;
   }
+
+  this.setMusic("cutscene_song");
+}
+
+
+Game.prototype.gotoCutscenePage = function(page_num) {
+  var self = this;
+  if (this.cutscene_state != "ready") {
+    return;
+  }
+  if (page_num >= this.cutscene_items.length) {
+    console.log("running over the end of the cutscene. don't do that. use the scene end button instead.");
+    return;
+  }
+  this.cutscene_state = "transitioning";
+  for (var p = 0; p < this.cutscene_items.length; p++) {
+    if (p != page_num - 1 && p != page_num) {
+      this.cutscene_pages[p].visible = false;
+    } else {
+      this.cutscene_pages[p].visible = true;
+    }
+    if (this.cutscene_pages[p].next != null) {
+      this.cutscene_pages[p].next.interactive = false;
+      this.cutscene_pages[p].next.visible = false;
+    }
+  }
+  // let m_x = this.cutscene_container.x;
+  // let m_y = this.cutscene_container.y;
+  let t_x = this.cutscene_pages[page_num].transition_x;
+  let t_y = this.cutscene_pages[page_num].transition_y;
+  let tween = new TWEEN.Tween(this.cutscene_container.position)
+    .to({x: t_x, y: t_y})
+    .duration(cutscene_transition_speed)
+    .easing(TWEEN.Easing.Cubic.InOut)
+    .onComplete(function() {
+      delay(function() {
+        for (var p = 0; p < self.cutscene_items.length; p++) {
+          if (self.cutscene_pages[p].next != null) {
+            self.cutscene_pages[p].next.interactive = true;
+            self.cutscene_pages[p].next.visible = true;
+          }
+        }
+        self.cutscene_state = "ready";
+        self.cutscene_pagenum = self.cutscene_pagenum + 1;
+      }, 200)})
+    .start();
+}
+
+
+Game.prototype.endCutscene = function() {
+  if (this.cutscene_state != "ready") {
+    return;
+  }
+  this.cutscene_state = "transitioning";
+  for (var p = 0; p < this.cutscene_items.length; p++) {
+    if (p != this.cutscene_pagenum) {
+      this.cutscene_pages[p].visible = false;
+    }
+    this.cutscene_pages[p].next.interactive = false;
+    this.cutscene_pages[p].next.visible = false;
+  }
+  this.fadeMusic(0);
+
+  // for now, it just goes directly into the game
+  this.initialize1pGame();
+  this.switchScreens("cutscene", "1p_game");
 }
 
 
@@ -116,8 +176,7 @@ Game.prototype.cutsceneUpdate = function(diff) {
   var screen = this.screens["cutscene"];
 }
 
-offscreen_width = 1536;
-offscreen_height = 1152;
+
 
 scenes = {
   intro: [
@@ -145,15 +204,10 @@ scenes = {
       ["next", "Next", -1, 1],
     ],
     [
-
       ["image", "word_rockets_image_1280.png", 640, 480, 1280, 960],
       ["text", "Mavis Bennett's \"Word Rockets\" used \nadvanced LASER technology...", 420, 60],
       ["text", "to give digital objects physical form.", 810, 460],
       ["text", "My class was addicted.", 1000, 660],
-      //   ["text", "Using advanced LASER technology...", 420, 60],
-      //   ["text", "Word Rockets gives digital objects physical form.", 730, 830],
-      // ["text", "Word Rockets gives digital objects physical form.", 690, 480],
-      // ["text", "Players literally destroy each other's keyboards.", 780, 830],
       ["next", "Next", 1, 0],
     ],
     [
@@ -177,7 +231,53 @@ scenes = {
       ["text", "So we went up against the Russians. \nThey were bigger, they were stronger, \nthey were really good typists...", 430, 120],
       ["text", "But god damnit*, we were Americans.", 850, 750],
       ["text", "*Sorry, Mom", 200, 900],
-      ["next", "Ready?", 0, 1],
+      ["exit_to_game", "Ready?", 0, 1],
     ],
-  ]
+  ],
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+  blippin: [
+    [
+      ["square", 620, 450, 1080, 620],
+      ["text", "Wog wog wog", 430, 120],
+      ["text", "Wheedle doo!", 850, 750],
+      ["exit_to_game", "Go", 0, 1],
+    ],
+  ],
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+  bloppin: [
+    [
+      ["square", 620, 450, 1080, 620],
+      ["text", "Sing the praises of wigs", 430, 120],
+      ["text", "Wala dee frickin da", 850, 750],
+      ["next", "Next", 1, 0],
+    ],
+    [
+      ["square", 600, 440, 720, 380],
+      ["text", "I am a wiggy wiggy wiggy wiggy wig", 700, 160],
+      ["text", "now let me go.", 890, 720],
+      ["next", "Go", 1, -1],
+    ],
+  ],
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+  flappin: [
+
+  ],
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+  pippin: [
+
+  ],
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+  end: [
+
+  ],
 }

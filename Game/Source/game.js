@@ -1,12 +1,12 @@
 'use strict';
 
-// var annoying = true;
-// var silence = true;
-var use_music = true;
-var use_sound = true;
+var use_music = false;
+var use_sound = false;
 var use_scores = false;
 var log_performance = true;
-var use_intro = true;
+
+var first_screen = "1p_base_capture";
+// var first_screen = "title";
 
 var performance_result = null;
 
@@ -69,6 +69,8 @@ class Game {
 
     this.paused = false;
     this.pause_time = 0;
+
+    this.freefalling = [];
 
     this.difficulty_level = localStorage.getItem("word_rockets_difficulty_level");
     if (this.difficulty_level == null) {
@@ -196,10 +198,14 @@ class Game {
       PIXI.Loader.shared.add("Art/intro.png").load(function() {
         if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
           PIXI.Loader.shared.add("Art/fire.json").load(function() {
-            if (use_intro) {
+            if (first_screen == "intro") {
               self.initializeIntro();
-            } else {
+            } else if (first_screen == "title") {
               self.initializeTitle();
+            } else if (first_screen == "1p_base_capture") {
+              self.resetGame();
+              // self.score = 999455;
+              self.initialize1pBaseCapture();
             }
             if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
               PIXI.Loader.shared.add("Art/explosion.json").load(function() {
@@ -313,9 +319,22 @@ class Game {
   }
 
 
+  resetGame() {
+    this.level = 1;
+    this.score = 0;
+
+    this.player_bombs = 0;
+    this.enemy_bombs = 0;
+
+    console.log(this.difficulty_level);
+  }
+
+
   update(diff) {
     if (this.current_screen == "1p_game") {
       this.singlePlayerGameUpdate(diff);
+    } else if (this.current_screen == "1p_base_capture") {
+      this.singlePlayerBaseCaptureUpdate(diff);
     } else if(this.current_screen == "1p_lobby") {
       this.singlePlayerLobbyUpdate(diff);
     } else if (this.current_screen == "cutscene") {
@@ -474,10 +493,11 @@ class Game {
   }
 
  
-  addHighScore(name, score, callback) {
+  addHighScore(name, score, callback, error_callback = null) {
     var self = this;
     console.log(name);
     console.log(score);
+    console.log(error_callback);
     let diff = this.difficulty_level.toLowerCase();
     addDedupeSort(this.high_scores["individual"][diff], [{name: name, score: score}]);
     localStorage.setItem("word_rockets_high_scores", JSON.stringify(this.high_scores));
@@ -493,12 +513,30 @@ class Game {
       this.network.saveGlobalHighScores(this.high_scores["global"], function() {
         self.network.saveIndividualHighScores(self.high_scores["individual"], function() {
           callback();
+        }, function() {
+          console.log(error_callback);
+          if (error_callback != null) {
+            console.log("here too");
+            error_callback();
+          }
         });
+      }, function() {
+        console.log(error_callback);
+        if (error_callback != null) {
+          console.log("here too");
+          error_callback();
+        }
       });
     } else {
       this.network.saveIndividualHighScores(this.high_scores["individual"], function() {
-      callback();
-    });
+        callback();
+      }, function() {
+        console.log(error_callback);
+        if (error_callback != null) {
+          console.log("here too");
+          error_callback();
+        }
+      });
     }
   }
 }

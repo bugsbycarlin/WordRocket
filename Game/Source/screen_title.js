@@ -98,7 +98,7 @@ Game.prototype.initializeTitle = function() {
     if (self.network.uid == null) {
       self.network.anonymousSignIn(function() {});
     }
-    self.reset1pGame();
+    self.resetGame();
     self.initialize1pGame();
     self.blendHighScores(function() {});
     self.switchScreens("title", "1p_game");

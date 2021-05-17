@@ -15,6 +15,8 @@ Game.prototype.keyAction = function(letter) {
         if (this.player_palette.letters[letter].playable === false) {
           tile.broken = true;
           tile.tint = 0xdb5858;
+        } else {
+          tile.tint = 0x000000;
         }
       }
     }
@@ -153,6 +155,12 @@ Game.prototype.highScoreEnter = function() {
     console.log("hiyo");
     self.initialize1pLobby();
     self.switchScreens("high_score", "1p_lobby");
+  }, function() {
+    console.log("lastly here");
+    self.showAlert("Oh no! Can't send high scores to server.", function() {
+      self.initialize1pLobby();
+      self.switchScreens("high_score", "1p_lobby");
+    });
   })
 }
 
@@ -259,6 +267,18 @@ Game.prototype.handleKeyDown = function(ev) {
 
     this.gameplayKeyDown(key);
 
+  } else if(this.current_screen == "1p_base_capture") {
+
+    let key = ev.key;
+    // if (key == "Shift") {
+    //   if (ev.code == "ShiftLeft") key = "LShift";
+    //   if (ev.code == "ShiftRight") key = "RShift";
+    // }
+
+    console.log("chicken");
+
+    this.baseCaptureKeyDown(key);
+
   } else if (this.current_screen == "1p_lobby") {
     if (ev.key === "ArrowRight") {
       this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
@@ -275,7 +295,7 @@ Game.prototype.handleKeyDown = function(ev) {
     } else if (ev.key === "Enter") {
       this.difficulty_level = this.option_values[this.difficulty_choice];
       localStorage.setItem("word_rockets_difficulty_level", this.difficulty_level);
-      this.reset1pGame();
+      this.resetGame();
       this.initializeCutscene();
       this.switchScreens("1p_lobby", "cutscene");
     } else if (ev.key == "Escape") {

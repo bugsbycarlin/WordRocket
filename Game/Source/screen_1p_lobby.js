@@ -118,7 +118,7 @@ Game.prototype.initialize1pLobby = function() {
   go_button.on("pointertap", function() {
     self.difficulty_level = self.option_values[self.difficulty_choice];
     localStorage.setItem("word_rockets_difficulty_level", self.difficulty_level);
-    self.reset1pGame();
+    self.resetGame();
     self.initializeCutscene();
     self.switchScreens("1p_lobby", "cutscene");
   });

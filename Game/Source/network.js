@@ -98,26 +98,40 @@ class Network {
   }
 
 
-  saveIndividualHighScores(scores, callback) {
+  saveIndividualHighScores(scores, callback, error_callback = null) {
     var self = this;
     if (this.uid == null) {
       console.log("Skipping saving individual high scores because not signed in");
       return;
     }
     
-    this.database.ref("high_scores/individual/" + this.uid).update(scores, (error) => {
-      if (error) {
-        console.log("Failed to save individual high scores to the cloud.");
-        console.log(error);
+    var connectedRef = firebase.database().ref(".info/connected");
+    connectedRef.on("value", (test) => {
+      if (test.val() === true) {
+        this.database.ref("high_scores/individual/" + this.uid).update(scores, (error) => {
+          if (error) {
+            console.log("Failed to save individual high scores to the cloud.");
+            console.log(error);
+            if (error_callback != null) {
+              error_callback();
+            }
+          } else {
+            console.log("Saved individual high scores to the cloud.");
+            callback();
+          }
+        });
       } else {
-        console.log("Saved individual high scores to the cloud.");
-        callback();
+        console.log("Not connected to the internet!");
+        if (error_callback != null) {
+          console.log("here");
+          error_callback();
+        }
       }
     });
   }
 
 
-  saveGlobalHighScores(scores, callback) {
+  saveGlobalHighScores(scores, callback, error_callback = null) {
     var self = this;
 
     let can_save = true;
@@ -134,15 +148,30 @@ class Network {
     if(!can_save) {
       return;
     }
-    this.database.ref("high_scores/global").update(scores, (error) => {
-      if (error) {
-        console.log("Failed to save global high scores to the cloud.");
-        console.log(error);
+    var connectedRef = firebase.database().ref(".info/connected");
+    connectedRef.on("value", (healthCheck) => {
+      if (healthCheck.val() === true) {
+        this.database.ref("high_scores/global").update(scores, (error) => {
+          if (error) {
+            console.log("Failed to save global high scores to the cloud.");
+            console.log(error);
+            if (error_callback != null) {
+              error_callback();
+            }
+          } else {
+            console.log("Saved global high scores to the cloud.");
+            callback();
+          }
+        });
       } else {
-        console.log("Saved global high scores to the cloud.");
-        callback();
+        console.log("Not connected to the internet!");
+        if (error_callback != null) {
+          console.log("here");
+          error_callback();
+        }
       }
     });
+    
   }
 
   // I used this to seed the global high scores.

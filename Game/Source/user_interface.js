@@ -287,17 +287,13 @@ Game.prototype.initializeScreens = function() {
   this.makeScreen("title");
   this.makeScreen("1p_lobby");
   this.makeScreen("1p_game");
+  this.makeScreen("1p_base_capture");
   this.makeScreen("cutscene");
   this.makeScreen("high_score");
   this.makeScreen("credits");
 
-  if (use_intro) {
-    this.screens["intro"].position.x = 0;
-    this.current_screen = "intro";
-  } else {
-    this.screens["title"].position.x = 0;
-    this.current_screen = "title";
-  }
+  this.screens[first_screen].position.x = 0;
+  this.current_screen = first_screen;
 
   this.alertMask = new PIXI.Container();
   pixi.stage.addChild(this.alertMask);

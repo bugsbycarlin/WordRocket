@@ -1,15 +1,5 @@
 
 
-Game.prototype.reset1pGame = function() {
-  this.level = 1;
-  this.score = 0;
-
-  this.player_bombs = 0;
-  this.enemy_bombs = 0;
-
-  console.log(this.difficulty_level);
-}
-
 Game.prototype.initialize1pGame = function() {
   var self = this;
   var screen = this.screens["1p_game"];
@@ -160,17 +150,28 @@ Game.prototype.resetBoard = function() {
   this.enemy_area.addChild(enemy_pad_mat);
 
   for (var p = 0; p < 2; p++) {
+    // let area = this.player_area;
+    // if (p == 1) area = this.enemy_area;
+    // for(var i = 0; i < 2 + Math.floor(Math.random() * 4); i++) {
+    //   let num = 1 + Math.floor(Math.random() * 3)
+    //   let cloud = new PIXI.Sprite(PIXI.Texture.from("Art/cloud_" + num + ".png"));
+    //   cloud.anchor.set(0.5, 0.5);
+    //   cloud.position.set(62 + Math.floor(Math.random() * 200), -125 - i * (100 + Math.floor(Math.random()*32)))
+    //   cloud.alpha = 0.3 + Math.floor(Math.random() * 4) / 10.0;
+    //   cloud.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    //   area.addChild(cloud);
+    // }
     let area = this.player_area;
     if (p == 1) area = this.enemy_area;
-    for(var i = 0; i < 2 + Math.floor(Math.random() * 4); i++) {
-      let num = 1 + Math.floor(Math.random() * 3)
-      let cloud = new PIXI.Sprite(PIXI.Texture.from("Art/cloud_" + num + ".png"));
-      cloud.anchor.set(0.5, 0.5);
-      cloud.position.set(62 + Math.floor(Math.random() * 200), -125 - i * (100 + Math.floor(Math.random()*32)))
-      cloud.alpha = 0.3 + Math.floor(Math.random() * 4) / 10.0;
-      cloud.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-      area.addChild(cloud);
-    }
+    let sky = new PIXI.Sprite(PIXI.Texture.from("Art/sky.png"));
+    sky.anchor.set(0,1);
+    sky.position.set(-32, 0);
+    area.addChild(sky);
+
+    let ground = new PIXI.Sprite(PIXI.Texture.from("Art/launch_ground.png"));
+    ground.anchor.set(0,0);
+    ground.position.set(0, -32);
+    area.addChild(ground);
 
     for (var i = 0; i < 2; i++) {
       let rock_wall = new PIXI.Container();
@@ -428,7 +429,7 @@ Game.prototype.shakeDamage = function() {
 
 Game.prototype.freeeeeFreeeeeFalling = function(fractional) {
   var self = this;
-  var screen = this.screens["1p_game"];
+  var screen = this.screens[this.current_screen];
 
   for (let i = 0; i < this.freefalling.length; i++) {
     let item = this.freefalling[i];

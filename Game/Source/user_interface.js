@@ -136,6 +136,29 @@ Game.prototype.makePixelatedLetterTile = function(parent, text, color) {
 }
 
 
+Game.prototype.makeLetterBuilding = function(parent, x, y, letter, team) {
+  let letter_building = new PIXI.Container();
+  parent.addChild(letter_building);
+  letter_building.position.set(x, y);
+
+
+  let building_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/" + team + "_building_draft_2.png"));
+  building_sprite.anchor.set(0.5, 0.5);
+  building_sprite.position.set(0, 0);
+  letter_building.addChild(building_sprite);
+  
+
+  let letter_image = this.makePixelatedLetterTile(letter_building, letter, "white");
+  letter_image.anchor.set(0.5, 0.5);
+  letter_image.position.set(0, -6);
+  if (team == "soviet") { 
+    letter_image.tint = 0x000000;
+  }
+
+  return letter_building;
+}
+
+
 //
 //
 // Keyboard UI tools

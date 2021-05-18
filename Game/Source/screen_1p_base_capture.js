@@ -193,6 +193,21 @@ Game.prototype.resetBase = function() {
         area.addChild(horizontal);
       }
     }
+
+    area.layers = [];
+    for (let i = 0; i < 13; i++) {
+      let c = new PIXI.Container();
+      area.addChild(c);
+      area.layers.push(c);
+    }
+  }
+
+  this.baseCaptureBoard = [];
+  for (let x = 0; x < 14; x++) {
+    this.baseCaptureBoard[x] = [];
+    for (let y = 0; y < 13; y++) {
+      this.baseCaptureBoard[x][y] = "";
+    }
   }
 
   // level and score
@@ -219,6 +234,12 @@ Game.prototype.resetBase = function() {
   this.score_text_box.position.set(735, 215);
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   screen.addChild(this.score_text_box);
+
+  var guy = new PIXI.Sprite(PIXI.Texture.from("Art/soviet_guy_draft_2.png"));
+  guy.anchor.set(0.5, 0.5);
+  guy.scale.set(3,3);
+  guy.position.set(1100, 299);
+  screen.addChild(guy);
 
   // this.setEnemyDifficulty(this.level);
 
@@ -315,9 +336,9 @@ Game.prototype.baseCaptureKeyDown = function(key) {
       }
     }
 
-    // if (key === "Backspace" || key === "Delete") {
-    //   this.deleteAction();
-    // }
+    if (key === "Backspace" || key === "Delete") {
+      this.baseCaptureDeleteAction();
+    }
 
     
 
@@ -337,9 +358,9 @@ Game.prototype.baseCaptureKeyDown = function(key) {
     //   this.bombAction();
     // }
 
-    // if (key === "Enter") {
-    //   this.enterAction();
-    // }
+    if (key === "Enter") {
+      this.baseCaptureEnterAction();
+    }
   }
 
   if (key === "Tab" && (this.game_phase == "active" || this.game_phase == "countdown")) {
@@ -372,6 +393,50 @@ Game.prototype.baseCaptureClearWord = function() {
 }
 
 
+Game.prototype.baseCaptureDeleteAction = function() {
+  if (this.base_player_letters.length == 0) {
+    return;
+  }
+
+  let tile = this.base_player_letters.pop();
+  tile.vx = -10 + Math.random() * 20;
+  tile.vy = -4 - Math.random() * 14;
+  this.freefalling.push(tile);
+
+  if (this.base_player_cursor.angle == 180) {
+    for (let i = 0; i < this.base_player_letters.length; i++) {
+      let old_tile = this.base_player_letters[i];
+      old_tile.x_tile += 1;
+      let x = 32 * this.base_player_cursor.x_tile + 16 - (this.base_player_letters.length - i) * 32;
+      if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
+        x -= 32;
+      }
+
+      new TWEEN.Tween(old_tile)
+        .to({x: x + 32})
+        .duration(150)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
+    }
+  } else if (this.base_player_cursor.angle == 180 || this.base_player_cursor.angle == -90) {
+    for (let i = 0; i < this.base_player_letters.length; i++) {
+      let old_tile = this.base_player_letters[i];
+      old_tile.y_tile += 1;
+      let y = 16 - 13 * 32 + 32 * this.base_player_cursor.y_tile - (this.base_player_letters.length - i) * 32;
+      if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
+        y -= 32;
+      }
+
+      new TWEEN.Tween(old_tile)
+        .to({y: y + 32})
+        .duration(150)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
+    }
+  }
+}
+
+
 Game.prototype.baseCaptureAddLetter = function(letter) {
 
   if (this.base_player_cursor.angle == 180 && this.base_player_letters.length > this.base_player_cursor.x_tile) {
@@ -386,60 +451,112 @@ Game.prototype.baseCaptureAddLetter = function(letter) {
   if (this.base_player_cursor.angle == 90 && this.base_player_letters.length + this.base_player_cursor.y_tile >= 13) {
     return;
   }
-  
-  let dx = 32 * Math.cos(this.base_player_cursor.angle * Math.PI / 180);
-  let dy = 32 * Math.sin(this.base_player_cursor.angle * Math.PI / 180);
-  console.log("dx and dy are " + dx + " " + dy);
 
   let tile = game.makePixelatedLetterTile(this.player_area, letter, "white");
   tile.text = letter;
   tile.parent = this.player_area;
   tile.tint = 0x000000;
-  if (this.base_player_cursor.angle == 180 || this.base_player_cursor.angle == -90) {
+  if (this.base_player_cursor.angle == 180) {
     tile.position.set(32 * this.base_player_cursor.x_tile + 16, 16 - 13 * 32 + 32 * this.base_player_cursor.y_tile);
-  
+    tile.x_tile = this.base_player_cursor.x_tile;
+    tile.y_tile = this.base_player_cursor.y_tile;
+    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
+      tile.x_tile -= 1;
+      tile.position.x -= 32;
+    }
+
     for (let i = 0; i < this.base_player_letters.length; i++) {
       let old_tile = this.base_player_letters[i];
-      let x = old_tile.x;
-      let y = old_tile.y;
-
+      old_tile.x_tile -= 1;
+      let x = tile.position.x - 32 * (this.base_player_letters.length - i);
       new TWEEN.Tween(old_tile)
-        .to({x: x + dx, y: y + dy})
+        .to({x: x})
         .duration(150)
         .easing(TWEEN.Easing.Quartic.Out)
         .start();
     }
-  } else {
+  } else if (this.base_player_cursor.angle == -90) {
+    tile.position.set(32 * this.base_player_cursor.x_tile + 16, 16 - 13 * 32 + 32 * this.base_player_cursor.y_tile);
+    tile.x_tile = this.base_player_cursor.x_tile;
+    tile.y_tile = this.base_player_cursor.y_tile;
+    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
+      tile.y_tile -= 1;
+      tile.position.y -= 32;
+    }
+
+    for (let i = 0; i < this.base_player_letters.length; i++) {
+      let old_tile = this.base_player_letters[i];
+      old_tile.y_tile -= 1;
+      //let y = 16 - 13 * 32 + 32 * (this.base_player_cursor.y_tile + i + 1 - this.base_player_letters.length);
+      let y = tile.position.y - 32 * (this.base_player_letters.length - i);
+      new TWEEN.Tween(old_tile)
+        .to({y: y})
+        .duration(150)
+        .easing(TWEEN.Easing.Quartic.Out)
+        .start();
+    }
+  } else if (this.base_player_cursor.angle == 0) {
     tile.position.set(
-      32 * this.base_player_cursor.x_tile + 16 + (this.base_player_letters.length) * dx,
-      16 - 13 * 32 + 32 * this.base_player_cursor.y_tile + (this.base_player_letters.length) * dy
+      32 * this.base_player_cursor.x_tile + 16 + this.base_player_letters.length * 32,
+      16 - 13 * 32 + 32 * this.base_player_cursor.y_tile
     );
+    tile.x_tile = this.base_player_cursor.x_tile + this.base_player_letters.length;
+    tile.y_tile = this.base_player_cursor.y_tile;
+    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
+      tile.x_tile += 1;
+      tile.position.x += 32;
+    }
+  } else if (this.base_player_cursor.angle == 90) {
+    tile.position.set(
+      32 * this.base_player_cursor.x_tile + 16,
+      16 - 13 * 32 + 32 * this.base_player_cursor.y_tile + 32 * this.base_player_letters.length
+    );
+    tile.x_tile = this.base_player_cursor.x_tile;
+    tile.y_tile = this.base_player_cursor.y_tile + this.base_player_letters.length;
+    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
+      tile.y_tile += 1;
+      tile.position.y += 32;
+    }
   }
 
-  
-
   this.base_player_letters.push(tile);
-
 
   console.log("wong");
   console.log(this.base_player_letters.length);
 }
 
 
+Game.prototype.baseCaptureEnterAction = function() {
+  //let team = (Math.random() > 0.5) ? "american" : "soviet";
+  for (let i = 0; i < this.base_player_letters.length; i++) {
+    let old_tile = this.base_player_letters[i];
+
+    console.log(old_tile.y_tile);
+    console.log(this.player_area.layers);
+    let building = this.makeLetterBuilding(this.player_area.layers[old_tile.y_tile], old_tile.x, old_tile.y, old_tile.text, "american");
+    this.baseCaptureBoard[old_tile.x_tile][old_tile.y_tile] = building;
+  }
+
+  // TO DO: maybe don't delete in this way. maybe just proper delete.
+  this.baseCaptureClearWord();
+}
+
+
 Game.prototype.baseCaptureMoveCursor = function(direction) {
   if (this.base_player_letters.length > 0) {
-    return;
+    //return;
+    this.baseCaptureClearWord();
   }
 
   let self = this;
   let bpc = this.base_player_cursor;
-  if (direction == "up" && bpc.y_tile > 0) {
+  if (direction == "up" && bpc.y_tile > 0 && this.baseCaptureBoard[bpc.x_tile][bpc.y_tile - 1] != "") {
     bpc.y_tile -= 1;
-  } else if (direction == "down" && bpc.y_tile < 12) {
+  } else if (direction == "down" && bpc.y_tile < 12 && this.baseCaptureBoard[bpc.x_tile][bpc.y_tile + 1] != "") {
     bpc.y_tile += 1;
-  } else if (direction == "left" && bpc.x_tile > 0) {
+  } else if (direction == "left" && bpc.x_tile > 0 && this.baseCaptureBoard[bpc.x_tile - 1][bpc.y_tile] != "") {
     bpc.x_tile -= 1;
-  } else if (direction == "right" && bpc.x_tile < 13) {
+  } else if (direction == "right" && bpc.x_tile < 13 && this.baseCaptureBoard[bpc.x_tile + 1][bpc.y_tile] != "") {
     bpc.x_tile += 1;
   }
 

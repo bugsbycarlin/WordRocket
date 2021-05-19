@@ -6,13 +6,20 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.clearScreen(screen);
 
   this.freefalling = [];
+  this.played_words = {};
 
   this.resetBase();
 
-  this.base_player_letters = [];
-  this.base_enemy_letters = [];
+  this.base_letters = [];
+
+  this.base_letters[0] = [];
+  this.base_letters[1] = [];
 
   this.game_phase = "pre_game";
+
+  this.enemy_play_speed = 1200;
+  this.enemy_guess_power = 20;
+  this.enemy_phase = "moving"; // moving, typing
 
   this.gravity = 3.8;
   this.boost = 0.18;
@@ -20,12 +27,20 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.gentle_limit = 6;
   this.boost_limit = -25;
 
+  this.can_play_word = [];
+  this.word_to_play = [];
+  this.can_play_word[0] = false;
+  this.word_to_play[0] = "";
+  this.can_play_word[1] = false;
+  this.word_to_play[1] = "";
+
   delay(function() {
     self.paused = false;
     self.pause_time = 0;
     self.start_time = self.markTime();
     self.game_phase = "countdown";
     self.soundEffect("countdown");
+    self.setMusic("action_song_2");
   }, 1200);
 }
 
@@ -49,7 +64,7 @@ Game.prototype.resetBase = function() {
         self.tutorial_1_snide_clicks += 1
       }
 
-      self.gameplayKeyDown(letter);
+      self.baseCaptureKeyDown(letter);
     }
   });
 
@@ -62,9 +77,6 @@ Game.prototype.resetBase = function() {
   });
   this.enemy_palette.scale.set(0.3125, 0.3125);
 
-  this.player_palette.setBombs(this.player_bombs);
-  this.enemy_palette.setBombs(this.enemy_bombs);
-
   // the player's board
   this.player_area = new PIXI.Container();
   screen.addChild(this.player_area);
@@ -74,19 +86,6 @@ Game.prototype.resetBase = function() {
   screen.addChild(this.player_live_area);
   this.player_live_area.position.set(this.player_area.x, this.player_area.y);
   this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
-
-
-
-  // the player's launchpad
-  // this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 32, 32, false);
-
-  // this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
-  // this.spelling_help.position.set(6, -64);
-  // this.spelling_help.alpha = 0.4;
-  // if (this.difficulty_level != "EASY") {
-  //   this.spelling_help.visible = false;
-  // }
-  // this.player_area.addChild(this.spelling_help);
 
   // silly mouse buttons
   for (let i = 0; i < 3; i++) {
@@ -121,23 +120,6 @@ Game.prototype.resetBase = function() {
   screen.addChild(this.enemy_live_area);
   this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
   this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
-
-  // var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // enemy_mat.width = 32 * board_width;
-  // enemy_mat.height = 32 * 14;
-  // enemy_mat.anchor.set(0, 1);
-  // enemy_mat.position.set(0, -32);
-  // enemy_mat.tint = 0x303889;
-
-  //this.enemy_area.addChild(enemy_mat);
-
-  // var enemy_pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // enemy_pad_mat.width = 32 * board_width;
-  // enemy_pad_mat.height = 32;
-  // enemy_pad_mat.anchor.set(0, 1);
-  // enemy_pad_mat.position.set(0, 0);
-  // enemy_pad_mat.tint = 0x000000; //0x2c3130;
-  // this.enemy_area.addChild(enemy_pad_mat);
 
   for (var p = 0; p < 2; p++) {
     let area = this.player_area;
@@ -193,13 +175,13 @@ Game.prototype.resetBase = function() {
         area.addChild(horizontal);
       }
     }
+  }
 
-    area.layers = [];
-    for (let i = 0; i < 13; i++) {
-      let c = new PIXI.Container();
-      area.addChild(c);
-      area.layers.push(c);
-    }
+  this.player_area.layers = [];
+  for (let i = 0; i < 13; i++) {
+    let c = new PIXI.Container();
+    this.player_area.addChild(c);
+    this.player_area.layers.push(c);
   }
 
   this.baseCaptureBoard = [];
@@ -241,27 +223,12 @@ Game.prototype.resetBase = function() {
   guy.position.set(1100, 299);
   screen.addChild(guy);
 
-  // this.setEnemyDifficulty(this.level);
-
-  // this.enemy_last_action = this.markTime();
-
-  // this.gravity = 3.8;
-  // this.boost = 0.18;
-  // this.gentle_drop = 0.05;
-  // this.gentle_limit = 6;
-  // this.boost_limit = -25;
-
-  // for (var i = 0; i < board_width; i++) {
-  //   this.launchpad.cursors[i].visible = false;
-  // }
-
   this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.announcement.anchor.set(0.5,0.5);
   this.announcement.position.set(470, 203);
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.announcement.style.lineHeight = 36;
   screen.addChild(this.announcement);
-
 
   this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.escape_to_quit.anchor.set(0.5,0.5);
@@ -286,80 +253,67 @@ Game.prototype.resetBase = function() {
   let corners = [0, 1, 2, 3];
   shuffleArray(corners);
 
-  this.base_player_cursor = new PIXI.Sprite(PIXI.Texture.from("Art/american_cursor_draft_3.png"));
-  let bpc = this.base_player_cursor;
-  bpc.anchor.set(0.5,0.5);
+  this.cursor = [];
+  this.cursor[0] = new PIXI.Sprite(PIXI.Texture.from("Art/american_cursor_draft_3.png"));
+  let pc = this.cursor[0];
+  pc.anchor.set(0.5,0.5);
   let corner = corners[0];
-  bpc.x_tile = corner < 2 ? 0 : 13;
-  bpc.y_tile = corner == 1 || corner == 2 ? 12 : 0;
-  bpc.angle = corner == 0 || corner == 1 ? 0 : 180;
-  bpc.position.set(32 * bpc.x_tile + 16, -13 * 32 + 32 * bpc.y_tile + 16);
-  this.player_area.addChild(bpc);
+  pc.x_tile = corner < 2 ? 0 : 13;
+  pc.y_tile = corner == 1 || corner == 2 ? 12 : 0;
+  pc.angle = corner == 0 || corner == 1 ? 0 : 180;
+  pc.position.set(32 * pc.x_tile + 16, -13 * 32 + 32 * pc.y_tile + 16);
+  this.player_area.addChild(pc);
+  pc.visible = false;
 
-  this.base_enemy_cursor = new PIXI.Sprite(PIXI.Texture.from("Art/soviet_cursor_draft_3.png"));
-  let bec = this.base_enemy_cursor;
-  bec.anchor.set(0.5,0.5);
+  this.cursor[1] = new PIXI.Sprite(PIXI.Texture.from("Art/soviet_cursor_draft_3.png"));
+  let ec = this.cursor[1];
+  ec.anchor.set(0.5,0.5);
   corner = corners[1];
-  bec.x_tile = corner < 2 ? 0 : 13;
-  bec.y_tile = corner == 1 || corner == 2 ? 12 : 0;
-  bec.angle = corner == 0 || corner == 1 ? 0 : 180;
-  bec.position.set(32 * bec.x_tile + 16, -13 * 32 + 32 * bec.y_tile + 16);
-  this.player_area.addChild(bec);
+  ec.x_tile = corner < 2 ? 0 : 13;
+  ec.y_tile = corner == 1 || corner == 2 ? 12 : 0;
+  ec.angle = corner == 0 || corner == 1 ? 0 : 180;
+  ec.position.set(32 * ec.x_tile + 16, -13 * 32 + 32 * ec.y_tile + 16);
+  this.player_area.addChild(ec);
+  ec.visible = false;
 }
 
 Game.prototype.baseCaptureKeyDown = function(key) {
-  console.log("bananas");
+  let player = 0;
   if (!this.paused) {
     this.pressKey(this.player_palette, key);
 
     if (key === "ArrowRight") {
-      this.baseCaptureMoveCursor("right");
+      this.baseCaptureMoveCursor("right", player);
     }
 
     if (key === "ArrowLeft") {
-      this.baseCaptureMoveCursor("left");
+      this.baseCaptureMoveCursor("left", player);
     }
 
     if (key === "ArrowUp") {
-      this.baseCaptureMoveCursor("up");
+      this.baseCaptureMoveCursor("up", player);
     }
 
     if (key === "ArrowDown") {
-      this.baseCaptureMoveCursor("down");
+      this.baseCaptureMoveCursor("down", player);
     }
-
-
 
     for (i in lower_array) {
       if (key === lower_array[i] || key === letter_array[i]) {
-        this.baseCaptureAddLetter(letter_array[i]);
+        this.baseCaptureAddLetter(letter_array[i], player);
       }
     }
 
     if (key === "Backspace" || key === "Delete") {
-      this.baseCaptureDeleteAction();
+      this.baseCaptureDeleteAction(player);
     }
-
-    
-
-    // if (key === "RShift") {
-    //   this.rightShiftAction();
-    // }
-
-    // if (key === "LShift") {
-    //   this.leftShiftAction();
-    // }
 
     if (key === "Escape") {
-      this.baseCaptureClearWord();
+      this.baseCaptureClearWord(player);
     }
 
-    // if (key === " ") {
-    //   this.bombAction();
-    // }
-
     if (key === "Enter") {
-      this.baseCaptureEnterAction();
+      this.baseCaptureEnterAction(player);
     }
   }
 
@@ -381,36 +335,41 @@ Game.prototype.baseCaptureKeyDown = function(key) {
 }
 
 
-Game.prototype.baseCaptureClearWord = function() {
-  for (let i = 0; i < this.base_player_letters.length; i++) {
-    let dead_tile = this.base_player_letters[i];
+Game.prototype.baseCaptureClearWord = function(player) {
+  if (this.game_phase != "active") {
+    return;
+  }
+  for (let i = 0; i < this.base_letters[player].length; i++) {
+    let dead_tile = this.base_letters[player][i];
     // this.player_area.removeChild(dead_tile);
     dead_tile.vx = -10 + Math.random() * 20;
     dead_tile.vy = -4 - Math.random() * 14;
     this.freefalling.push(dead_tile);
   }
-  this.base_player_letters = [];
+  this.base_letters[player] = [];
 }
 
 
-Game.prototype.baseCaptureDeleteAction = function() {
-  if (this.base_player_letters.length == 0) {
+Game.prototype.baseCaptureDeleteAction = function(player) {
+  if (this.game_phase != "active") {
+    return;
+  }
+  if (this.base_letters[player].length == 0) {
     return;
   }
 
-  let tile = this.base_player_letters.pop();
+  let tile = this.base_letters[player].pop();
   tile.vx = -10 + Math.random() * 20;
   tile.vy = -4 - Math.random() * 14;
   this.freefalling.push(tile);
 
-  if (this.base_player_cursor.angle == 180) {
-    for (let i = 0; i < this.base_player_letters.length; i++) {
-      let old_tile = this.base_player_letters[i];
+  let mod = this.baseCaptureBoard[this.cursor[player].x_tile][this.cursor[player].y_tile] != "" ? 1 : 0;
+
+  if (this.cursor[player].angle == 180) {
+    for (let i = 0; i < this.base_letters[player].length; i++) {
+      let old_tile = this.base_letters[player][i];
       old_tile.x_tile += 1;
-      let x = 32 * this.base_player_cursor.x_tile + 16 - (this.base_player_letters.length - i) * 32;
-      if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
-        x -= 32;
-      }
+      let x = 32 * (this.cursor[player].x_tile - mod) + 16 - (this.base_letters[player].length - i) * 32;
 
       new TWEEN.Tween(old_tile)
         .to({x: x + 32})
@@ -418,14 +377,11 @@ Game.prototype.baseCaptureDeleteAction = function() {
         .easing(TWEEN.Easing.Quartic.Out)
         .start();
     }
-  } else if (this.base_player_cursor.angle == 180 || this.base_player_cursor.angle == -90) {
-    for (let i = 0; i < this.base_player_letters.length; i++) {
-      let old_tile = this.base_player_letters[i];
+  } else if (this.cursor[player].angle == 180 || this.cursor[player].angle == -90) {
+    for (let i = 0; i < this.base_letters[player].length; i++) {
+      let old_tile = this.base_letters[player][i];
       old_tile.y_tile += 1;
-      let y = 16 - 13 * 32 + 32 * this.base_player_cursor.y_tile - (this.base_player_letters.length - i) * 32;
-      if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
-        y -= 32;
-      }
+      let y = 16 - 13 * 32 + 32 * (this.cursor[player].y_tile - this.base_letters[player].length + i - mod);
 
       new TWEEN.Tween(old_tile)
         .to({y: y + 32})
@@ -434,149 +390,455 @@ Game.prototype.baseCaptureDeleteAction = function() {
         .start();
     }
   }
+
+  this.baseCaptureCheckWord(player);
 }
 
 
-Game.prototype.baseCaptureAddLetter = function(letter) {
-
-  if (this.base_player_cursor.angle == 180 && this.base_player_letters.length > this.base_player_cursor.x_tile) {
+Game.prototype.baseCaptureEnterAction = function(player) {
+  if (this.game_phase != "active") {
     return;
   }
-  if (this.base_player_cursor.angle == -90 && this.base_player_letters.length > this.base_player_cursor.y_tile) {
-    return;
-  }
-  if (this.base_player_cursor.angle == 0 && this.base_player_letters.length + this.base_player_cursor.x_tile >= 14) {
-    return;
-  }
-  if (this.base_player_cursor.angle == 90 && this.base_player_letters.length + this.base_player_cursor.y_tile >= 13) {
+  if (this.can_play_word[player] == false) {
     return;
   }
 
+  let team = (player == 0) ? "american" : "soviet";
+  for (let i = 0; i < this.base_letters[player].length; i++) {
+    let old_tile = this.base_letters[player][i];
+
+    console.log(old_tile.y_tile);
+    console.log(this.player_area.layers);
+    let building = this.makeLetterBuilding(this.player_area.layers[old_tile.y_tile], old_tile.x, old_tile.y, old_tile.text, team);
+    this.baseCaptureBoard[old_tile.x_tile][old_tile.y_tile] = building;
+  }
+
+  this.played_words[this.word_to_play] = 1;
+
+  // TO DO: maybe don't delete in this way. maybe just proper delete.
+  this.baseCaptureClearWord(player);
+}
+
+
+Game.prototype.baseCaptureMoveCursor = function(direction, player) {
+  if (this.game_phase != "active") {
+    return;
+  }
+  if (this.base_letters[player].length > 0) {
+    //return;
+    this.baseCaptureClearWord(player);
+  }
+
+  let self = this;
+  let cursor = this.cursor[player];
+  if (direction == "up" && cursor.y_tile > 0 && this.baseCaptureBoard[cursor.x_tile][cursor.y_tile - 1] != "") {
+    cursor.y_tile -= 1;
+  } else if (direction == "down" && cursor.y_tile < 12 && this.baseCaptureBoard[cursor.x_tile][cursor.y_tile + 1] != "") {
+    cursor.y_tile += 1;
+  } else if (direction == "left" && cursor.x_tile > 0 && this.baseCaptureBoard[cursor.x_tile - 1][cursor.y_tile] != "") {
+    cursor.x_tile -= 1;
+  } else if (direction == "right" && cursor.x_tile < 13 && this.baseCaptureBoard[cursor.x_tile + 1][cursor.y_tile] != "") {
+    cursor.x_tile += 1;
+  }
+
+  // TO DO:
+  // make this choose intelligently
+  if (direction == "up") {
+    cursor.angle = -90;
+  } else if (direction == "down") {
+    cursor.angle = 90;
+  } else if (direction == "left") {
+    cursor.angle = 180;
+  } else if (direction == "right") {
+    cursor.angle = 0;
+  }
+
+  new TWEEN.Tween(cursor)
+    .to({x: 32 * cursor.x_tile + 16, y: 16 - 13 * 32 + 32 * cursor.y_tile})
+    .duration(150)
+    .easing(TWEEN.Easing.Quartic.Out)
+    .start();
+}
+
+
+Game.prototype.baseCaptureAddLetter = function(letter, player) {
+  if (this.game_phase != "active") {
+    return;
+  }
+  let bpc = this.cursor[player];
+  let letters = this.base_letters[player];
+  let mod = this.baseCaptureBoard[bpc.x_tile][bpc.y_tile] != "" ? 1 : 0;
+
+  // Bail out if we'd hit the edges of the board
+  if (bpc.angle == 180 && letters.length + mod > bpc.x_tile) {
+    return;
+  }
+  if (bpc.angle == -90 && letters.length + mod > bpc.y_tile) {
+    return;
+  }
+  if (bpc.angle == 0 && letters.length + bpc.x_tile + mod >= 14) {
+    return;
+  }
+  if (bpc.angle == 90 && letters.length + bpc.y_tile + mod >= 13) {
+    return;
+  }
+
+  // Bail out if we'd hit another tile
+  if (bpc.angle == 0 && this.baseCaptureBoard[bpc.x_tile + letters.length + mod][bpc.y_tile] != "") {
+    return;
+  }
+  if (bpc.angle == 180 && this.baseCaptureBoard[bpc.x_tile - letters.length - mod][bpc.y_tile] != "") {
+    return;
+  }
+  if (bpc.angle == -90 && this.baseCaptureBoard[bpc.x_tile][bpc.y_tile - letters.length - mod] != "") {
+    return;
+  }
+  if (bpc.angle == 90 && this.baseCaptureBoard[bpc.x_tile][bpc.y_tile + letters.length + mod] != "") {
+    return;
+  }
+
+  // Okay, we're good. Make the tile
   let tile = game.makePixelatedLetterTile(this.player_area, letter, "white");
   tile.text = letter;
   tile.parent = this.player_area;
   tile.tint = 0x000000;
-  if (this.base_player_cursor.angle == 180) {
-    tile.position.set(32 * this.base_player_cursor.x_tile + 16, 16 - 13 * 32 + 32 * this.base_player_cursor.y_tile);
-    tile.x_tile = this.base_player_cursor.x_tile;
-    tile.y_tile = this.base_player_cursor.y_tile;
-    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
-      tile.x_tile -= 1;
-      tile.position.x -= 32;
-    }
 
-    for (let i = 0; i < this.base_player_letters.length; i++) {
-      let old_tile = this.base_player_letters[i];
+  // Place the tile and adjust existing tiles
+  if (bpc.angle == 0) {
+    tile.position.set(
+      32 * (bpc.x_tile + mod) + 16 + letters.length * 32,
+      16 - 13 * 32 + 32 * bpc.y_tile
+    );
+    tile.x_tile = bpc.x_tile + letters.length + mod;
+    tile.y_tile = bpc.y_tile;
+  } else if (bpc.angle == 90) {
+    tile.position.set(
+      32 * bpc.x_tile + 16,
+      16 - 13 * 32 + 32 * (bpc.y_tile + letters.length + mod)
+    );
+    tile.x_tile = bpc.x_tile;
+    tile.y_tile = bpc.y_tile + letters.length + mod;
+  } else if (bpc.angle == 180) {
+    tile.position.set(
+      32 * (bpc.x_tile - mod) + 16,
+      16 - 13 * 32 + 32 * bpc.y_tile
+    );
+    tile.x_tile = bpc.x_tile - mod;
+    tile.y_tile = bpc.y_tile;
+
+    for (let i = 0; i < letters.length; i++) {
+      let old_tile = letters[i];
       old_tile.x_tile -= 1;
-      let x = tile.position.x - 32 * (this.base_player_letters.length - i);
+      let x = tile.position.x - 32 * (letters.length - i);
       new TWEEN.Tween(old_tile)
         .to({x: x})
         .duration(150)
         .easing(TWEEN.Easing.Quartic.Out)
         .start();
     }
-  } else if (this.base_player_cursor.angle == -90) {
-    tile.position.set(32 * this.base_player_cursor.x_tile + 16, 16 - 13 * 32 + 32 * this.base_player_cursor.y_tile);
-    tile.x_tile = this.base_player_cursor.x_tile;
-    tile.y_tile = this.base_player_cursor.y_tile;
-    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
-      tile.y_tile -= 1;
-      tile.position.y -= 32;
-    }
+  } else if (bpc.angle == -90) {
+    tile.position.set(
+      32 * bpc.x_tile + 16,
+      16 - 13 * 32 + 32 * (bpc.y_tile - mod));
+    tile.x_tile = bpc.x_tile;
+    tile.y_tile = bpc.y_tile - mod;
 
-    for (let i = 0; i < this.base_player_letters.length; i++) {
-      let old_tile = this.base_player_letters[i];
+    for (let i = 0; i < letters.length; i++) {
+      let old_tile = letters[i];
       old_tile.y_tile -= 1;
-      //let y = 16 - 13 * 32 + 32 * (this.base_player_cursor.y_tile + i + 1 - this.base_player_letters.length);
-      let y = tile.position.y - 32 * (this.base_player_letters.length - i);
+      let y = tile.position.y - 32 * (letters.length - i);
       new TWEEN.Tween(old_tile)
         .to({y: y})
         .duration(150)
         .easing(TWEEN.Easing.Quartic.Out)
         .start();
     }
-  } else if (this.base_player_cursor.angle == 0) {
-    tile.position.set(
-      32 * this.base_player_cursor.x_tile + 16 + this.base_player_letters.length * 32,
-      16 - 13 * 32 + 32 * this.base_player_cursor.y_tile
-    );
-    tile.x_tile = this.base_player_cursor.x_tile + this.base_player_letters.length;
-    tile.y_tile = this.base_player_cursor.y_tile;
-    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
-      tile.x_tile += 1;
-      tile.position.x += 32;
-    }
-  } else if (this.base_player_cursor.angle == 90) {
-    tile.position.set(
-      32 * this.base_player_cursor.x_tile + 16,
-      16 - 13 * 32 + 32 * this.base_player_cursor.y_tile + 32 * this.base_player_letters.length
-    );
-    tile.x_tile = this.base_player_cursor.x_tile;
-    tile.y_tile = this.base_player_cursor.y_tile + this.base_player_letters.length;
-    if (this.baseCaptureBoard[this.base_player_cursor.x_tile][this.base_player_cursor.y_tile] != "") {
-      tile.y_tile += 1;
-      tile.position.y += 32;
-    }
   }
 
-  this.base_player_letters.push(tile);
+  // Add the tile to the list of tiles.
+  letters.push(tile);
 
-  console.log("wong");
-  console.log(this.base_player_letters.length);
+  // Now check the word and color it accordingly.
+  this.baseCaptureCheckWord(player);
 }
 
 
-Game.prototype.baseCaptureEnterAction = function() {
-  //let team = (Math.random() > 0.5) ? "american" : "soviet";
-  for (let i = 0; i < this.base_player_letters.length; i++) {
-    let old_tile = this.base_player_letters[i];
+Game.prototype.baseCaptureCheckWord = function(player) {
+  this.can_play_word[player] = false;
+  this.word_to_play[player] = "";
+  let letters = this.base_letters[player];
+  let bpc = this.cursor[player]
 
-    console.log(old_tile.y_tile);
-    console.log(this.player_area.layers);
-    let building = this.makeLetterBuilding(this.player_area.layers[old_tile.y_tile], old_tile.x, old_tile.y, old_tile.text, "american");
-    this.baseCaptureBoard[old_tile.x_tile][old_tile.y_tile] = building;
+  if (letters.length == 0) {
+    return;
   }
 
-  // TO DO: maybe don't delete in this way. maybe just proper delete.
-  this.baseCaptureClearWord();
+  // Check the word itself
+  let word = this.baseCaptureConstructWord(letters, bpc.angle);
+
+  this.word_to_play[player] = word;
+  this.can_play_word[player] = this.baseCaptureLegalWord(word);
+
+  // Check perpendicular words
+  let perpendicular = bpc.angle == 180 || bpc.angle == 0 ? 90 : 0;
+  for (let i = 0; i < letters.length; i++) {
+    let perpendicular_word = this.baseCaptureConstructWord([letters[i]], perpendicular);
+    if (perpendicular_word.length >= 2) {
+      if (!this.baseCaptureLegalWord(perpendicular_word)) {
+        console.log("fails on the perpendicular");
+        this.can_play_word[player] = false;
+      }
+    }
+  }
+
+  if (this.can_play_word[player]) {
+    for (let i = 0; i < letters.length; i++) {
+      letter = letters[i];
+      letter.tint = 0x000000;
+    }
+  } else {
+    for (let i = 0; i < letters.length; i++) {
+      letter = letters[i];
+      letter.tint = 0xdb5858;
+    }
+  }
 }
 
 
-Game.prototype.baseCaptureMoveCursor = function(direction) {
-  if (this.base_player_letters.length > 0) {
-    //return;
-    this.baseCaptureClearWord();
+Game.prototype.baseCaptureConstructWord = function(word_list, angle) {
+  // Get the word. It's everything in this.base_player_letters plus everything touching it in either direction.
+  let word = [];
+  for (let i = 0; i < word_list.length; i++) {
+    letter = word_list[i];
+    word.push(letter.text);
   }
 
-  let self = this;
-  let bpc = this.base_player_cursor;
-  if (direction == "up" && bpc.y_tile > 0 && this.baseCaptureBoard[bpc.x_tile][bpc.y_tile - 1] != "") {
-    bpc.y_tile -= 1;
-  } else if (direction == "down" && bpc.y_tile < 12 && this.baseCaptureBoard[bpc.x_tile][bpc.y_tile + 1] != "") {
-    bpc.y_tile += 1;
-  } else if (direction == "left" && bpc.x_tile > 0 && this.baseCaptureBoard[bpc.x_tile - 1][bpc.y_tile] != "") {
-    bpc.x_tile -= 1;
-  } else if (direction == "right" && bpc.x_tile < 13 && this.baseCaptureBoard[bpc.x_tile + 1][bpc.y_tile] != "") {
-    bpc.x_tile += 1;
+  // Add horizontal stuff
+  if (angle == 180 || angle == 0) {
+    let x = word_list[0].x_tile - 1;
+    let y = word_list[0].y_tile;
+    let more_letters = true;
+    while (x >= 0 && more_letters) {
+      if (this.baseCaptureBoard[x][y] != "") { 
+        word.unshift(this.baseCaptureBoard[x][y].text);
+        x -= 1;
+      } else {
+        more_letters = false;
+      }
+    }
+
+    x = word_list[word_list.length - 1].x_tile + 1;
+    more_letters = true;
+    while (x < 14 && more_letters) {
+      if (this.baseCaptureBoard[x][y] != "") { 
+        word.push(this.baseCaptureBoard[x][y].text);
+        x += 1;
+      } else {
+        more_letters = false;
+      }
+    }
+  } else if (angle == 90 || angle == -90) {
+    // Or add vertical stuff
+    let x = word_list[0].x_tile;
+    let y = word_list[0].y_tile - 1;
+    let more_letters = true;
+    while (y >= 0 && more_letters) {
+      if (this.baseCaptureBoard[x][y] != "") { 
+        word.unshift(this.baseCaptureBoard[x][y].text);
+        y -= 1;
+      } else {
+        more_letters = false;
+      }
+    }
+
+    y = word_list[word_list.length - 1].y_tile + 1;
+    more_letters = true;
+    while (y < 13 && more_letters) {
+      if (this.baseCaptureBoard[x][y] != "") { 
+        word.push(this.baseCaptureBoard[x][y].text);
+        y += 1;
+      } else {
+        more_letters = false;
+      }
+    }
   }
 
-  // TO DO:
-  // make this choose intelligently
-  if (direction == "up") {
-    bpc.angle = -90;
-  } else if (direction == "down") {
-    bpc.angle = 90;
-  } else if (direction == "left") {
-    bpc.angle = 180;
-  } else if (direction == "right") {
-    bpc.angle = 0;
+  word = word.join("");
+
+  return word;
+}
+
+
+Game.prototype.baseCaptureLegalWord = function(word) {
+  if (word.length < 2) {
+    return false;
   }
 
-  new TWEEN.Tween(bpc)
-    .to({x: 32 * bpc.x_tile + 16, y: 16 - 13 * 32 + 32 * bpc.y_tile})
-    .duration(150)
-    .easing(TWEEN.Easing.Quartic.Out)
-    .start();
+  if (!(word in this.legal_words)) {
+    return false;
+  }
+  
+  if (word in this.played_words) {
+    return false;
+  }
+
+  return true;
+}
+
+
+Game.prototype.baseCaptureUpdateAnnouncement = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  if (this.game_phase == "countdown" && !this.paused) {
+    let time_remaining = (2400 - (this.timeSince(this.start_time))) / 800;
+    this.announcement.text = Math.ceil(time_remaining).toString();
+    if (time_remaining <= 0) {
+      
+      this.game_phase = "active";
+
+      this.announcement.text = "GO";
+      delay(function() {self.announcement.text = "";}, 1600);
+
+      for (var i = 0; i < board_width; i++) {
+        this.cursor[0].visible = true;
+        this.cursor[1].visible = true;
+      }
+      
+    }
+  }
+}
+
+
+Game.prototype.baseCaptureEnemyAction = function() {
+  if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_play_speed) {
+    return;
+  } else {
+    // console.log(this.timeSince(this.enemy_last_action));
+    this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_play_speed) - 0.4 * Math.random() * 60000/this.enemy_play_speed);
+  }
+
+  if (this.enemy_phase == "moving") {
+    // Make a random move
+    let move_set = [];
+    if (this.cursor[1].x_tile > 0) move_set.push("left");
+    if (this.cursor[1].x_tile < 13) move_set.push("right");
+    if (this.cursor[1].y_tile > 0) move_set.push("up");
+    if (this.cursor[1].y_tile < 12) move_set.push("down");
+    let direction = move_set[Math.floor(Math.random() * (move_set.length + 1))];
+    this.baseCaptureMoveCursor(direction, 1);
+
+    // Check if we're on a letter tile
+    let main_letter = "";
+    if (this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile] != "") {
+      main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
+    }
+
+    let cursor_angle = this.cursor[1].angle;
+
+    // Search for a word whose beginning or end matches the current letter
+    // (or any word if there's no current letter)
+    // TO DO: test that it doesn't violate space constraints!!!!!!
+    let candidate_word = "";
+    for (let i = 0; i < this.enemy_guess_power; i++) {
+      let word_size = 2 + Math.floor(Math.random() * 6);
+      let word_list = this.enemy_words[word_size];
+      let word = word_list[Math.floor(Math.random() * word_list.length)];
+
+      if (main_letter == "") {
+        candidate_word = word;
+      } else if (cursor_angle == 0 || cursor_angle == 90) {
+        if (word[0] == main_letter) {
+          candidate_word = word;
+        }
+      } else if (cursor_angle == 180 || cursor_angle == -90) {
+        if (word[word.length - 1] == main_letter) {
+          candidate_word = word;
+        }
+      }
+    }
+
+    // If we have a word,
+    if (candidate_word != "") {
+      let start_x = this.cursor[1].x_tile;
+      let start_y = this.cursor[1].y_tile;
+      
+      // Build a tile collection for it so we can test that collection.
+      let tiles = [];
+      let bad_tiles = false;
+      for (let i = 0; i < candidate_word.length; i++) {
+        let x = 0;
+        let y = 0;
+        if (cursor_angle == 0) {
+          x = this.cursor[1].x_tile + i;
+          y = this.cursor[1].y_tile;
+        }
+        if (cursor_angle == 180) {
+          x = this.cursor[1].x_tile + i + 1 - candidate_word.length;
+          y = this.cursor[1].y_tile;
+        }
+        if (cursor_angle == 90) {
+          x = this.cursor[1].x_tile;
+          y = this.cursor[1].y_tile + i;
+        }
+        if (cursor_angle == -90) {
+          x = this.cursor[1].x_tile;
+          y = this.cursor[1].y_tile + i + 1 - candidate_word.length;
+        }
+        
+        let do_it = true;
+        if (main_letter != "" && i == 0 && (cursor_angle == 0 || cursor_angle == 90)) do_it = false;
+        if (main_letter != "" && i == candidate_word.length - 1 && (cursor_angle == 180 || cursor_angle == -90)) do_it = false;
+        if (do_it) {
+          tiles.push({
+            x_tile: x,
+            y_tile: y,
+            text: candidate_word[i]
+          });
+        }
+        if (x < 0 || y < 0 || x > 13 || y > 12) bad_tiles = true;
+      }
+
+      if (!bad_tiles) {
+        let word = this.baseCaptureConstructWord(tiles, cursor_angle);
+
+        this.can_play_word[1] = this.baseCaptureLegalWord(word);
+
+        // Check perpendicular words
+        let perpendicular = cursor_angle == 180 || cursor_angle == 0 ? 90 : 0;
+        for (let i = 0; i < tiles.length; i++) {
+          let perpendicular_word = this.baseCaptureConstructWord([tiles[i]], perpendicular);
+          if (perpendicular_word.length >= 2) {
+            if (!this.baseCaptureLegalWord(perpendicular_word)) {
+              this.can_play_word[1] = false;
+            }
+          }
+        }
+
+        if (this.can_play_word[1] == true) {
+          this.enemy_phase = "typing";
+          this.enemy_typing_mark = 0;
+
+          this.enemy_word = "";
+          for (let i = 0; i < tiles.length; i++) {
+            this.enemy_word += tiles[i].text;
+          }
+        }
+      }
+    }
+  } else if (this.enemy_phase == "typing") {
+    //console.log(this.word_to_play[1]);
+    if (this.enemy_typing_mark < this.enemy_word.length) {
+      this.baseCaptureAddLetter(this.enemy_word[this.enemy_typing_mark], 1);
+      this.enemy_typing_mark += 1;
+    } else {
+      this.baseCaptureEnterAction(1);
+      this.enemy_phase = "moving";
+      this.enemy_typing_mark = 0;
+      this.can_play_word[1] = false;
+      this.enemy_word = "";
+    }
+  }
 }
 
 
@@ -591,18 +853,18 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
   // }
 
   // this.spellingHelp();
-  // this.updateAnnouncement();
+  this.baseCaptureUpdateAnnouncement();
   // this.shakeDamage();
   // this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);
   // this.coolHotKeys();
 
-  // // Skip the rest if we aren't in active gameplay
-  // if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
-  //   return;
-  // }
+  // Skip the rest if we aren't in active gameplay
+  if (this.game_phase != "active") {
+    return;
+  }
 
-  // this.enemyAction();  
+  this.baseCaptureEnemyAction();  
   // this.spawnBomb();
   // this.boostRockets(fractional);
   // this.checkBombCollisions();

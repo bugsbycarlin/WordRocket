@@ -141,6 +141,7 @@ Game.prototype.makeLetterBuilding = function(parent, x, y, letter, team) {
   parent.addChild(letter_building);
   letter_building.position.set(x, y);
 
+  letter_building.text = letter;
 
   let building_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/" + team + "_building_draft_2.png"));
   building_sprite.anchor.set(0.5, 0.5);

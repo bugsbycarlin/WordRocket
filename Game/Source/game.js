@@ -287,7 +287,7 @@ class Game {
         let word = thing[0];
         let common = thing[1];
         let parts_of_speech = thing[2];
-        if (word != null && word.length >= 3) {
+        if (word != null && word.length >= 2) {
           self.addPredictiveSpelling(word.toUpperCase());
           self.legal_words[word.toUpperCase()] = 1;
           if (parts_of_speech.includes("v")) {

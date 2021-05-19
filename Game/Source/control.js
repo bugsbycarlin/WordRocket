@@ -275,8 +275,6 @@ Game.prototype.handleKeyDown = function(ev) {
     //   if (ev.code == "ShiftRight") key = "RShift";
     // }
 
-    console.log("chicken");
-
     this.baseCaptureKeyDown(key);
 
   } else if (this.current_screen == "1p_lobby") {

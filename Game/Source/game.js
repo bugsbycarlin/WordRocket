@@ -1,12 +1,13 @@
 'use strict';
 
-var use_music = false;
-var use_sound = false;
+var use_music = true;
+var use_sound = true;
 var use_scores = false;
 var log_performance = true;
 
-var first_screen = "1p_base_capture";
+// var first_screen = "1p_base_capture";
 // var first_screen = "title";
+var first_screen = "cutscene";
 
 var performance_result = null;
 
@@ -206,6 +207,8 @@ class Game {
               self.resetGame();
               // self.score = 999455;
               self.initialize1pBaseCapture();
+            } else if (first_screen == "cutscene") {
+              self.initializeCutscene("old_man");
             }
             if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
               PIXI.Loader.shared.add("Art/explosion.json").load(function() {
@@ -271,6 +274,16 @@ class Game {
 
     this.spelling_prediction = {};
 
+    this.starting_dictionaries = [];
+    this.ending_dictionaries = [];
+    this.bridge_word_dictionaries = [];
+    for (let i = 0; i < letter_array.length; i++) {
+      this.starting_dictionaries[letter_array[i]] = [];
+      this.ending_dictionaries[letter_array[i]] = [];
+      for (let j = 0; j < letter_array.length; j++)
+      this.bridge_word_dictionaries[letter_array[i]+letter_array[j]] = [];
+    }
+
     request = new XMLHttpRequest();
     request.open("GET", "Dada/legal_words.txt.gz", true);
     request.responseType = "arraybuffer";
@@ -288,11 +301,20 @@ class Game {
         let common = thing[1];
         let parts_of_speech = thing[2];
         if (word != null && word.length >= 2) {
+
           self.addPredictiveSpelling(word.toUpperCase());
+
           self.legal_words[word.toUpperCase()] = 1;
+          
           if (parts_of_speech.includes("v")) {
             self.special_dictionaries["verbs"][word.toUpperCase()] = 1;
           }
+
+          let first = word.toUpperCase()[0];
+          let last = word.toUpperCase()[word.length - 1];
+          if (word.length >= 2 && word.length <= 9) self.starting_dictionaries[first].push(word.toUpperCase());
+          if (word.length >= 2 && word.length <= 9) self.ending_dictionaries[last].push(word.toUpperCase());
+          if (word.length >= 3 && word.length <= 6) self.bridge_word_dictionaries[first+last].push(word.toUpperCase());    
         }
         if (word != null && word.length <= board_width) {
           enemy_word_dict[word.length][word.toUpperCase()] = 1;

@@ -3,7 +3,7 @@ var cutscene_transition_speed = 1200;
 var offscreen_width = 1536;
 var offscreen_height = 1152;
 
-Game.prototype.initializeCutscene = function() {
+Game.prototype.initializeCutscene = function(name = "intro") {
   let self = this;
   let screen = this.screens["cutscene"];
   this.clearScreen(screen);
@@ -19,7 +19,8 @@ Game.prototype.initializeCutscene = function() {
   this.cutscene_container = new PIXI.Container();
   screen.addChild(this.cutscene_container);
 
-  let cutscene_name = "intro";
+  let cutscene_name = name;
+  console.log(name);
   this.cutscene_items = scenes[cutscene_name];
 
   this.cutscene_state = "ready";
@@ -237,6 +238,17 @@ scenes = {
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
+  old_man: [
+    [
+      ["image", "fight_image_v3.png", 690, 480, 1024, 620], // x, y, w, h
+      ["text", "Next up, for base capture mode, USSR chooses...", 600, 160],
+      ["text", "Moscow High School student Vitaly Stukov.", 810, 810],
+      ["exit_to_game", "Ready?", 0, 1],
+    ],
+  ],
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------  
   blippin: [
     [
       ["square", 620, 450, 1080, 620],

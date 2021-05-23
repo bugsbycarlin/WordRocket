@@ -8,8 +8,6 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.freefalling = [];
   this.played_words = {};
 
-  this.resetBase();
-
   this.base_letters = [];
 
   this.base_letters[0] = [];
@@ -17,9 +15,14 @@ Game.prototype.initialize1pBaseCapture = function() {
 
   this.game_phase = "pre_game";
 
-  this.enemy_play_speed = 1200;
+  this.enemy_move_speed = 1200;
+  this.enemy_typing_speed = 600;
   this.enemy_guess_power = 20;
   this.enemy_phase = "moving"; // moving, typing
+
+  this.play_clock = 10;
+  this.last_play = this.markTime();
+  this.speed_play = false;
 
   this.gravity = 3.8;
   this.boost = 0.18;
@@ -33,6 +36,12 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.word_to_play[0] = "";
   this.can_play_word[1] = false;
   this.word_to_play[1] = "";
+
+  this.tile_score = [];
+  this.tile_score[0] = 0;
+  this.tile_score[1] = 0;
+
+  this.resetBase();
 
   delay(function() {
     self.paused = false;
@@ -195,27 +204,66 @@ Game.prototype.resetBase = function() {
   // level and score
   this.level_label = new PIXI.Text("Level", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_label.anchor.set(0.5,0.5);
-  this.level_label.position.set(189, 180);
+  this.level_label.position.set(189, 184);
   this.level_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   screen.addChild(this.level_label);
 
   this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.level_text_box.anchor.set(0.5,0.5);
-  this.level_text_box.position.set(189, 215);
+  this.level_text_box.position.set(189, 217);
   this.level_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   screen.addChild(this.level_text_box);
 
+  this.tile_score_label = new PIXI.Text("Tiles", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.tile_score_label.anchor.set(0.5,0.5);
+  this.tile_score_label.position.set(189, 344);
+  this.tile_score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  screen.addChild(this.tile_score_label);
+
+  this.player_tile_score_text_box = new PIXI.Text(this.tile_score[0], {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x75a3cc, letterSpacing: 3, align: "center"});
+  this.player_tile_score_text_box.anchor.set(0.5,0.5);
+  this.player_tile_score_text_box.position.set(189, 377);
+  this.player_tile_score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  screen.addChild(this.player_tile_score_text_box);
+
+  this.dash_label = new PIXI.Text("-", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.dash_label.anchor.set(0.5,0.5);
+  this.dash_label.position.set(189, 409);
+  this.dash_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  screen.addChild(this.dash_label);
+
+  this.enemy_tile_score_text_box = new PIXI.Text(this.tile_score[1], {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xb1ac90, letterSpacing: 3, align: "center"});
+  this.enemy_tile_score_text_box.anchor.set(0.5,0.5);
+  this.enemy_tile_score_text_box.position.set(189, 441);
+  this.enemy_tile_score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  screen.addChild(this.enemy_tile_score_text_box);
+
   this.score_label = new PIXI.Text("Score", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(735, 180);
+  this.score_label.position.set(735, 184);
   this.score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   screen.addChild(this.score_label);
 
   this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(735, 215);
+  this.score_text_box.position.set(735, 217);
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   screen.addChild(this.score_text_box);
+
+  this.play_clock_label = new PIXI.Text("Clock", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.play_clock_label.anchor.set(0.5,0.5);
+  this.play_clock_label.position.set(735, 344);
+  this.play_clock_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  screen.addChild(this.play_clock_label);
+  this.play_clock_label.visible = false;
+
+  this.play_clock_text_box = new PIXI.Text(this.play_clock, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.play_clock_text_box.anchor.set(0.5,0.5);
+  this.play_clock_text_box.position.set(735, 377);
+  this.play_clock_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  screen.addChild(this.play_clock_text_box);
+  this.play_clock_text_box.visible = false;
+
 
   var guy = new PIXI.Sprite(PIXI.Texture.from("Art/soviet_guy_draft_2.png"));
   guy.anchor.set(0.5, 0.5);
@@ -223,7 +271,7 @@ Game.prototype.resetBase = function() {
   guy.position.set(1100, 299);
   screen.addChild(guy);
 
-  this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0x000000, letterSpacing: 3, align: "center"});
   this.announcement.anchor.set(0.5,0.5);
   this.announcement.position.set(470, 203);
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
@@ -250,7 +298,7 @@ Game.prototype.resetBase = function() {
   enemy_monitor_mask.endFill();
   this.enemy_area.mask = enemy_monitor_mask;
 
-  let corners = [0, 1, 2, 3];
+  let corners = [0, 1, 2, 3]; // bottom left, top left, top right, bottom right
   shuffleArray(corners);
 
   this.cursor = [];
@@ -260,7 +308,7 @@ Game.prototype.resetBase = function() {
   let corner = corners[0];
   pc.x_tile = corner < 2 ? 0 : 13;
   pc.y_tile = corner == 1 || corner == 2 ? 12 : 0;
-  pc.angle = corner == 0 || corner == 1 ? 0 : 180;
+  pc.angle = corner < 2 ? 0 : 180;
   pc.position.set(32 * pc.x_tile + 16, -13 * 32 + 32 * pc.y_tile + 16);
   this.player_area.addChild(pc);
   pc.visible = false;
@@ -271,9 +319,14 @@ Game.prototype.resetBase = function() {
   corner = corners[1];
   ec.x_tile = corner < 2 ? 0 : 13;
   ec.y_tile = corner == 1 || corner == 2 ? 12 : 0;
-  ec.angle = corner == 0 || corner == 1 ? 0 : 180;
+  ec.angle = corner < 2 ? 0 : 180;
   ec.position.set(32 * ec.x_tile + 16, -13 * 32 + 32 * ec.y_tile + 16);
   this.player_area.addChild(ec);
+  if (corner == 0) ec.favor = ["down", "right"];
+  if (corner == 1) ec.favor = ["up", "right"];
+  if (corner == 2) ec.favor = ["up", "left"];
+  if (corner == 3) ec.favor = ["down", "left"];
+  console.log(ec.favor);
   ec.visible = false;
 }
 
@@ -396,6 +449,8 @@ Game.prototype.baseCaptureDeleteAction = function(player) {
 
 
 Game.prototype.baseCaptureEnterAction = function(player) {
+  var self = this;
+
   if (this.game_phase != "active") {
     return;
   }
@@ -403,17 +458,58 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     return;
   }
 
+  // Oops, explode the word because it blocks something
+  let fail_word = false;
+  for (let i = 0; i < this.base_letters[player].length; i++) {
+    let old_tile = this.base_letters[player][i];
+    if (this.baseCaptureBoard[old_tile.x_tile][old_tile.y_tile] != "") {
+      fail_word = true;
+    }
+  }
+  if (fail_word) {
+    this.baseCaptureClearWord(player);
+    return;
+  }
+
   let team = (player == 0) ? "american" : "soviet";
   for (let i = 0; i < this.base_letters[player].length; i++) {
     let old_tile = this.base_letters[player][i];
 
-    console.log(old_tile.y_tile);
-    console.log(this.player_area.layers);
-    let building = this.makeLetterBuilding(this.player_area.layers[old_tile.y_tile], old_tile.x, old_tile.y, old_tile.text, team);
+    // x and y might be in the middle of moving, so we need to use the fixed values
+    let x = 32 * old_tile.x_tile + 16
+    let y = -13 * 32 + 32 * old_tile.y_tile + 16
+    let building = this.makeLetterBuilding(this.player_area.layers[old_tile.y_tile], x, y, old_tile.text, team);
     this.baseCaptureBoard[old_tile.x_tile][old_tile.y_tile] = building;
   }
 
-  this.played_words[this.word_to_play] = 1;
+  // Add tile scores
+  this.tile_score[player] += this.base_letters[player].length;
+  if (player == 1) {
+    this.enemy_tile_score_text_box.text = this.tile_score[player];
+    // Update the other player's word validity
+    this.baseCaptureCheckWord(0);
+  } else if (player == 0) {
+    this.player_tile_score_text_box.text = this.tile_score[player];
+
+    // Add to player score. Note here that you get credit for the whole word.
+    this.score += 10 * this.word_to_play[player].length;
+    this.score_text_box.text = this.score;
+    // Update the other player's word validity
+    this.baseCaptureCheckWord(1);
+  }
+  if (this.tile_score[player] >= 40 && this.speed_play == false) {
+    // Speed it up!
+    this.speed_play = true;
+    this.announcement.text = "SPEED IT UP!";
+    this.last_play = this.markTime();
+    delay(function() {
+      self.announcement.text = "";
+    }, 2000);
+  }
+
+  this.last_play = this.markTime();
+
+  this.played_words[this.word_to_play[player]] = 1;
 
   // TO DO: maybe don't delete in this way. maybe just proper delete.
   this.baseCaptureClearWord(player);
@@ -686,7 +782,7 @@ Game.prototype.baseCaptureLegalWord = function(word) {
 }
 
 
-Game.prototype.baseCaptureUpdateAnnouncement = function() {
+Game.prototype.baseCaptureUpdateCountdown = function() {
   var self = this;
   var screen = this.screens["1p_base_capture"];
 
@@ -696,6 +792,7 @@ Game.prototype.baseCaptureUpdateAnnouncement = function() {
     if (time_remaining <= 0) {
       
       this.game_phase = "active";
+      this.last_play = this.markTime();
 
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);
@@ -704,18 +801,346 @@ Game.prototype.baseCaptureUpdateAnnouncement = function() {
         this.cursor[0].visible = true;
         this.cursor[1].visible = true;
       }
-      
     }
   }
 }
 
 
+Game.prototype.baseCaptureUpdatePlayClock = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  if (this.game_phase == "active" && !this.paused && this.speed_play == true) {
+    this.play_clock_label.visible = true;
+    this.play_clock_text_box.visible = true;
+    let time_remaining = (this.play_clock*1000 - (this.timeSince(this.last_play))) / 1000;
+    console.log(time_remaining);
+    this.play_clock_text_box.text = Math.ceil(time_remaining).toString();
+    if (time_remaining <= 5) {
+      this.play_clock_text_box.style.fill = 0xdb5858;
+    } else {
+      this.play_clock_text_box.style.fill = 0xFFFFFF;
+    }
+    if (time_remaining <= 0) {
+      this.game_phase = "gameover";
+
+      this.announcement.style.fontSize = 36;
+
+      if (this.tile_score[0] < this.tile_score[1]) {
+        this.announcement.text = "GAME OVER";
+        this.stopMusic();
+        this.soundEffect("game_over");
+        delay(function() {
+          let low_high = self.high_scores["individual"][self.difficulty_level.toLowerCase()][9];
+          if (low_high == null || low_high.score < self.score) {
+            self.initializeHighScore(self.score);
+            self.switchScreens("1p_base_capture", "high_score");
+          } else {
+            self.initialize1pLobby();
+            self.switchScreens("1p_base_capture", "1p_lobby");
+          }
+        }, 4000);
+      } else {
+        this.announcement.text = "VICTORY!";
+        this.level += 1;
+        delay(function() {self.initialize1pBaseCapture();}, 4000);
+      }
+
+    }
+  } else {
+    this.play_clock_label.visible = false;
+    this.play_clock_text_box.visible = false;
+  }
+}
+
+
 Game.prototype.baseCaptureEnemyAction = function() {
-  if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_play_speed) {
+  if (this.game_phase != "active") {
+    return;
+  }
+
+  ////////////
+  // STRATEGY
+  //
+  // First, if the cursor is over an empty spot, it's the beginning of the game,
+  // the AI should immediately play a big word.
+  //
+  // Otherwise, the AI should move. Most of the time, it should move in the same
+  // direction as the previous move. Some of the time, it should change direction.
+  // A tiny amount of the time, it should leap around the board.
+  //
+  // After moving, the AI will be facing in a particular direction.
+  // It should now attempt a word.
+  // If the immediate next tile is filled or a wall, do nothing.
+  // If the immediate preceding tile is filled, but there is some space ahead,
+  // The candidate word should be drawn from the predictive spelling dictionary,
+  // plus the suffixes "s", "er", "ers", and "ed".
+  // If the immediate preceding tile is not filled, and a short distance ahead there
+  // is another filled tile, the candidate word should be drawn from the bridge word
+  // dictionary. If the bridge word dictionary fails, or there is not a filled tile
+  // ahead, or there is a wall ahead, the AI should attempt to select a word of the
+  // appropriate size. (For example, if there is clear space for 10 tiles to the wall,
+  // the AI should target roughly 11 character words. However, if there is a wall just
+  // one space away, the AI should look for 2 character words.)
+  // 
+
+
+  if (this.enemy_phase == "moving") {
+    if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_move_speed) {
+      return;
+    } else {
+      this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_move_speed) - 0.4 * Math.random() * 60000/this.enemy_move_speed);
+    }
+
+    let tiles = null;
+    let word = null;
+    if (this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile] == "") {
+      // We're at the beginning of the game. Make a big word right away.
+      let word_size = 5 + Math.floor(Math.random() * 7);
+      let word_list = this.enemy_words[word_size];
+      word = word_list[Math.floor(Math.random() * word_list.length)];
+
+      let potential_tiles = this.baseCaptureWordList(word, this.cursor[1].x_tile, this.cursor[1].y_tile, this.cursor[1].angle)
+      if (potential_tiles != null) {
+        tiles = potential_tiles;
+      }
+    } else {
+      // Move, probably in the same direction as before, with a tiny chance of jumping around the board
+      // and a larger chance of just changing direction.
+      let dice = Math.random();
+      if (dice <= 0.7) {
+        let direction = "right";
+        if (this.cursor[1].angle == 180) direction = "left";
+        if (this.cursor[1].angle == 90) direction = "down";
+        if (this.cursor[1].angle == -90) direction = "up";
+        this.baseCaptureMoveCursor(direction, 1);
+      } else if (dice <= 0.75) {
+        // Jump to another occupied board tile
+      } else {
+        let move_set = [];
+        if (this.cursor[1].x_tile > 0) move_set.push("left");
+        if (this.cursor[1].x_tile < 13) move_set.push("right");
+        if (this.cursor[1].y_tile > 0) move_set.push("up");
+        if (this.cursor[1].y_tile < 12) move_set.push("down");
+        move_set.push(this.cursor[1].favor[0]);
+        move_set.push(this.cursor[1].favor[1]);
+        let direction = move_set[Math.floor(Math.random() * move_set.length)];
+        this.baseCaptureMoveCursor(direction, 1);
+      }
+
+      let angle = this.cursor[1].angle;
+      let main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
+
+      // Now we need to determine 
+
+    }
+
+
+    if (this.tile_score[1] >= 50 && this.tile_score[1] - this.tile_score[0] >= 10) {
+      // do nothing because winning. run out the clock.
+    } else if (this.tile_score[0] + this.tile_score[1] <= 50) {
+      // Early game, favor expanding with long words.
+      if (Math.random() < 0.7) {
+        let direction = "right";
+        if (this.cursor[1].angle == 180) direction = "left";
+        if (this.cursor[1].angle == 90) direction = "down";
+        if (this.cursor[1].angle == -90) direction = "up";
+        this.baseCaptureMoveCursor(direction, 1);
+      } else {
+        let move_set = [];
+        if (this.cursor[1].x_tile > 0) move_set.push("left");
+        if (this.cursor[1].x_tile < 13) move_set.push("right");
+        if (this.cursor[1].y_tile > 0) move_set.push("up");
+        if (this.cursor[1].y_tile < 12) move_set.push("down");
+        move_set.push(this.cursor[1].favor[0]);
+        move_set.push(this.cursor[1].favor[1]);
+        let direction = move_set[Math.floor(Math.random() * move_set.length)];
+        this.baseCaptureMoveCursor(direction, 1);
+      }
+
+      let angle = this.cursor[1].angle;
+      let main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
+
+      let d = null;
+      if (angle == 0 || angle == 90) {
+        d = this.starting_dictionaries[main_letter];
+      } else {
+        d = this.ending_dictionaries[main_letter];
+      }
+      word = d[Math.floor(Math.random() * d.length)];
+
+      if (angle == 0 || angle == 90) {
+        // Slice the first letter
+        word = word.slice(1);
+      } else {
+        // Slice the last letter
+        word = word.slice(0,-1);
+      }
+      let x = this.cursor[1].x_tile;
+      let y = this.cursor[1].y_tile;
+      if (angle == 0) x += 1;
+      if (angle == 180) x -= 1;
+      if (angle == 90) y += 1;
+      if (angle == -90) y -= 1;
+
+      let potential_tiles = this.baseCaptureWordList(word, x, y, angle)
+      if (potential_tiles != null) {
+        tiles = potential_tiles;
+      }
+    } else {
+      // Late game, favor random moves and short words.
+      // Still not sure how to do linking words!
+      if (Math.random() < 0.7) {
+        let direction = "right";
+        if (this.cursor[1].angle == 180) direction = "left";
+        if (this.cursor[1].angle == 90) direction = "down";
+        if (this.cursor[1].angle == -90) direction = "up";
+        this.baseCaptureMoveCursor(direction, 1);
+      } else {
+        let move_set = [];
+        if (this.cursor[1].x_tile > 0) move_set.push("left");
+        if (this.cursor[1].x_tile < 13) move_set.push("right");
+        if (this.cursor[1].y_tile > 0) move_set.push("up");
+        if (this.cursor[1].y_tile < 12) move_set.push("down");
+        let direction = move_set[Math.floor(Math.random() * (move_set.length + 1))];
+        this.baseCaptureMoveCursor(direction, 1);
+      }
+
+      let angle = this.cursor[1].angle;
+      let main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
+
+      let d = null;
+      if (angle == 0 || angle == 90) {
+        d = this.starting_dictionaries[main_letter];
+      } else {
+        d = this.ending_dictionaries[main_letter];
+      }
+      for (let i = 0; i < 8; i++) {
+        let w = d[Math.floor(Math.random() * d.length)];
+        if (w.length <= 4 && (word == null || word.length > w.length)) {
+          word = w;
+        }
+      }
+
+      if (word != null) {
+        console.log("how about " + word);
+        if (angle == 0 || angle == 90) {
+          // Slice the first letter
+          word = word.slice(1);
+        } else {
+          // Slice the last letter
+          word = word.slice(0,-1);
+        }
+        let x = this.cursor[1].x_tile;
+        let y = this.cursor[1].y_tile;
+        if (angle == 0) x += 1;
+        if (angle == 180) x -= 1;
+        if (angle == 90) y += 1;
+        if (angle == -90) y -= 1;
+
+        let potential_tiles = this.baseCaptureWordList(word, x, y, angle)
+        if (potential_tiles != null) {
+          tiles = potential_tiles;
+        }
+      } else {
+        "words too long";
+      }
+    }
+
+    if (tiles != null) {
+      let angle = this.cursor[1].angle;
+      let full_word = this.baseCaptureConstructWord(tiles, angle);
+
+      this.can_play_word[1] = this.baseCaptureLegalWord(full_word);
+
+      // Check perpendicular words
+      let perpendicular = angle == 180 || angle == 0 ? 90 : 0;
+      for (let i = 0; i < tiles.length; i++) {
+        let perpendicular_word = this.baseCaptureConstructWord([tiles[i]], perpendicular);
+        if (perpendicular_word.length >= 2) {
+          if (!this.baseCaptureLegalWord(perpendicular_word)) {
+            this.can_play_word[1] = false;
+          }
+        }
+      }
+
+      if (this.can_play_word[1] == true) {
+        this.enemy_phase = "typing";
+        this.enemy_typing_mark = 0;
+
+        this.enemy_word = "";
+        for (let i = 0; i < tiles.length; i++) {
+          this.enemy_word += tiles[i].text;
+        }
+      }
+    }
+  } else if (this.enemy_phase == "typing") {
+    if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_typing_speed) {
+      return;
+    } else {
+      this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_typing_speed) - 0.4 * Math.random() * 60000/this.enemy_typing_speed);
+    }
+
+    if (this.enemy_typing_mark < this.enemy_word.length) {
+      this.baseCaptureAddLetter(this.enemy_word[this.enemy_typing_mark], 1);
+      this.enemy_typing_mark += 1;
+    } else {
+      this.baseCaptureEnterAction(1);
+      this.enemy_phase = "moving";
+      this.enemy_typing_mark = 0;
+      this.can_play_word[1] = false;
+      this.enemy_word = "";
+    }
+  }
+}
+
+
+Game.prototype.baseCaptureWordList = function(word, x_tile, y_tile, angle) {
+  let tiles = [];
+  for (let i = 0; i < word.length; i++) {
+    let x = 0;
+    let y = 0;
+    if (angle == 0) {
+      x = x_tile + i;
+      y = y_tile;
+    }
+    if (angle == 180) {
+      x = x_tile + i + 1 - word.length;
+      y = y_tile;
+    }
+    if (angle == 90) {
+      x = x_tile;
+      y = y_tile + i;
+    }
+    if (angle == -90) {
+      x = x_tile;
+      y = y_tile + i + 1 - word.length;
+    }
+    if (x < 0 || y < 0 || x > 13 || y > 12) {
+      // bad list
+      return null;
+    } else {
+      tiles.push({
+        x_tile: x,
+        y_tile: y,
+        text: word[i]
+      });
+    }
+  }
+  return tiles;
+}
+
+
+Game.prototype.oldBaseCaptureEnemyAction = function() {
+  if (this.game_phase != "active") {
+    return;
+  }
+
+  if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_move_speed) {
     return;
   } else {
     // console.log(this.timeSince(this.enemy_last_action));
-    this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_play_speed) - 0.4 * Math.random() * 60000/this.enemy_play_speed);
+    this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_move_speed) - 0.4 * Math.random() * 60000/this.enemy_move_speed);
   }
 
   if (this.enemy_phase == "moving") {
@@ -740,8 +1165,16 @@ Game.prototype.baseCaptureEnemyAction = function() {
     // (or any word if there's no current letter)
     // TO DO: test that it doesn't violate space constraints!!!!!!
     let candidate_word = "";
+
     for (let i = 0; i < this.enemy_guess_power; i++) {
-      let word_size = 2 + Math.floor(Math.random() * 6);
+      let min = 2;
+      let extra = 6;
+      if (main_letter == "" || Math.random() > 0.7) {
+        min = 5;
+        extra = 8;
+      }
+
+      let word_size = min + Math.floor(Math.random() * extra);
       let word_list = this.enemy_words[word_size];
       let word = word_list[Math.floor(Math.random() * word_list.length)];
 
@@ -842,6 +1275,8 @@ Game.prototype.baseCaptureEnemyAction = function() {
 }
 
 
+
+
 Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
   var self = this;
   var screen = this.screens["1p_base_capture"];
@@ -853,7 +1288,7 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
   // }
 
   // this.spellingHelp();
-  this.baseCaptureUpdateAnnouncement();
+  this.baseCaptureUpdateCountdown();
   // this.shakeDamage();
   // this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);
@@ -864,6 +1299,7 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
     return;
   }
 
+  this.baseCaptureUpdatePlayClock();
   this.baseCaptureEnemyAction();  
   // this.spawnBomb();
   // this.boostRockets(fractional);

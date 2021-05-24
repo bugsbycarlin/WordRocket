@@ -333,11 +333,7 @@ Game.prototype.handleKeyDown = function(ev) {
     }
   } else if (this.current_screen == "cutscene") {
     if (ev.key === "Enter" || ev.key === " ") {
-      if (this.cutscene_pagenum < this.cutscene_items.length - 1) {
-        this.gotoCutscenePage(this.cutscene_pagenum + 1);
-      } else {
-        this.endCutscene();
-      }
+      this.gotoCutscenePage(this.cutscene_pagenum + 1);
     }
 
     if (ev.key == "Escape") {

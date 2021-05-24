@@ -475,12 +475,12 @@ Game.prototype.showAlert = function(text, action) {
 }
 
 
-Game.prototype.comicBubble = function(parent, text, x, y) {
+Game.prototype.comicBubble = function(parent, text, x, y, size=36) {
   let comic_container = new PIXI.Container();
   comic_container.position.set(x, y);
   parent.addChild(comic_container);
 
-  let comic_text = new PIXI.Text(" " + text + " ", {fontFamily: "Bangers", fontSize: 36, fill: 0x000000, letterSpacing: 6, align: "center"});
+  let comic_text = new PIXI.Text(" " + text + " ", {fontFamily: "Bangers", fontSize: size, fill: 0x000000, letterSpacing: 6, align: "center"});
   comic_text.anchor.set(0.5,0.53);
 
   let black_fill = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -498,6 +498,10 @@ Game.prototype.comicBubble = function(parent, text, x, y) {
   comic_container.addChild(black_fill); 
   comic_container.addChild(white_fill);
   comic_container.addChild(comic_text);
+
+  comic_container.is_comic_bubble = true;
+
+  comic_container.cacheAsBitmap = true;
 
   return comic_container;
 }

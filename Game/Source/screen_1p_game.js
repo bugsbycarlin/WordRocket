@@ -91,14 +91,6 @@ Game.prototype.resetBoard = function() {
   // the player's launchpad
   this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 32, 32, false);
 
-  this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
-  this.spelling_help.position.set(6, -64);
-  this.spelling_help.alpha = 0.4;
-  if (this.difficulty_level != "EASY") {
-    this.spelling_help.visible = false;
-  }
-  this.player_area.addChild(this.spelling_help);
-
   // silly mouse buttons
   for (let i = 0; i < 3; i++) {
     let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
@@ -191,6 +183,14 @@ Game.prototype.resetBoard = function() {
       rock_wall.cacheAsBitmap = true;
     }
   }
+
+  this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
+  this.spelling_help.position.set(6, -64);
+  this.spelling_help.alpha = 0.4;
+  if (this.difficulty_level != "EASY") {
+    this.spelling_help.visible = false;
+  }
+  this.player_area.addChild(this.spelling_help);
 
   // level and score
   this.level_label = new PIXI.Text("Level", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});

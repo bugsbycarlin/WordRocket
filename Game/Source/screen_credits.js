@@ -87,7 +87,3 @@ Game.prototype.initializeCredits = function() {
 }
 
 
-Game.prototype.cutsceneUpdate = function(diff) {
-  var self = this;
-  var screen = this.screens["cutscene"];
-}

@@ -1,4 +1,5 @@
 
+var run_clock_when_winning = true;
 
 Game.prototype.initialize1pBaseCapture = function() {
   var self = this;
@@ -13,14 +14,20 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.base_letters[0] = [];
   this.base_letters[1] = [];
 
+  this.played_squares = [];
+
   this.game_phase = "pre_game";
 
-  this.enemy_move_speed = 1200;
-  this.enemy_typing_speed = 600;
-  this.enemy_guess_power = 20;
+  // Enemy speeds
+  // 1200, 600 is pretty hard to play against.
+  // 1800, 900 is inhuman
+  // 3000, 1500 is impossible
+  // 900, 450: 3 - 6, and many of the games were *very* close.
+  this.enemy_move_speed = 900;
+  this.enemy_typing_speed = 450;
   this.enemy_phase = "moving"; // moving, typing
 
-  this.play_clock = 10;
+  this.play_clock = 15;
   this.last_play = this.markTime();
   this.speed_play = false;
 
@@ -49,7 +56,6 @@ Game.prototype.initialize1pBaseCapture = function() {
     self.start_time = self.markTime();
     self.game_phase = "countdown";
     self.soundEffect("countdown");
-    self.setMusic("action_song_2");
   }, 1200);
 }
 
@@ -479,7 +485,11 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     let x = 32 * old_tile.x_tile + 16
     let y = -13 * 32 + 32 * old_tile.y_tile + 16
     let building = this.makeLetterBuilding(this.player_area.layers[old_tile.y_tile], x, y, old_tile.text, team);
+    building.x_tile = old_tile.x_tile;
+    building.y_tile = old_tile.y_tile;
     this.baseCaptureBoard[old_tile.x_tile][old_tile.y_tile] = building;
+
+    this.played_squares.push([old_tile.x_tile, old_tile.y_tile]);
   }
 
   // Add tile scores
@@ -497,7 +507,7 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     // Update the other player's word validity
     this.baseCaptureCheckWord(1);
   }
-  if (this.tile_score[player] >= 40 && this.speed_play == false) {
+  if (this.tile_score[player] >= 50 && this.speed_play == false) {
     // Speed it up!
     this.speed_play = true;
     this.announcement.text = "SPEED IT UP!";
@@ -539,6 +549,41 @@ Game.prototype.baseCaptureMoveCursor = function(direction, player) {
 
   // TO DO:
   // make this choose intelligently
+  if (direction == "up") {
+    cursor.angle = -90;
+  } else if (direction == "down") {
+    cursor.angle = 90;
+  } else if (direction == "left") {
+    cursor.angle = 180;
+  } else if (direction == "right") {
+    cursor.angle = 0;
+  }
+
+  new TWEEN.Tween(cursor)
+    .to({x: 32 * cursor.x_tile + 16, y: 16 - 13 * 32 + 32 * cursor.y_tile})
+    .duration(150)
+    .easing(TWEEN.Easing.Quartic.Out)
+    .start();
+}
+
+
+Game.prototype.baseCaptureJumpCursor = function(player, x, y, direction = -1) {
+  if (this.game_phase != "active") {
+    return;
+  }
+  if (this.base_letters[player].length > 0) {
+    //return;
+    this.baseCaptureClearWord(player);
+  }
+
+  let self = this;
+  let cursor = this.cursor[player];
+  cursor.x_tile = x;
+  cursor.y_tile = y;
+
+  if (direction == -1) {
+    direction = ["up", "down", "left", "right"][Math.floor(Math.random() * 4)];
+  }
   if (direction == "up") {
     cursor.angle = -90;
   } else if (direction == "down") {
@@ -701,6 +746,7 @@ Game.prototype.baseCaptureCheckWord = function(player) {
 }
 
 
+
 Game.prototype.baseCaptureConstructWord = function(word_list, angle) {
   // Get the word. It's everything in this.base_player_letters plus everything touching it in either direction.
   let word = [];
@@ -794,6 +840,8 @@ Game.prototype.baseCaptureUpdateCountdown = function() {
       this.game_phase = "active";
       this.last_play = this.markTime();
 
+      this.setMusic("action_song_2");
+
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);
 
@@ -814,12 +862,16 @@ Game.prototype.baseCaptureUpdatePlayClock = function() {
     this.play_clock_label.visible = true;
     this.play_clock_text_box.visible = true;
     let time_remaining = (this.play_clock*1000 - (this.timeSince(this.last_play))) / 1000;
-    console.log(time_remaining);
     this.play_clock_text_box.text = Math.ceil(time_remaining).toString();
-    if (time_remaining <= 5) {
-      this.play_clock_text_box.style.fill = 0xdb5858;
+    // Green: 0x71d07d
+    // Yellow: 0xf3db3c
+    // Red: 0xdb5858
+    if (time_remaining > 10) {
+      this.play_clock_text_box.style.fill = 0x71d07d;
+    } else if (time_remaining > 5) {
+      this.play_clock_text_box.style.fill = 0xf3db3c;
     } else {
-      this.play_clock_text_box.style.fill = 0xFFFFFF;
+      this.play_clock_text_box.style.fill = 0xdb5858;
     }
     if (time_remaining <= 0) {
       this.game_phase = "gameover";
@@ -854,6 +906,11 @@ Game.prototype.baseCaptureUpdatePlayClock = function() {
 }
 
 
+Game.prototype.baseCaptureInBounds = function(x, y) {
+  return (x >= 0 && x < 14 && y >= 0 && y < 13);
+}
+
+
 Game.prototype.baseCaptureEnemyAction = function() {
   if (this.game_phase != "active") {
     return;
@@ -868,6 +925,9 @@ Game.prototype.baseCaptureEnemyAction = function() {
   // Otherwise, the AI should move. Most of the time, it should move in the same
   // direction as the previous move. Some of the time, it should change direction.
   // A tiny amount of the time, it should leap around the board.
+  //
+  // If the AI is winning by 10 points and has more than 50, it should keep moving but mostly
+  // not play, in order to run out the clock.
   //
   // After moving, the AI will be facing in a particular direction.
   // It should now attempt a word.
@@ -900,10 +960,7 @@ Game.prototype.baseCaptureEnemyAction = function() {
       let word_list = this.enemy_words[word_size];
       word = word_list[Math.floor(Math.random() * word_list.length)];
 
-      let potential_tiles = this.baseCaptureWordList(word, this.cursor[1].x_tile, this.cursor[1].y_tile, this.cursor[1].angle)
-      if (potential_tiles != null) {
-        tiles = potential_tiles;
-      }
+      tiles = this.baseCaptureWordList(word, this.cursor[1].x_tile, this.cursor[1].y_tile, this.cursor[1].angle)
     } else {
       // Move, probably in the same direction as before, with a tiny chance of jumping around the board
       // and a larger chance of just changing direction.
@@ -916,6 +973,8 @@ Game.prototype.baseCaptureEnemyAction = function() {
         this.baseCaptureMoveCursor(direction, 1);
       } else if (dice <= 0.75) {
         // Jump to another occupied board tile
+        let spot = this.played_squares[Math.floor(Math.random() * this.played_squares.length)];
+        this.baseCaptureJumpCursor(1, spot[0], spot[1]);
       } else {
         let move_set = [];
         if (this.cursor[1].x_tile > 0) move_set.push("left");
@@ -929,125 +988,188 @@ Game.prototype.baseCaptureEnemyAction = function() {
       }
 
       let angle = this.cursor[1].angle;
-      let main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
+      let x_tile = this.cursor[1].x_tile;
+      let y_tile = this.cursor[1].y_tile;
+      let main_letter = this.baseCaptureBoard[x_tile][y_tile].text;
+      let x_adj = 0;
+      let y_adj = 0;
 
-      // Now we need to determine 
+      if (angle == 0) x_adj = 1;
+      if (angle == 180) x_adj = -1;
+      if (angle == 90) y_adj = 1;
+      if (angle == -90) y_adj = -1;
 
-    }
-
-
-    if (this.tile_score[1] >= 50 && this.tile_score[1] - this.tile_score[0] >= 10) {
-      // do nothing because winning. run out the clock.
-    } else if (this.tile_score[0] + this.tile_score[1] <= 50) {
-      // Early game, favor expanding with long words.
-      if (Math.random() < 0.7) {
-        let direction = "right";
-        if (this.cursor[1].angle == 180) direction = "left";
-        if (this.cursor[1].angle == 90) direction = "down";
-        if (this.cursor[1].angle == -90) direction = "up";
-        this.baseCaptureMoveCursor(direction, 1);
-      } else {
-        let move_set = [];
-        if (this.cursor[1].x_tile > 0) move_set.push("left");
-        if (this.cursor[1].x_tile < 13) move_set.push("right");
-        if (this.cursor[1].y_tile > 0) move_set.push("up");
-        if (this.cursor[1].y_tile < 12) move_set.push("down");
-        move_set.push(this.cursor[1].favor[0]);
-        move_set.push(this.cursor[1].favor[1]);
-        let direction = move_set[Math.floor(Math.random() * move_set.length)];
-        this.baseCaptureMoveCursor(direction, 1);
-      }
-
-      let angle = this.cursor[1].angle;
-      let main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
-
-      let d = null;
-      if (angle == 0 || angle == 90) {
-        d = this.starting_dictionaries[main_letter];
-      } else {
-        d = this.ending_dictionaries[main_letter];
-      }
-      word = d[Math.floor(Math.random() * d.length)];
-
-      if (angle == 0 || angle == 90) {
-        // Slice the first letter
-        word = word.slice(1);
-      } else {
-        // Slice the last letter
-        word = word.slice(0,-1);
-      }
-      let x = this.cursor[1].x_tile;
-      let y = this.cursor[1].y_tile;
-      if (angle == 0) x += 1;
-      if (angle == 180) x -= 1;
-      if (angle == 90) y += 1;
-      if (angle == -90) y -= 1;
-
-      let potential_tiles = this.baseCaptureWordList(word, x, y, angle)
-      if (potential_tiles != null) {
-        tiles = potential_tiles;
-      }
-    } else {
-      // Late game, favor random moves and short words.
-      // Still not sure how to do linking words!
-      if (Math.random() < 0.7) {
-        let direction = "right";
-        if (this.cursor[1].angle == 180) direction = "left";
-        if (this.cursor[1].angle == 90) direction = "down";
-        if (this.cursor[1].angle == -90) direction = "up";
-        this.baseCaptureMoveCursor(direction, 1);
-      } else {
-        let move_set = [];
-        if (this.cursor[1].x_tile > 0) move_set.push("left");
-        if (this.cursor[1].x_tile < 13) move_set.push("right");
-        if (this.cursor[1].y_tile > 0) move_set.push("up");
-        if (this.cursor[1].y_tile < 12) move_set.push("down");
-        let direction = move_set[Math.floor(Math.random() * (move_set.length + 1))];
-        this.baseCaptureMoveCursor(direction, 1);
-      }
-
-      let angle = this.cursor[1].angle;
-      let main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
-
-      let d = null;
-      if (angle == 0 || angle == 90) {
-        d = this.starting_dictionaries[main_letter];
-      } else {
-        d = this.ending_dictionaries[main_letter];
-      }
-      for (let i = 0; i < 8; i++) {
-        let w = d[Math.floor(Math.random() * d.length)];
-        if (w.length <= 4 && (word == null || word.length > w.length)) {
-          word = w;
-        }
-      }
-
-      if (word != null) {
-        console.log("how about " + word);
-        if (angle == 0 || angle == 90) {
-          // Slice the first letter
-          word = word.slice(1);
+      let forward_room = 0;
+      let m = 1;
+      let terminus_is_letter = false;
+      while (m > 0 && this.baseCaptureInBounds(x_tile + m * x_adj, y_tile + m * y_adj)) {
+        if (this.baseCaptureBoard[x_tile + m * x_adj][y_tile + m * y_adj] == "") {
+          forward_room += 1;
+          m += 1;
         } else {
-          // Slice the last letter
-          word = word.slice(0,-1);
+          terminus_is_letter = true;
+          m = -100;
         }
-        let x = this.cursor[1].x_tile;
-        let y = this.cursor[1].y_tile;
-        if (angle == 0) x += 1;
-        if (angle == 180) x -= 1;
-        if (angle == 90) y += 1;
-        if (angle == -90) y -= 1;
+      }
 
-        let potential_tiles = this.baseCaptureWordList(word, x, y, angle)
-        if (potential_tiles != null) {
-          tiles = potential_tiles;
+      let common_case = false;
+
+      //console.log("Room is " + forward_room + ", terminus_is_letter is " + terminus_is_letter);
+      // if (terminus_is_letter && forward_room > 0 && forward_room <= 5) {
+      //   let a = !this.baseCaptureInBounds(x_tile - x_adj, y_tile - y_adj);
+      //   let b = this.baseCaptureBoard[x_tile - x_adj][y_tile - y_adj] == "";
+      //   let c = !this.baseCaptureInBounds(x_tile + (forward_room+1) * x_adj, y_tile + (forward_room+1) * y_adj);
+      //   let d = this.baseCaptureBoard[x_tile + (forward_room+1) * x_adj][y_tile + (forward_room+1) * y_adj];
+      //   // console.log(forward_room + "," + a + ","
+      //   //   + b + ","
+      //   //   + c + ","
+      //   //   + d)
+      //   console.log(d);
+      // }
+      
+      // Now we need to determine what kind of move we can make.
+      if (!this.baseCaptureInBounds(x_tile + x_adj, y_tile + y_adj)
+        || this.baseCaptureBoard[x_tile + x_adj][y_tile + y_adj] != "") {
+        // Here, the tile ahead is taken or we are at a wall. Do nothing.
+      } else if (this.baseCaptureInBounds(x_tile - x_adj, y_tile - y_adj)
+        && this.baseCaptureBoard[x_tile - x_adj][y_tile - y_adj] != "") {
+        // Since the tile opposite us is taken, we're either playing a prefix (180 or -90) or a suffix (0 or 90).
+        existing_word = this.baseCaptureConstructWord([this.baseCaptureBoard[x_tile][y_tile]], angle);
+
+        if (angle == 180 || angle == -90) {
+          // Here we could play a prefix. Try prefixes.
+          let prefixes = ["RE", "PRE", "DE", "ANTI", "BE", "DIS",
+            "EXTRA", "IN", "INTRA", "INTER", "OUT", "BI", "TRI", 
+            "OVER", "POST", "PRO", "SUB", "TRANS", "UN", "UNDER"];
+          shuffleArray(prefixes);
+          for (let i = 0; i < prefixes.length; i++) {
+            let prefix = prefixes[i];
+            if ((prefix + existing_word) in this.legal_words) {
+              word = prefix;
+              tiles = this.baseCaptureWordList(word, x_tile + x_adj, y_tile + y_adj, angle)
+              if (tiles != null) {
+                break;
+              }
+            } 
+          }
+        } else {
+          // Here we could play a suffix or an autocomplete.
+          let suffixes = ["ERS", "ING", "INGLY", "ESQUE", "ION", "FUL", "ISH",
+            "INGS", "EST", "IEST", "IER", "NESS", "MENT", "TY", "ITY", "SHIP",
+            "IVE", "LESS", "Y", "S", "ES", "ER", "ED", "EN", ];
+          shuffleArray(suffixes);
+          for (let i = 0; i < suffixes.length; i++) {
+            let suffix = suffixes[i];
+            if ((existing_word + suffix) in this.legal_words) {
+              word = suffix;
+              tiles = this.baseCaptureWordList(word, x_tile + x_adj, y_tile + y_adj, angle)
+              if (tiles != null) {
+                break;
+              }
+            } 
+          }
+
+          if (tiles == null) {
+            if (existing_word in this.long_spelling_prediction) {
+              word = this.long_spelling_prediction[existing_word].slice(existing_word.length);
+
+              if (word.length > 0) {
+                tiles = this.baseCaptureWordList(word, x_tile + x_adj, y_tile + y_adj, angle);
+              }
+            }
+          }
+        }
+      } else if (terminus_is_letter && forward_room > 0 && forward_room <= 5
+        && (!this.baseCaptureInBounds(x_tile - x_adj, y_tile - y_adj) || this.baseCaptureBoard[x_tile - x_adj][y_tile - y_adj] == "")
+        && (!this.baseCaptureInBounds(x_tile + (forward_room+2) * x_adj, y_tile + (forward_room+2) * y_adj) 
+              || this.baseCaptureBoard[x_tile + (forward_room+2) * x_adj][y_tile + (forward_room+2) * y_adj] == "")) {
+        // There is a gap of five letters or less!
+        // We can try for a bridge word. Note that if this fails, we still want to hit the common case.
+        console.log("BRIDGE WORD!");
+
+
+        let bridge_letter = this.baseCaptureBoard[x_tile + (forward_room+1) * x_adj][y_tile + (forward_room+1) * y_adj].text;
+        let desired_length = forward_room + 2;
+        let d = this.bridge_word_dictionaries[main_letter + bridge_letter];
+        // NOTE: because of angles, it may be necessary to swap the main and bridge letters.
+        if (angle == 180 || angle == -90) d = this.bridge_word_dictionaries[bridge_letter + main_letter];
+        //console.log(main_letter + bridge_letter);
+        //console.log(d);
+        let candidate_word = null;
+        // Not every pair has words in it! This was an actual bug I thankfully triggered pretty quickly.
+        if (d.length > 0) {
+          for (let z = 0; z < 20; z++) {
+            let w = d[Math.floor(Math.random() * d.length)];
+            if (w.length == desired_length) {
+              candidate_word = w;
+              break;
+            }
+          }
+        }
+
+        if (candidate_word != null) {
+          word = candidate_word.slice(1,-1);
+          tiles = this.baseCaptureWordList(word, x_tile + x_adj, y_tile + y_adj, angle)
+        } else {
+          console.log("I failed to form a bridge word");
+          common_case = true;
         }
       } else {
-        "words too long";
+        // hit the common case.
+        common_case = true;
+      }
+
+      if (common_case) {
+        // This is the last and most common case. We're free to play ahead a certain distance, and will use it.
+
+        let d = null;
+        let tries = 20;
+        if (forward_room >= 3) {
+          if (angle == 0 || angle == 90) {
+            d = this.starting_dictionaries[main_letter];
+          } else {
+            d = this.ending_dictionaries[main_letter];
+          }
+        } else {
+          tries = 40;
+          if (angle == 0 || angle == 90) {
+            console.log("SHORT START");
+            d = this.short_starting_dictionaries[main_letter];
+          } else {
+            console.log("SHORT END");
+            d = this.short_ending_dictionaries[main_letter];
+          }
+        }
+
+        for (let z = 0; z < tries; z++) {
+          let w = d[Math.floor(Math.random() * d.length)];
+          if (w.length < forward_room + 1) {
+            if (angle == 0 || angle == 90) word = w.slice(1);
+            if (angle == 180 || angle == -90) word = w.slice(0,-1);
+            tiles = this.baseCaptureWordList(word, x_tile + x_adj, y_tile + y_adj, angle)
+            if (forward_room < 4) {
+              console.log("FOUND A SHORT");
+              console.log(w);
+            }
+            break;
+          }
+        }
       }
     }
+
+
+    // Now play what we've got
 
     if (tiles != null) {
+      if(this.tile_score[1] >= 50 && this.tile_score[1] - this.tile_score[0] >= 10) {
+        // Probably best not to play. Run the clock and let the player beat themselves.
+        if (run_clock_when_winning) {
+          if (Math.random() < 0.7) {
+            return;
+          }
+        }
+      }
+
       let angle = this.cursor[1].angle;
       let full_word = this.baseCaptureConstructWord(tiles, angle);
 
@@ -1074,6 +1196,7 @@ Game.prototype.baseCaptureEnemyAction = function() {
         }
       }
     }
+
   } else if (this.enemy_phase == "typing") {
     if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_typing_speed) {
       return;
@@ -1129,152 +1252,6 @@ Game.prototype.baseCaptureWordList = function(word, x_tile, y_tile, angle) {
   }
   return tiles;
 }
-
-
-Game.prototype.oldBaseCaptureEnemyAction = function() {
-  if (this.game_phase != "active") {
-    return;
-  }
-
-  if(this.timeSince(this.enemy_last_action) <= 60000/this.enemy_move_speed) {
-    return;
-  } else {
-    // console.log(this.timeSince(this.enemy_last_action));
-    this.enemy_last_action = this.timeSince(0.2 * (60000/this.enemy_move_speed) - 0.4 * Math.random() * 60000/this.enemy_move_speed);
-  }
-
-  if (this.enemy_phase == "moving") {
-    // Make a random move
-    let move_set = [];
-    if (this.cursor[1].x_tile > 0) move_set.push("left");
-    if (this.cursor[1].x_tile < 13) move_set.push("right");
-    if (this.cursor[1].y_tile > 0) move_set.push("up");
-    if (this.cursor[1].y_tile < 12) move_set.push("down");
-    let direction = move_set[Math.floor(Math.random() * (move_set.length + 1))];
-    this.baseCaptureMoveCursor(direction, 1);
-
-    // Check if we're on a letter tile
-    let main_letter = "";
-    if (this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile] != "") {
-      main_letter = this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile].text;
-    }
-
-    let cursor_angle = this.cursor[1].angle;
-
-    // Search for a word whose beginning or end matches the current letter
-    // (or any word if there's no current letter)
-    // TO DO: test that it doesn't violate space constraints!!!!!!
-    let candidate_word = "";
-
-    for (let i = 0; i < this.enemy_guess_power; i++) {
-      let min = 2;
-      let extra = 6;
-      if (main_letter == "" || Math.random() > 0.7) {
-        min = 5;
-        extra = 8;
-      }
-
-      let word_size = min + Math.floor(Math.random() * extra);
-      let word_list = this.enemy_words[word_size];
-      let word = word_list[Math.floor(Math.random() * word_list.length)];
-
-      if (main_letter == "") {
-        candidate_word = word;
-      } else if (cursor_angle == 0 || cursor_angle == 90) {
-        if (word[0] == main_letter) {
-          candidate_word = word;
-        }
-      } else if (cursor_angle == 180 || cursor_angle == -90) {
-        if (word[word.length - 1] == main_letter) {
-          candidate_word = word;
-        }
-      }
-    }
-
-    // If we have a word,
-    if (candidate_word != "") {
-      let start_x = this.cursor[1].x_tile;
-      let start_y = this.cursor[1].y_tile;
-      
-      // Build a tile collection for it so we can test that collection.
-      let tiles = [];
-      let bad_tiles = false;
-      for (let i = 0; i < candidate_word.length; i++) {
-        let x = 0;
-        let y = 0;
-        if (cursor_angle == 0) {
-          x = this.cursor[1].x_tile + i;
-          y = this.cursor[1].y_tile;
-        }
-        if (cursor_angle == 180) {
-          x = this.cursor[1].x_tile + i + 1 - candidate_word.length;
-          y = this.cursor[1].y_tile;
-        }
-        if (cursor_angle == 90) {
-          x = this.cursor[1].x_tile;
-          y = this.cursor[1].y_tile + i;
-        }
-        if (cursor_angle == -90) {
-          x = this.cursor[1].x_tile;
-          y = this.cursor[1].y_tile + i + 1 - candidate_word.length;
-        }
-        
-        let do_it = true;
-        if (main_letter != "" && i == 0 && (cursor_angle == 0 || cursor_angle == 90)) do_it = false;
-        if (main_letter != "" && i == candidate_word.length - 1 && (cursor_angle == 180 || cursor_angle == -90)) do_it = false;
-        if (do_it) {
-          tiles.push({
-            x_tile: x,
-            y_tile: y,
-            text: candidate_word[i]
-          });
-        }
-        if (x < 0 || y < 0 || x > 13 || y > 12) bad_tiles = true;
-      }
-
-      if (!bad_tiles) {
-        let word = this.baseCaptureConstructWord(tiles, cursor_angle);
-
-        this.can_play_word[1] = this.baseCaptureLegalWord(word);
-
-        // Check perpendicular words
-        let perpendicular = cursor_angle == 180 || cursor_angle == 0 ? 90 : 0;
-        for (let i = 0; i < tiles.length; i++) {
-          let perpendicular_word = this.baseCaptureConstructWord([tiles[i]], perpendicular);
-          if (perpendicular_word.length >= 2) {
-            if (!this.baseCaptureLegalWord(perpendicular_word)) {
-              this.can_play_word[1] = false;
-            }
-          }
-        }
-
-        if (this.can_play_word[1] == true) {
-          this.enemy_phase = "typing";
-          this.enemy_typing_mark = 0;
-
-          this.enemy_word = "";
-          for (let i = 0; i < tiles.length; i++) {
-            this.enemy_word += tiles[i].text;
-          }
-        }
-      }
-    }
-  } else if (this.enemy_phase == "typing") {
-    //console.log(this.word_to_play[1]);
-    if (this.enemy_typing_mark < this.enemy_word.length) {
-      this.baseCaptureAddLetter(this.enemy_word[this.enemy_typing_mark], 1);
-      this.enemy_typing_mark += 1;
-    } else {
-      this.baseCaptureEnterAction(1);
-      this.enemy_phase = "moving";
-      this.enemy_typing_mark = 0;
-      this.can_play_word[1] = false;
-      this.enemy_word = "";
-    }
-  }
-}
-
-
 
 
 Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {

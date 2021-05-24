@@ -1,12 +1,12 @@
 'use strict';
 
-var use_music = true;
+var use_music = false;
 var use_sound = true;
 var use_scores = false;
 var log_performance = true;
 
 // var first_screen = "1p_base_capture";
-// var first_screen = "title";
+// var first_screen = "intro";
 var first_screen = "cutscene";
 
 var performance_result = null;
@@ -273,13 +273,18 @@ class Game {
     }
 
     this.spelling_prediction = {};
+    this.long_spelling_prediction = {};
 
     this.starting_dictionaries = [];
     this.ending_dictionaries = [];
+    this.short_starting_dictionaries = [];
+    this.short_ending_dictionaries = [];
     this.bridge_word_dictionaries = [];
     for (let i = 0; i < letter_array.length; i++) {
       this.starting_dictionaries[letter_array[i]] = [];
       this.ending_dictionaries[letter_array[i]] = [];
+      this.short_starting_dictionaries[letter_array[i]] = [];
+      this.short_ending_dictionaries[letter_array[i]] = [];
       for (let j = 0; j < letter_array.length; j++)
       this.bridge_word_dictionaries[letter_array[i]+letter_array[j]] = [];
     }
@@ -314,6 +319,8 @@ class Game {
           let last = word.toUpperCase()[word.length - 1];
           if (word.length >= 2 && word.length <= 9) self.starting_dictionaries[first].push(word.toUpperCase());
           if (word.length >= 2 && word.length <= 9) self.ending_dictionaries[last].push(word.toUpperCase());
+          if (word.length >= 2 && word.length < 4) self.short_starting_dictionaries[first].push(word.toUpperCase());
+          if (word.length >= 2 && word.length < 4) self.short_ending_dictionaries[last].push(word.toUpperCase());
           if (word.length >= 3 && word.length <= 6) self.bridge_word_dictionaries[first+last].push(word.toUpperCase());    
         }
         if (word != null && word.length <= board_width) {
@@ -337,6 +344,9 @@ class Game {
       if (!(slice in this.spelling_prediction) || word.length < this.spelling_prediction[slice].length) {
         this.spelling_prediction[slice] = word;
       }
+      if (!(slice in this.long_spelling_prediction) || word.length > this.long_spelling_prediction[slice].length && word.length <= 12) {
+        this.long_spelling_prediction[slice] = word;
+      } 
     }
   }
 

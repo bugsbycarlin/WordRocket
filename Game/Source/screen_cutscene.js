@@ -283,13 +283,13 @@ Game.prototype.cutsceneUpdate = function(diff) {
 scenes = {
   intro: [
     [
-      {image: "1988_v2_1080.png", x: 600, y: 440},
+      {image: "1988.png", x: 600, y: 440},
       {text: "1988", x: 180, y: 160, drift: "right"},
       {text: "Crazy time to live in Berlin.", x: 890, y: 720, drift: "left"},
       {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1}
     ],
     [
-      {image: "fight_image_v3.png", x: 690, y: 480},
+      {image: "fight_image.png", x: 690, y: 480},
       {text: "Tensions were high at the first \nWorld Nerd Games.", x: 360, y: 160, drift: "right"},
       {text: "The opening ceremonies were chaos.", x: 810, y: 810, drift: "left"},
       {button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1}
@@ -306,7 +306,7 @@ scenes = {
       {button: "Next", x: 90, y: 50, swipe_x: -1, swipe_y: 1}
     ],
     [
-      {image: "word_rockets_image_1280.png", x: 640, y: 480, drift: "scale"},
+      {image: "word_rockets.png", x: 640, y: 480, drift: "scale"},
       {text: "Mavis Bennett's \"Word Rockets\" used \nadvanced LASER technology...", x: 420, y: 60},
       {text: "to give digital objects physical form.", x: 810, y: 460},
       {text: "My class was addicted.", x: 1000, y: 660},
@@ -329,7 +329,7 @@ scenes = {
       {button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1}
     ],
     [
-      {image: "us_vs_them_v3.png", x: 620, y: 450},
+      {image: "us_vs_them.png", x: 620, y: 450},
       {text: "So we went up against the Russians. \nThey were bigger, they were stronger, \nthey were really good typists...", x: 430, y: 120},
       {text: "But god damnit*, we were Americans.", x: 850, y: 750, drift: "left"},
       {text: "*Sorry, Mom", x: 200, y: 900},
@@ -354,7 +354,7 @@ scenes = {
       {appears: 9, image:"zhukov_2a.png", x: 255, y: 520},
       {appears: 9, text: "For the Base Capture portion of the \ncompetition, the USSR selects...", size: 24, x: 320, y: 100},
       {appears: 10, text: "Moskva High student Georgy Zhukov.", size: 24, x: 640, y: 860},
-      {appears: 10, image:"zhukov_2b3.png", x: 640, y: 450},
+      {appears: 10, image:"zhukov_2b.png", x: 640, y: 450},
       {appears: 11, image:"zhukov_2c.png", x: 1000, y: 545},
       {appears: 12, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
     ],

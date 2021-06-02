@@ -127,6 +127,32 @@ Game.prototype.makeElectric = function(parent, x, y, xScale, yScale) {
 }
 
 
+Game.prototype.makeSmoke = function(parent, x, y, xScale, yScale) {
+  let sheet = PIXI.Loader.shared.resources["Art/smoke.json"].spritesheet;
+  let smoke_sprite = new PIXI.AnimatedSprite(sheet.animations["smoke"]);
+  smoke_sprite.anchor.set(0.5,0.5);
+  smoke_sprite.position.set(x, y);
+  // smoke_sprite.angle = Math.random() * 360;
+  parent.addChild(smoke_sprite);
+  smoke_sprite.animationSpeed = 0.4; 
+  smoke_sprite.scale.set(xScale, yScale);
+
+  // smoke_sprite.onLoop = function() {
+  //   this.angle = Math.random() * 360;
+  // }
+  // console.log("But abba tho");
+  parent.addChild(smoke_sprite);
+  smoke_sprite.loop = false;
+  smoke_sprite.onComplete = function() {
+    // delete me!
+    console.log("Delete me!");
+    parent.removeChild(smoke_sprite);
+  }
+  smoke_sprite.play();
+  return smoke_sprite;
+}
+
+
 Game.prototype.makePixelatedLetterTile = function(parent, text, color) {
   var tile = new PIXI.Sprite(PIXI.Texture.from("Art/PixelatedKeys/pixelated_" + color + "_" + text + ".png"));
   parent.addChild(tile);

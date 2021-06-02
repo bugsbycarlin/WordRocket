@@ -342,3 +342,17 @@ Game.prototype.handleKeyDown = function(ev) {
     }
   }
 }
+
+
+Game.prototype.handleMouseMove = function(ev) {
+  if(this.current_screen == "1p_base_capture") {
+    this.baseCaptureMouseMove(ev);
+  } 
+}
+
+
+Game.prototype.handleMouseDown = function(ev) {
+  if(this.current_screen == "1p_base_capture") {
+    this.baseCaptureMouseDown(ev);
+  } 
+}

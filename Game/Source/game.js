@@ -1,13 +1,14 @@
 'use strict';
 
 var use_music = false;
-var use_sound = true;
+var use_sound = false;
 var use_scores = false;
 var log_performance = true;
 
-// var first_screen = "1p_base_capture";
+var first_screen = "1p_base_capture";
 // var first_screen = "intro";
-var first_screen = "cutscene";
+// var first_screen = "title";
+// var first_screen = "cutscene";
 
 var performance_result = null;
 
@@ -65,6 +66,8 @@ class Game {
     this.network = new Network(this);
 
     document.addEventListener("keydown", function(ev) {self.handleKeyDown(ev)}, false);
+    document.addEventListener("mousemove", function(ev) {self.handleMouseMove(ev)}, false);
+    document.addEventListener("mousedown", function(ev) {self.handleMouseDown(ev)}, false);
 
     this.keyboard_mode = "QWERTY";
 
@@ -72,6 +75,7 @@ class Game {
     this.pause_time = 0;
 
     this.freefalling = [];
+    this.shakers = [];
 
     this.difficulty_level = localStorage.getItem("word_rockets_difficulty_level");
     if (this.difficulty_level == null) {
@@ -199,21 +203,26 @@ class Game {
       PIXI.Loader.shared.add("Art/intro.png").load(function() {
         if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
           PIXI.Loader.shared.add("Art/fire.json").load(function() {
-            if (first_screen == "intro") {
-              self.initializeIntro();
-            } else if (first_screen == "title") {
-              self.initializeTitle();
-            } else if (first_screen == "1p_base_capture") {
-              self.resetGame();
-              // self.score = 999455;
-              self.initialize1pBaseCapture();
-            } else if (first_screen == "cutscene") {
-              self.initializeCutscene("old_man");
-            }
             if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
               PIXI.Loader.shared.add("Art/explosion.json").load(function() {
                 if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
                   PIXI.Loader.shared.add("Art/electric.json").load(function() {
+                    if (!PIXI.Loader.shared.resources["Art/smoke.json"]) {
+                      PIXI.Loader.shared.add("Art/smoke.json").load(function() {
+
+                        if (first_screen == "intro") {
+                          self.initializeIntro();
+                        } else if (first_screen == "title") {
+                          self.initializeTitle();
+                        } else if (first_screen == "1p_base_capture") {
+                          self.resetGame();
+                          // self.score = 999455;
+                          self.initialize1pBaseCapture();
+                        } else if (first_screen == "cutscene") {
+                          self.initializeCutscene("old_man");
+                        }
+                      });
+                    }
                   });
                 }
               });

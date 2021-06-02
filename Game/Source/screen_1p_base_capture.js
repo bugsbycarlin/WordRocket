@@ -11,6 +11,8 @@ Game.prototype.initialize1pBaseCapture = function() {
 
   this.base_letters = [];
 
+  this.shakers = [];
+
   this.base_letters[0] = [];
   this.base_letters[1] = [];
 
@@ -23,6 +25,8 @@ Game.prototype.initialize1pBaseCapture = function() {
   // 1800, 900 is inhuman
   // 3000, 1500 is impossible
   // 900, 450: 3 - 6, and many of the games were *very* close.
+  // 500, 250: pretty fun
+  // 100, 100: nice and easy.
   this.enemy_move_speed = 900;
   this.enemy_typing_speed = 450;
   this.enemy_phase = "moving"; // moving, typing
@@ -64,9 +68,42 @@ Game.prototype.resetBase = function() {
   var self = this;
   var screen = this.screens["1p_base_capture"];
 
-  var background = new PIXI.Sprite(PIXI.Texture.from("Art/game_background.png"));
-  background.anchor.set(0, 0);
-  screen.addChild(background);
+  var far_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_far_background.png"));
+  far_background.anchor.set(0, 0);
+  screen.addChild(far_background);
+
+  // the enemy board
+  this.enemy_area = new PIXI.Container();
+  screen.addChild(this.enemy_area);
+  this.enemy_area.position.set(this.width * 1/2 + 325 - 16,340);
+  this.enemy_area.scale.set(0.5,0.5);
+
+  this.enemy_live_area = new PIXI.Container();
+  screen.addChild(this.enemy_live_area);
+  this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
+  this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
+
+  this.enemy_palette = this.makeKeyboard({
+    player: 2,
+    parent: screen, x: 1062.5, y: 472,
+    defense: this.enemy_defense, 
+    action: function(letter) {
+    }
+  });
+  this.enemy_palette.scale.set(0.3125, 0.3125);
+
+  this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/opponent_2.png"));
+  this.opponent_image.anchor.set(0.5, 0.5);
+  // this.opponent_image.scale.set(3,3);
+  this.opponent_image.position.set(1100, 304);
+  screen.addChild(this.opponent_image);
+
+  var near_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_near_background.png"));
+  near_background.anchor.set(0, 0);
+  screen.addChild(near_background);
+
+  this.mouse_cord = new PIXI.Container();
+  screen.addChild(this.mouse_cord);
 
   this.player_palette = this.makeKeyboard({
     player: 1,
@@ -83,15 +120,6 @@ Game.prototype.resetBase = function() {
     }
   });
 
-  this.enemy_palette = this.makeKeyboard({
-    player: 2,
-    parent: screen, x: 1062.5, y: 472,
-    defense: this.enemy_defense, 
-    action: function(letter) {
-    }
-  });
-  this.enemy_palette.scale.set(0.3125, 0.3125);
-
   // the player's board
   this.player_area = new PIXI.Container();
   screen.addChild(this.player_area);
@@ -102,40 +130,6 @@ Game.prototype.resetBase = function() {
   this.player_live_area.position.set(this.player_area.x, this.player_area.y);
   this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
 
-  // silly mouse buttons
-  for (let i = 0; i < 3; i++) {
-    let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
-    mouse_button.anchor.set(0, 0);
-    mouse_button.position.set(962.5 + 39.25*i, 741);
-    screen.addChild(mouse_button);
-
-    mouse_button.interactive = true;
-    mouse_button.buttonMode = true;
-    mouse_button.button_pressed = false;
-    mouse_button.on("pointerdown", function() {
-      self.soundEffect("keyboard_click_1", 1.0);
-      if (mouse_button.button_pressed != true) {
-        mouse_button.button_pressed = true;
-        mouse_button.position.y += 3;
-        delay(function() {
-          mouse_button.button_pressed = false;
-          mouse_button.position.y -= 3;
-        }, 50);
-      }
-    });
-  }
-
-  // the enemy board
-  this.enemy_area = new PIXI.Container();
-  screen.addChild(this.enemy_area);
-  this.enemy_area.position.set(this.width * 1/2 + 325 - 16,340);
-  this.enemy_area.scale.set(0.5,0.5);
-
-  this.enemy_live_area = new PIXI.Container();
-  screen.addChild(this.enemy_live_area);
-  this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
-  this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
-
   for (var p = 0; p < 2; p++) {
     let area = this.player_area;
     if (p == 1) area = this.enemy_area;
@@ -143,35 +137,51 @@ Game.prototype.resetBase = function() {
     // Sky and Ground
     let sky = new PIXI.Sprite(PIXI.Texture.from("Art/base_sky.png"));
     sky.anchor.set(0,1);
-    sky.position.set(0, -13 * 32);
+    sky.position.set(-3 * 32, -13 * 32);
     area.addChild(sky);
+    let sky2 = new PIXI.Sprite(PIXI.Texture.from("Art/base_sky_2.png"));
+    sky2.anchor.set(0,1);
+    sky2.scale.set(1,1);
+    sky2.position.set(12*32, -13 * 32);
+    area.addChild(sky2);
 
     let ground = new PIXI.Sprite(PIXI.Texture.from("Art/base_ground.png"));
     ground.anchor.set(0,1);
-    ground.position.set(0, 0);
+    ground.position.set(-96, 0);
+    ground.scale.set(20/14, 1);
     area.addChild(ground);
 
     // Rock Wall
-    for (var i = 0; i < 2; i++) {
-      let rock_wall = new PIXI.Container();
-      area.addChild(rock_wall);
-      for (var m = 1; m < 4; m++) {
-        for (var n = 1; n < 16; n++) {
-          let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
-          c = (30 + Math.floor(Math.random() * 30)) / 255.0;
-          tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-          tile.width = 32;
-          tile.height = 32;
-          shift = i == 0 ? 0 : (board_width + 5) * 32;
-          tile.position.set(shift - 32 * m, 0 - 32 * n);
-          rock_wall.addChild(tile);
-        }
-      }
-      rock_wall.cacheAsBitmap = true;
+    // for (var i = 0; i < 2; i++) {
+    //   let rock_wall = new PIXI.Container();
+    //   area.addChild(rock_wall);
+    //   for (var m = 1; m < 4; m++) {
+    //     for (var n = 1; n < 16; n++) {
+    //       let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    //       c = (30 + Math.floor(Math.random() * 30)) / 255.0;
+    //       tile.tint = PIXI.utils.rgb2hex([c,c,c]);
+    //       tile.width = 32;
+    //       tile.height = 32;
+    //       shift = i == 0 ? 0 : (board_width + 5) * 32;
+    //       tile.position.set(shift - 32 * m, 0 - 32 * n);
+    //       rock_wall.addChild(tile);
+    //     }
+    //   }
+    //   rock_wall.cacheAsBitmap = true;
+    // }
+
+    // Sidebar lands
+    for (let i = 0; i <= 1; i++) {
+      let shift = i == 0 ? 0 : 20 * 32;
+      let sidebar_land = new PIXI.Sprite(PIXI.Texture.from("Art/sidebar_land_setback.png"))
+      sidebar_land.anchor.set(0, 1);
+      sidebar_land.scale.set(i == 0 ? 1 : -1, 1);
+      sidebar_land.position.set(-96 + shift, 0);
+      area.addChild(sidebar_land);
     }
 
     // Board lines
-    for (let i = 0; i < 13; i++) {
+    for (let i = 0; i < 14; i++) {
       let vertical = PIXI.Sprite.from(PIXI.Texture.WHITE);
       vertical.tint = 0x000000;
       vertical.width = 4;
@@ -192,6 +202,8 @@ Game.prototype.resetBase = function() {
     }
   }
 
+  this.player_area.underlayer = new PIXI.Container();
+  this.player_area.addChild(this.player_area.underlayer)
   this.player_area.layers = [];
   for (let i = 0; i < 13; i++) {
     let c = new PIXI.Container();
@@ -199,11 +211,20 @@ Game.prototype.resetBase = function() {
     this.player_area.layers.push(c);
   }
 
+  this.trees = [];
   this.baseCaptureBoard = [];
   for (let x = 0; x < 14; x++) {
     this.baseCaptureBoard[x] = [];
+    this.trees[x] = [];
     for (let y = 0; y < 13; y++) {
       this.baseCaptureBoard[x][y] = "";
+      this.trees[x][y] = "";
+      if (x > 0 && x < 13 && y > 0 && y < 12 && Math.random() < 0.03) {
+        this.trees[x][y] = new PIXI.Sprite(PIXI.Texture.from("Art/tree_" + Math.ceil(Math.random() * 2) + ".png"))
+        this.trees[x][y].anchor.set(0.5, 0.95);
+        this.trees[x][y].position.set(32 * x + 16, -13 * 32 + 32 * y + 16);
+        this.player_area.layers[y].addChild(this.trees[x][y]);
+      }
     }
   }
 
@@ -270,13 +291,6 @@ Game.prototype.resetBase = function() {
   screen.addChild(this.play_clock_text_box);
   this.play_clock_text_box.visible = false;
 
-
-  var guy = new PIXI.Sprite(PIXI.Texture.from("Art/soviet_guy_draft_2.png"));
-  guy.anchor.set(0.5, 0.5);
-  guy.scale.set(3,3);
-  guy.position.set(1100, 299);
-  screen.addChild(guy);
-
   this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0x000000, letterSpacing: 3, align: "center"});
   this.announcement.anchor.set(0.5,0.5);
   this.announcement.position.set(470, 203);
@@ -334,6 +348,47 @@ Game.prototype.resetBase = function() {
   if (corner == 3) ec.favor = ["down", "left"];
   console.log(ec.favor);
   ec.visible = false;
+
+  // this.mouse = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_v3.png"));
+  // this.mouse.anchor.set(0,0);
+  // this.mouse.position.set(300, 300);
+  // screen.addChild(this.mouse);
+
+  this.mouse_tester = new PIXI.Container();
+  this.mouse_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_v4.png"));
+  this.mouse_sprite.anchor.set(0.5,0.5);
+  this.mouse_tester.position.set(1084, 826);
+  screen.addChild(this.mouse_tester);
+  this.mouse_tester.addChild(this.mouse_sprite);
+
+    // silly mouse buttons
+  this.mouse_tester.buttons = [];
+  for (let i = 0; i < 3; i++) {
+    let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
+    mouse_button.anchor.set(0, 0);
+    mouse_button.position.set(1022.5 + 39.25*i - 1084, 748 - 826);
+    this.mouse_tester.addChild(mouse_button);
+    this.mouse_tester.buttons.push(mouse_button);
+
+    mouse_button.interactive = true;
+    mouse_button.buttonMode = true;
+    mouse_button.button_pressed = false;
+    mouse_button.on("pointerdown", function() {
+      self.soundEffect("keyboard_click_1", 1.0);
+      if (mouse_button.button_pressed != true) {
+        mouse_button.button_pressed = true;
+        mouse_button.position.y += 3;
+        delay(function() {
+          mouse_button.button_pressed = false;
+          mouse_button.position.y -= 3;
+        }, 50);
+      }
+    });
+  }
+
+  this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
+
+  this.shakers = [screen, this.player_area, this.enemy_area, this.opponent_image];
 }
 
 Game.prototype.baseCaptureKeyDown = function(key) {
@@ -394,16 +449,105 @@ Game.prototype.baseCaptureKeyDown = function(key) {
 }
 
 
-Game.prototype.baseCaptureClearWord = function(player) {
+Game.prototype.baseCaptureMouseMove = function(ev) {
+  let mouse_data = pixi.renderer.plugins.interaction.mouse.global;
+  // console.log(mouse_data.x);
+  // this.mouse.position.set(mouse_data.x, mouse_data.y);
+  // x is 141 to 784
+  // y is 40 to 530
+  if (this.mouse_tester != null && mouse_data.x >= 140 && mouse_data.x <= 784 && mouse_data.y >= 40 && mouse_data.y <= 530) {
+    this.mouse_tester.position.set(1084 - 250/2 + 250 * (mouse_data.x - 141) / (784-141) , 826 - 180/2 + 180 * (mouse_data.y - 40) / (530-40));
+  
+    this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
+  }
+}
+
+
+Game.prototype.drawMouseCord = function(x, y) {
+  while(this.mouse_cord.children[0]) {
+    let item = this.mouse_cord.removeChild(this.mouse_cord.children[0]);
+    item.destroy();
+  }
+
+  let graph = new PIXI.Graphics();
+  this.mouse_cord.addChild(graph);
+
+  let start_x = 870;
+  let start_y = 686 - 30 + (x - start_x) / 20;
+
+  // Move it to the beginning of the line
+  graph.position.set(start_x, start_y);
+
+  // Draw the line (endPoint should be relative to graph's position)
+  let l = graph.lineStyle(5, 0x000000).moveTo(0, 0);
+  for (let i = 1; i <= 100; i++) {
+    let t = i / 100;
+    let pt = easeOutBack(t);
+    l = l.lineTo(pt * (x - start_x), t * (y - 90 - start_y));
+  }
+
+  l = graph.lineStyle(5, 0x454F5E).moveTo(0, 0);
+  for (let i = 1; i <= 100; i++) {
+    let t = i / 100;
+    let pt = easeOutBack(t);
+    l = l.lineTo(pt * (x - start_x), t * (y - 90 - start_y) - 2);
+  }
+  
+}
+
+// https://easings.net/#easeOutBack
+function easeOutBack(x) {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+
+  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+}
+
+
+Game.prototype.baseCaptureMouseDown = function(ev) {
+  let self = this;
+  let mouse_data = pixi.renderer.plugins.interaction.mouse.global;
+  if (ev.button >= 0 && ev.button <= 2) {
+    let mouse_button = this.mouse_tester.buttons[ev.button];
+
+    self.soundEffect("keyboard_click_1", 1.0);
+    if (mouse_button.button_pressed != true) {
+      mouse_button.button_pressed = true;
+      mouse_button.position.y += 3;
+      delay(function() {
+        mouse_button.button_pressed = false;
+        mouse_button.position.y -= 3;
+      }, 50);
+    }
+  }
+
+  if (ev.button == 0) {
+    // click to move the cursor.
+    let x_click = mouse_data.x - this.player_area.x;
+    let y_click = mouse_data.y - this.player_area.y;
+    let x_tile = Math.floor(x_click / 32);
+    let y_tile = Math.floor((13 * 32 + y_click)/32);
+
+    if (this.baseCaptureInBounds(x_tile, y_tile) && this.baseCaptureBoard[x_tile][y_tile] != "") {
+      this.baseCaptureJumpCursor(0, x_tile, y_tile, null);
+    }
+  }
+}
+
+
+Game.prototype.baseCaptureClearWord = function(player, drop_letters = true) {
   if (this.game_phase != "active") {
     return;
   }
   for (let i = 0; i < this.base_letters[player].length; i++) {
     let dead_tile = this.base_letters[player][i];
-    // this.player_area.removeChild(dead_tile);
-    dead_tile.vx = -10 + Math.random() * 20;
-    dead_tile.vy = -4 - Math.random() * 14;
-    this.freefalling.push(dead_tile);
+    if (drop_letters) {
+      dead_tile.vx = -10 + Math.random() * 20;
+      dead_tile.vy = -4 - Math.random() * 14;
+      this.freefalling.push(dead_tile);
+    } else {
+      this.player_area.removeChild(dead_tile);
+    }
   }
   this.base_letters[player] = [];
 }
@@ -456,6 +600,7 @@ Game.prototype.baseCaptureDeleteAction = function(player) {
 
 Game.prototype.baseCaptureEnterAction = function(player) {
   var self = this;
+  var screen = this.screens["1p_base_capture"];
 
   if (this.game_phase != "active") {
     return;
@@ -477,6 +622,10 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     return;
   }
 
+  this.player_area.shake = this.markTime();
+  this.enemy_area.shake = this.markTime();
+  this.soundEffect("punch_" + Math.ceil(Math.random() * 6));
+
   let team = (player == 0) ? "american" : "soviet";
   for (let i = 0; i < this.base_letters[player].length; i++) {
     let old_tile = this.base_letters[player][i];
@@ -488,6 +637,16 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     building.x_tile = old_tile.x_tile;
     building.y_tile = old_tile.y_tile;
     this.baseCaptureBoard[old_tile.x_tile][old_tile.y_tile] = building;
+    if (this.trees[old_tile.x_tile][old_tile.y_tile] != "") {
+      this.player_area.layers[old_tile.y_tile].removeChild(this.trees[old_tile.x_tile][old_tile.y_tile]);
+      this.trees[old_tile.x_tile][old_tile.y_tile] = "";
+    } else if (old_tile.y_tile < 12 && this.trees[old_tile.x_tile][old_tile.y_tile + 1] != "") {
+      this.trees[old_tile.x_tile][old_tile.y_tile + 1].alpha = 0.7;
+    } else if (old_tile.y_tile < 11 && this.trees[old_tile.x_tile][old_tile.y_tile + 2] != "") {
+      this.trees[old_tile.x_tile][old_tile.y_tile + 2].alpha = 0.7;
+    }
+
+    this.makeSmoke(this.player_area.underlayer, x, y - 24, 1.5, 1.5);
 
     this.played_squares.push([old_tile.x_tile, old_tile.y_tile]);
   }
@@ -506,6 +665,15 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     this.score_text_box.text = this.score;
     // Update the other player's word validity
     this.baseCaptureCheckWord(1);
+
+    // if the score is good, add a swear word to the opponent's head
+    if (this.base_letters[player].length >= 4 &&
+      (Math.random() < 0.07) ||
+      (this.tile_score[0] + this.tile_score[1] > 50 && this.tile_score[0] - this.tile_score[1] > 0) || 
+      (this.tile_score[0] - this.tile_score[1] > 20 && this.tile_score[0] - this.tile_score[1] >= 10)) {
+      this.swearing();
+    }
+  
   }
   if (this.tile_score[player] >= 50 && this.speed_play == false) {
     // Speed it up!
@@ -522,7 +690,27 @@ Game.prototype.baseCaptureEnterAction = function(player) {
   this.played_words[this.word_to_play[player]] = 1;
 
   // TO DO: maybe don't delete in this way. maybe just proper delete.
-  this.baseCaptureClearWord(player);
+  this.baseCaptureClearWord(player, false);
+}
+
+
+Game.prototype.swearing = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  let word = "";
+  for (let i = 0; i < 5; i++) {
+    let num = Math.floor(Math.random() * 5);
+    word += "#$%&*".slice(num, num+1);
+  }
+  word += "!";
+  let bub = this.comicBubble(screen, word, 1100 - 150 + 300 * Math.random(), 100 - 50 + 100 * Math.random(), 24);
+  delay(function() {
+    screen.removeChild(bub);
+  }, 500 + Math.random(500));
+  this.shakers.push(bub);
+  bub.shake = this.markTime();
+  this.opponent_image.shake = this.markTime();
 }
 
 
@@ -1013,19 +1201,6 @@ Game.prototype.baseCaptureEnemyAction = function() {
       }
 
       let common_case = false;
-
-      //console.log("Room is " + forward_room + ", terminus_is_letter is " + terminus_is_letter);
-      // if (terminus_is_letter && forward_room > 0 && forward_room <= 5) {
-      //   let a = !this.baseCaptureInBounds(x_tile - x_adj, y_tile - y_adj);
-      //   let b = this.baseCaptureBoard[x_tile - x_adj][y_tile - y_adj] == "";
-      //   let c = !this.baseCaptureInBounds(x_tile + (forward_room+1) * x_adj, y_tile + (forward_room+1) * y_adj);
-      //   let d = this.baseCaptureBoard[x_tile + (forward_room+1) * x_adj][y_tile + (forward_room+1) * y_adj];
-      //   // console.log(forward_room + "," + a + ","
-      //   //   + b + ","
-      //   //   + c + ","
-      //   //   + d)
-      //   console.log(d);
-      // }
       
       // Now we need to determine what kind of move we can make.
       if (!this.baseCaptureInBounds(x_tile + x_adj, y_tile + y_adj)
@@ -1266,7 +1441,7 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
 
   // this.spellingHelp();
   this.baseCaptureUpdateCountdown();
-  // this.shakeDamage();
+  this.shakeDamage();
   // this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);
   // this.coolHotKeys();

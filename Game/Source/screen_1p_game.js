@@ -10,6 +10,8 @@ Game.prototype.initialize1pGame = function() {
   this.played_words = {};
   this.bombs = [];
 
+  this.shakers = [];
+
   this.rocket_letters = [];
 
   this.pickDefense(6, 10);
@@ -258,6 +260,8 @@ Game.prototype.resetBoard = function() {
   enemy_monitor_mask.drawRect(894, 98, 334, 251);
   enemy_monitor_mask.endFill();
   this.enemy_area.mask = enemy_monitor_mask;
+
+  this.shakers = [screen, this.player_area, this.enemy_area];
 }
 
 
@@ -413,7 +417,8 @@ Game.prototype.shakeDamage = function() {
   var self = this;
   var screen = this.screens["1p_game"];
 
-  for (let item of [screen, this.player_area, this.enemy_area]) {
+  // for (let item of [screen, this.player_area, this.enemy_area]) {
+  for (let item of this.shakers) {
     if (item.shake != null) {
       if (item.permanent_x == null) item.permanent_x = item.position.x;
       if (item.permanent_y == null) item.permanent_y = item.position.y;

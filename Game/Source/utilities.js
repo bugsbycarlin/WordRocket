@@ -39,6 +39,12 @@ for (i in letter_array) {
   shuffle_letters.push(letter_array[i]);
 }
 
+
+function distance(x1, y1, x2, y2) {
+  return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
+
 // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffleArray(array) {
   for (var i = array.length - 1; i > 0; i--) {

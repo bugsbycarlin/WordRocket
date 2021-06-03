@@ -223,12 +223,6 @@ Game.prototype.resetBoard = function() {
 
   this.enemy_last_action = this.markTime();
 
-  this.gravity = 3.8;
-  this.boost = 0.18;
-  this.gentle_drop = 0.05;
-  this.gentle_limit = 6;
-  this.boost_limit = -25;
-
   for (var i = 0; i < board_width; i++) {
     this.launchpad.cursors[i].visible = false;
   }
@@ -448,7 +442,8 @@ Game.prototype.freeeeeFreeeeeFalling = function(fractional) {
       if (item.vy > this.gentle_limit) item.vy = this.gentle_limit;
     }
 
-    if (item.position.y > 200 || item.alpha < 0.04) {
+    // TODO: this needs to be 200 for the player areas and 960 for the screen in total.
+    if (item.position.y > 960 || item.alpha < 0.04) {
       if (item.parent != null) {
         item.parent.removeChild(item);
       }

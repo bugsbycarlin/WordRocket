@@ -1,7 +1,7 @@
 'use strict';
 
 var use_music = false;
-var use_sound = false;
+var use_sound = true;
 var use_scores = false;
 var log_performance = true;
 
@@ -76,6 +76,12 @@ class Game {
 
     this.freefalling = [];
     this.shakers = [];
+
+    this.gravity = 3.8;
+    this.boost = 0.18;
+    this.gentle_drop = 0.05;
+    this.gentle_limit = 6;
+    this.boost_limit = -25;
 
     this.difficulty_level = localStorage.getItem("word_rockets_difficulty_level");
     if (this.difficulty_level == null) {

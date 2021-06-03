@@ -144,8 +144,6 @@ Game.prototype.makeSmoke = function(parent, x, y, xScale, yScale) {
   parent.addChild(smoke_sprite);
   smoke_sprite.loop = false;
   smoke_sprite.onComplete = function() {
-    // delete me!
-    console.log("Delete me!");
     parent.removeChild(smoke_sprite);
   }
   smoke_sprite.play();
@@ -183,6 +181,24 @@ Game.prototype.makeLetterBuilding = function(parent, x, y, letter, team) {
   }
 
   return letter_building;
+}
+
+
+Game.prototype.makeRocketWithScaffolding = function(parent, x, y) {
+  let container = new PIXI.Container();
+  parent.addChild(container);
+  container.position.set(x, y);
+
+  container.scaffolding = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_scaffolding.png"));
+  container.scaffolding.anchor.set(0.5, 0.5);
+  container.scaffolding.position.set(0,-8);
+  container.addChild(container.scaffolding);
+
+  container.rocket = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_neutral.png"));
+  container.rocket.anchor.set(0.5, 0.5);
+  container.addChild(container.rocket);
+
+  return container;
 }
 
 

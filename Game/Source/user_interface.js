@@ -338,6 +338,26 @@ Game.prototype.makeKey = function(parent, x, y, filename, size, action) {
 }
 
 
+Game.prototype.swearing = function() {
+  var self = this;
+  var screen = this.screens[this.current_screen];
+
+  let word = "";
+  for (let i = 0; i < 5; i++) {
+    let num = Math.floor(Math.random() * 5);
+    word += "#$%&*".slice(num, num+1);
+  }
+  word += "!";
+  let bub = this.comicBubble(screen, word, 1100 - 150 + 300 * Math.random(), 100 - 50 + 100 * Math.random(), 24);
+  delay(function() {
+    screen.removeChild(bub);
+  }, 500 + Math.random(500));
+  if (this.shakers != null) this.shakers.push(bub);
+  bub.shake = this.markTime();
+  if (this.opponent_image != null) this.opponent_image.shake = this.markTime();
+}
+
+
 
 //
 //

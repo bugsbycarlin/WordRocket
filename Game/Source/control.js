@@ -270,10 +270,10 @@ Game.prototype.handleKeyDown = function(ev) {
   } else if(this.current_screen == "1p_base_capture") {
 
     let key = ev.key;
-    // if (key == "Shift") {
-    //   if (ev.code == "ShiftLeft") key = "LShift";
-    //   if (ev.code == "ShiftRight") key = "RShift";
-    // }
+    if (key == "Shift") {
+      if (ev.code == "ShiftLeft") key = "LShift";
+      if (ev.code == "ShiftRight") key = "RShift";
+    }
 
     this.baseCaptureKeyDown(key);
 
@@ -345,13 +345,30 @@ Game.prototype.handleKeyDown = function(ev) {
 
 
 Game.prototype.handleMouseMove = function(ev) {
-  if(this.current_screen == "1p_base_capture") {
-    this.baseCaptureMouseMove(ev);
+  if(this.current_screen == "1p_base_capture" || this.current_screen == "1p_game") {
+    this.mouseMove(ev);
   } 
 }
 
 
 Game.prototype.handleMouseDown = function(ev) {
+  let self = this;
+  if(this.current_screen == "1p_base_capture" || this.current_screen == "1p_game") {
+    if (ev.button >= 0 && ev.button <= 2) {
+      let mouse_button = this.mouse_tester.buttons[ev.button];
+
+      self.soundEffect("keyboard_click_1", 1.0);
+      if (mouse_button.button_pressed != true) {
+        mouse_button.button_pressed = true;
+        mouse_button.position.y += 3;
+        delay(function() {
+          mouse_button.button_pressed = false;
+          mouse_button.position.y -= 3;
+        }, 50);
+      }
+    }
+  }
+
   if(this.current_screen == "1p_base_capture") {
     this.baseCaptureMouseDown(ev);
   } 

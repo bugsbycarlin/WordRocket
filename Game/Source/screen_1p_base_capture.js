@@ -29,8 +29,8 @@ Game.prototype.initialize1pBaseCapture = function() {
   // 900, 450: 3 - 6, and many of the games were *very* close.
   // 500, 250: pretty fun
   // 100, 100: nice and easy.
-  this.enemy_move_speed = 100;
-  this.enemy_typing_speed = 100;
+  this.enemy_move_speed = 900 + 100 * this.level;
+  this.enemy_typing_speed = 400 + 50 * this.level;
   this.enemy_phase = "moving"; // moving, typing
 
   this.play_clock = 15;
@@ -56,6 +56,9 @@ Game.prototype.initialize1pBaseCapture = function() {
 
   this.resetBase();
 
+  this.updateEnemyScreenTexture();
+  this.enemy_screen_texture_update = this.markTime();
+  
   delay(function() {
     self.paused = false;
     self.pause_time = 0;
@@ -63,6 +66,26 @@ Game.prototype.initialize1pBaseCapture = function() {
     self.game_phase = "countdown";
     self.soundEffect("countdown");
   }, 1200);
+}
+
+Game.prototype.updateEnemyScreenTexture = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  let texture = PIXI.RenderTexture.create({width: 800, height: 600});
+
+  this.renderer.render(this.player_area, texture);
+
+  if (this.enemy_area.sprite == null) {
+    let sprite = PIXI.Sprite.from(texture);
+    sprite.position.set(-240,-520);
+    sprite.anchor.set(0, 0);
+    this.enemy_area.removeChild[0];
+    this.enemy_area.addChild(sprite);
+    this.enemy_area.sprite = sprite;
+  } else {
+    this.enemy_area.sprite.texture = texture;
+  }
 }
 
 
@@ -82,8 +105,8 @@ Game.prototype.resetBase = function() {
 
   this.enemy_live_area = new PIXI.Container();
   screen.addChild(this.enemy_live_area);
-  this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
-  this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
+  //this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
+  //this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
 
   this.enemy_palette = this.makeKeyboard({
     player: 2,
@@ -93,6 +116,8 @@ Game.prototype.resetBase = function() {
     }
   });
   this.enemy_palette.scale.set(0.3125, 0.3125);
+
+
 
   this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/opponent_2.png"));
   this.opponent_image.anchor.set(0.5, 0.5);
@@ -134,86 +159,67 @@ Game.prototype.resetBase = function() {
   this.player_live_area.position.set(this.player_area.x, this.player_area.y);
   this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
 
-  for (var p = 0; p < 2; p++) {
-    let area = this.player_area;
-    if (p == 1) area = this.enemy_area;
+  //for (var p = 0; p < 2; p++) {
+  let area = this.player_area;
+  //if (p == 1) area = this.enemy_area;
 
-    // Sky and Ground
-    let sky = new PIXI.Sprite(PIXI.Texture.from("Art/base_sky.png"));
-    sky.anchor.set(0,1);
-    sky.position.set(-3 * 32, -13 * 32);
-    area.addChild(sky);
-    let sky2 = new PIXI.Sprite(PIXI.Texture.from("Art/base_sky_2.png"));
-    sky2.anchor.set(0,1);
-    sky2.scale.set(1,1);
-    sky2.position.set(12*32, -13 * 32);
-    area.addChild(sky2);
+  // Sky and Ground
+  let sky = new PIXI.Sprite(PIXI.Texture.from("Art/base_sky.png"));
+  sky.anchor.set(0,1);
+  sky.position.set(-3 * 32, -13 * 32);
+  area.addChild(sky);
+  let sky2 = new PIXI.Sprite(PIXI.Texture.from("Art/base_sky_2.png"));
+  sky2.anchor.set(0,1);
+  sky2.scale.set(1,1);
+  sky2.position.set(12*32, -13 * 32);
+  area.addChild(sky2);
 
-    let ground = new PIXI.Sprite(PIXI.Texture.from("Art/base_ground.png"));
-    ground.anchor.set(0,1);
-    ground.position.set(-96, 0);
-    ground.scale.set(20/14, 1);
-    area.addChild(ground);
+  let ground = new PIXI.Sprite(PIXI.Texture.from("Art/base_ground.png"));
+  ground.anchor.set(0,1);
+  ground.position.set(-96, 0);
+  ground.scale.set(20/14, 1);
+  area.addChild(ground);
 
-    // Rock Wall
-    // for (var i = 0; i < 2; i++) {
-    //   let rock_wall = new PIXI.Container();
-    //   area.addChild(rock_wall);
-    //   for (var m = 1; m < 4; m++) {
-    //     for (var n = 1; n < 16; n++) {
-    //       let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
-    //       c = (30 + Math.floor(Math.random() * 30)) / 255.0;
-    //       tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-    //       tile.width = 32;
-    //       tile.height = 32;
-    //       shift = i == 0 ? 0 : (board_width + 5) * 32;
-    //       tile.position.set(shift - 32 * m, 0 - 32 * n);
-    //       rock_wall.addChild(tile);
-    //     }
-    //   }
-    //   rock_wall.cacheAsBitmap = true;
-    // }
-
-    // Sidebar lands
-    for (let i = 0; i <= 1; i++) {
-      let shift = i == 0 ? 0 : 20 * 32;
-      let sidebar_land = new PIXI.Sprite(PIXI.Texture.from("Art/sidebar_land_setback.png"))
-      sidebar_land.anchor.set(0, 1);
-      sidebar_land.scale.set(i == 0 ? 1 : -1, 1);
-      sidebar_land.position.set(-96 + shift, 0);
-      area.addChild(sidebar_land);
-    }
-
-    // Board lines
-    for (let i = -1; i < 14; i++) {
-      let vertical = PIXI.Sprite.from(PIXI.Texture.WHITE);
-      vertical.tint = 0x000000;
-      vertical.width = 4;
-      vertical.height = 13 * 32 - 4;
-      vertical.position.set(32 * (i + 1) - 2, -13 * 32 + 2);
-      vertical.alpha = 0.05;
-      area.addChild(vertical);
-
-      if (i > 0) {
-        let horizontal = PIXI.Sprite.from(PIXI.Texture.WHITE);
-        horizontal.tint = 0x000000;
-        horizontal.height = 4;
-        horizontal.width = 14 * 32 - 4;
-        horizontal.position.set(2, 32 * (i - 13) - 2);
-        horizontal.alpha = 0.05;
-        area.addChild(horizontal);
-      }
-    }
+  // Sidebar lands
+  for (let i = 0; i <= 1; i++) {
+    let shift = i == 0 ? 0 : 20 * 32;
+    let sidebar_land = new PIXI.Sprite(PIXI.Texture.from("Art/sidebar_land_setback.png"))
+    sidebar_land.anchor.set(0, 1);
+    sidebar_land.scale.set(i == 0 ? 1 : -1, 1);
+    sidebar_land.position.set(-96 + shift, 0);
+    area.addChild(sidebar_land);
   }
 
-  this.enemy_area.underlayer = new PIXI.Container();
-  this.enemy_area.addChild(this.enemy_area.underlayer)
-  this.enemy_area.layers = [];
-  for (let i = 0; i < 13; i++) {
-    let c = new PIXI.Container();
-    this.enemy_area.addChild(c);
-    this.enemy_area.layers.push(c);
+  // Board lines
+  for (let i = -1; i < 14; i++) {
+    let vertical = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    vertical.tint = 0x000000;
+    vertical.width = 4;
+    vertical.height = 13 * 32 - 4;
+    vertical.position.set(32 * (i + 1) - 2, -13 * 32 + 2);
+    vertical.alpha = 0.05;
+    area.addChild(vertical);
+
+    if (i > 0) {
+      let horizontal = PIXI.Sprite.from(PIXI.Texture.WHITE);
+      horizontal.tint = 0x000000;
+      horizontal.height = 4;
+      horizontal.width = 14 * 32 - 4;
+      horizontal.position.set(2, 32 * (i - 13) - 2);
+      horizontal.alpha = 0.05;
+      area.addChild(horizontal);
+    }
+  //}
   }
+
+  // this.enemy_area.underlayer = new PIXI.Container();
+  // this.enemy_area.addChild(this.enemy_area.underlayer)
+  // this.enemy_area.layers = [];
+  // for (let i = 0; i < 13; i++) {
+  //   let c = new PIXI.Container();
+  //   this.enemy_area.addChild(c);
+  //   this.enemy_area.layers.push(c);
+  // }
 
   this.player_area.underlayer = new PIXI.Container();
   this.player_area.addChild(this.player_area.underlayer)
@@ -354,11 +360,11 @@ Game.prototype.resetBase = function() {
   player_monitor_mask.endFill();
   this.player_area.mask = player_monitor_mask;
 
-  let enemy_monitor_mask = new PIXI.Graphics();
-  enemy_monitor_mask.beginFill(0xFF3300);
-  enemy_monitor_mask.drawRect(894, 98, 334, 251);
-  enemy_monitor_mask.endFill();
-  this.enemy_area.mask = enemy_monitor_mask;
+  // let enemy_monitor_mask = new PIXI.Graphics();
+  // enemy_monitor_mask.beginFill(0xFF3300);
+  // enemy_monitor_mask.drawRect(894, 98, 334, 251);
+  // enemy_monitor_mask.endFill();
+  // this.enemy_area.mask = enemy_monitor_mask;
 
   let corners = [0, 1, 2, 3]; // bottom left, top left, top right, bottom right
   shuffleArray(corners);
@@ -449,6 +455,64 @@ Game.prototype.baseCaptureKeyDown = function(key) {
       this.baseCaptureMoveCursor("down", player);
     }
 
+    if (key === "LShift") {
+       
+      let cursor = this.cursor[player];
+      if (cursor.angle == "0" || cursor.angle == "180") {
+        let x_tile = cursor.x_tile;
+        while (this.baseCaptureInBounds(x_tile - 1, cursor.y_tile) && this.baseCaptureBoard[x_tile - 1][cursor.y_tile] != "") {
+          x_tile -= 1;
+        }
+        if (x_tile != cursor.x_tile) {
+          this.baseCaptureJumpCursor(player, x_tile, cursor.y_tile, "left");
+        }
+      } else if (cursor.angle == "90" || cursor.angle == "-90") {
+        let y_tile = cursor.y_tile;
+        while (this.baseCaptureInBounds(cursor.x_tile, y_tile - 1) && this.baseCaptureBoard[cursor.x_tile][y_tile - 1] != "") {
+          y_tile -= 1;
+        }
+        if (y_tile != cursor.y_tile) {
+          this.baseCaptureJumpCursor(player, cursor.x_tile, y_tile, "up");
+        }
+      }
+
+    }
+
+    if (key === "RShift") {
+       
+      let cursor = this.cursor[player];
+      if (cursor.angle == "0" || cursor.angle == "180") {
+        let x_tile = cursor.x_tile;
+        while (this.baseCaptureInBounds(x_tile + 1, cursor.y_tile) && this.baseCaptureBoard[x_tile + 1][cursor.y_tile] != "") {
+          x_tile += 1;
+        }
+        if (x_tile != cursor.x_tile) {
+          this.baseCaptureJumpCursor(player, x_tile, cursor.y_tile, "right");
+        }
+      } else if (cursor.angle == "90" || cursor.angle == "-90") {
+        let y_tile = cursor.y_tile;
+        while (this.baseCaptureInBounds(cursor.x_tile, y_tile + 1) && this.baseCaptureBoard[cursor.x_tile][y_tile + 1] != "") {
+          y_tile += 1;
+        }
+        if (y_tile != cursor.y_tile) {
+          this.baseCaptureJumpCursor(player, cursor.x_tile, y_tile, "down");
+        }
+      }
+
+    }
+  //   if (direction == "up" && cursor.y_tile > 0 && this.baseCaptureBoard[cursor.x_tile][cursor.y_tile - 1] != "") {
+  //   cursor.y_tile -= 1;
+  // } else if (direction == "down" && cursor.y_tile < 12 && this.baseCaptureBoard[cursor.x_tile][cursor.y_tile + 1] != "") {
+  //   cursor.y_tile += 1;
+  // } else if (direction == "left" && cursor.x_tile > 0 && this.baseCaptureBoard[cursor.x_tile - 1][cursor.y_tile] != "") {
+  //   cursor.x_tile -= 1;
+  // } else if (direction == "right" && cursor.x_tile < 13 && this.baseCaptureBoard[cursor.x_tile + 1][cursor.y_tile] != "") {
+  //   cursor.x_tile += 1;
+  // }
+  //   }
+
+
+
     for (i in lower_array) {
       if (key === lower_array[i] || key === letter_array[i]) {
         if(this.player_palette.letters[letter_array[i]].playable === true) {
@@ -488,7 +552,7 @@ Game.prototype.baseCaptureKeyDown = function(key) {
 }
 
 
-Game.prototype.baseCaptureMouseMove = function(ev) {
+Game.prototype.mouseMove = function(ev) {
   let mouse_data = pixi.renderer.plugins.interaction.mouse.global;
   // console.log(mouse_data.x);
   // this.mouse.position.set(mouse_data.x, mouse_data.y);
@@ -546,19 +610,6 @@ function easeOutBack(x) {
 Game.prototype.baseCaptureMouseDown = function(ev) {
   let self = this;
   let mouse_data = pixi.renderer.plugins.interaction.mouse.global;
-  if (ev.button >= 0 && ev.button <= 2) {
-    let mouse_button = this.mouse_tester.buttons[ev.button];
-
-    self.soundEffect("keyboard_click_1", 1.0);
-    if (mouse_button.button_pressed != true) {
-      mouse_button.button_pressed = true;
-      mouse_button.position.y += 3;
-      delay(function() {
-        mouse_button.button_pressed = false;
-        mouse_button.position.y -= 3;
-      }, 50);
-    }
-  }
 
   if (ev.button == 0) {
     // click to move the cursor.
@@ -663,7 +714,7 @@ Game.prototype.baseCaptureEnterAction = function(player) {
 
   this.player_area.shake = this.markTime();
   this.enemy_area.shake = this.markTime();
-  this.soundEffect("punch_" + Math.ceil(Math.random() * 6));
+  this.soundEffect("build");
 
   let team = (player == 0) ? "american" : "soviet";
   for (let i = 0; i < this.base_letters[player].length; i++) {
@@ -677,45 +728,14 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     let building = this.makeLetterBuilding(this.player_area.layers[o_y], x, y, old_tile.text, team);
     building.x_tile = o_x;
     building.y_tile = o_y;
+    building.player = player;
     this.baseCaptureBoard[o_x][o_y] = building;
     if (this.doodads[o_x][o_y] != "") {
-
-
       if (this.doodads[o_x][o_y].type == "tree") {
         this.player_area.layers[o_y].removeChild(this.doodads[o_x][o_y]);
         this.doodads[o_x][o_y] = "";
       } else if (this.doodads[o_x][o_y].type == "rocket") {
-        this.soundEffect("rocket")
-        let dead_tile = this.doodads[o_x][o_y];
-        dead_tile.rocket.visible = false;
-        dead_tile.vx = -10 + Math.random() * 20;
-        dead_tile.vy = -4 - Math.random() * 14;
-        this.freefalling.push(dead_tile);
-
-        let rocket = new PIXI.Container();
-        rocket.position.set(32 * o_x + 16 + this.player_area.x, -13 * 32 + 32 * o_y + this.player_area.y);
-        
-        rocket.fire_sprite = this.makeFire(rocket, 0, 34, 0.28, 0.24);
-        rocket.fire_sprite.original_x = rocket.fire_sprite.x;
-        rocket.fire_sprite.original_y = rocket.fire_sprite.y;
-
-        rocket.rocket_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_neutral.png"));
-        rocket.rocket_sprite.anchor.set(0.5, 0.5);
-        rocket.addChild(rocket.rocket_sprite);
-        
-        // calculations to prepare for odd parabolic flight
-        let M = 790 - rocket.y;
-        rocket.b_val = 5 * (Math.sqrt(100 + M) + 10);
-        rocket.a_val = -1 * rocket.b_val * rocket.b_val / 400;
-        console.log(rocket.a_val);
-        console.log(rocket.b_val);
-        rocket.original_x = rocket.x;
-        rocket.original_y = rocket.y;
-        rocket.player = player;
-
-        rocket.start_time = this.markTime();
-        screen.addChild(rocket);
-        this.active_rockets.push(rocket);
+        this.baseCaptureMakeRocket(player, o_x, o_y)
       }
     } else if (o_y < 12 && this.doodads[o_x][o_y + 1] != "") {
       this.doodads[o_x][o_y + 1].alpha = 0.7;
@@ -750,8 +770,8 @@ Game.prototype.baseCaptureEnterAction = function(player) {
       (this.tile_score[0] - this.tile_score[1] > 20 && this.tile_score[0] - this.tile_score[1] >= 10)) {
       this.swearing();
     }
-  
   }
+
   if (this.tile_score[player] >= 50 && this.speed_play == false) {
     // Speed it up!
     this.speed_play = true;
@@ -760,6 +780,10 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     delay(function() {
       self.announcement.text = "";
     }, 2000);
+  }
+
+  if (this.tile_score[0] >= 75 || this.tile_score[1] >= 75) {
+    this.baseCaptureGameOver();
   }
 
   this.last_play = this.markTime();
@@ -771,23 +795,57 @@ Game.prototype.baseCaptureEnterAction = function(player) {
 }
 
 
-Game.prototype.swearing = function() {
+Game.prototype.baseCaptureMakeRocket = function(player, o_x, o_y) {
   var self = this;
   var screen = this.screens["1p_base_capture"];
 
-  let word = "";
-  for (let i = 0; i < 5; i++) {
-    let num = Math.floor(Math.random() * 5);
-    word += "#$%&*".slice(num, num+1);
+  this.soundEffect("rocket")
+  let dead_tile = this.doodads[o_x][o_y];
+  if (dead_tile != "") {
+    dead_tile.rocket.visible = false;
+    dead_tile.vx = -10 + Math.random() * 20;
+    dead_tile.vy = -4 - Math.random() * 14;
+    this.freefalling.push(dead_tile);
   }
-  word += "!";
-  let bub = this.comicBubble(screen, word, 1100 - 150 + 300 * Math.random(), 100 - 50 + 100 * Math.random(), 24);
-  delay(function() {
-    screen.removeChild(bub);
-  }, 500 + Math.random(500));
-  this.shakers.push(bub);
-  bub.shake = this.markTime();
-  this.opponent_image.shake = this.markTime();
+
+  let rocket = new PIXI.Container();
+  rocket.position.set(32 * o_x + 16 + this.player_area.x, -13 * 32 + 32 * o_y + this.player_area.y);
+  if (player == 0) {
+    rocket.position.set((32 * o_x + 16) * 0.5 + this.enemy_area.x, (-13 * 32 + 32 * o_y) * 0.5 + this.enemy_area.y);
+  }
+
+  rocket.fire_sprite = this.makeFire(rocket, 0, 34, 0.28, 0.24);
+  rocket.fire_sprite.original_x = rocket.fire_sprite.x;
+  rocket.fire_sprite.original_y = rocket.fire_sprite.y;
+
+  rocket.rocket_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_neutral.png"));
+  rocket.rocket_sprite.anchor.set(0.5, 0.5);
+  rocket.addChild(rocket.rocket_sprite);
+  
+  // calculations to prepare for odd parabolic flight
+  let M = 760 - rocket.y;
+
+  if (player == 0) {
+    M = 470 - rocket.y;
+  }
+
+  rocket.b_val = 5 * (Math.sqrt(100 + M) + 10);
+  rocket.a_val = -1 * rocket.b_val * rocket.b_val / 400;
+  console.log(rocket.a_val);
+  console.log(rocket.b_val);
+  rocket.original_x = rocket.x;
+  rocket.original_y = rocket.y;
+  rocket.player = player;
+
+  rocket.start_time = this.markTime();
+
+  if (player == 1) {
+    screen.addChild(rocket);
+  } else {
+    rocket.scale.set(0.5, 0.5);
+    this.enemy_live_area.addChild(rocket);
+  }
+  this.active_rockets.push(rocket);
 }
 
 
@@ -1139,35 +1197,69 @@ Game.prototype.baseCaptureUpdatePlayClock = function() {
       this.play_clock_text_box.style.fill = 0xdb5858;
     }
     if (time_remaining <= 0) {
-      this.game_phase = "gameover";
-
-      this.announcement.style.fontSize = 36;
-
-      if (this.tile_score[0] < this.tile_score[1]) {
-        this.announcement.text = "GAME OVER";
-        this.stopMusic();
-        this.soundEffect("game_over");
-        delay(function() {
-          let low_high = self.high_scores["individual"][self.difficulty_level.toLowerCase()][9];
-          if (low_high == null || low_high.score < self.score) {
-            self.initializeHighScore(self.score);
-            self.switchScreens("1p_base_capture", "high_score");
-          } else {
-            self.initialize1pLobby();
-            self.switchScreens("1p_base_capture", "1p_lobby");
-          }
-        }, 4000);
-      } else {
-        this.announcement.text = "VICTORY!";
-        this.level += 1;
-        delay(function() {self.initialize1pBaseCapture();}, 4000);
-      }
-
+      this.baseCaptureGameOver();
     }
   } else {
     this.play_clock_label.visible = false;
     this.play_clock_text_box.visible = false;
   }
+}
+
+
+Game.prototype.baseCaptureGameOver = function() {
+  var self = this;
+  this.game_phase = "gameover";
+
+  this.announcement.style.fontSize = 36;
+
+  let winning_player = 0;
+
+  if (this.tile_score[0] < this.tile_score[1]) {
+    this.announcement.text = "GAME OVER";
+    this.stopMusic();
+    //this.soundEffect("game_over");
+    delay(function() {
+      let low_high = self.high_scores["individual"][self.difficulty_level.toLowerCase()][9];
+      if (low_high == null || low_high.score < self.score) {
+        self.initializeHighScore(self.score);
+        self.switchScreens("1p_base_capture", "high_score");
+      } else {
+        self.initialize1pLobby();
+        self.switchScreens("1p_base_capture", "1p_lobby");
+      }
+    }, 10000);
+    winning_player = 1;
+  } else {
+    this.announcement.text = "VICTORY!";
+    this.level += 1;
+    delay(function() {self.initialize1pBaseCapture();}, 10000);
+    winning_player = 0;
+  }
+
+  let i = 1;
+  for (let y = 3; y < 13; y += 3) {
+    delay(function() {
+      for (let x = 3; x < 14; x += 3) {
+        self.doodads[x][y] = self.makeRocketWithScaffolding(self.player_area.layers[y], 32 * x + 16, -13 * 32 + 32 * y);
+        self.doodads[x][y].type = "rocket";
+        self.makeSmoke(self.player_area.underlayer, 32 * x + 16, -13 * 32 + 32 * y - 24, 1.5, 1.5);
+      }
+    }, i * 500);
+    i += 1;
+  }
+  delay(function() {
+    self.soundEffect("multibuild");
+  }, 500);
+  delay(function() {
+    for (let x = 0; x < 14; x++) {
+      for (let y = 0; y < 13; y++) {
+        if (self.doodads[x][y] != "" && self.doodads[x][y].type == "rocket") {
+          self.doodads[x][y].visible = false;
+          self.baseCaptureMakeRocket(winning_player, x, y);
+        }
+      }
+    }
+  }, 2500);
 }
 
 
@@ -1450,8 +1542,10 @@ Game.prototype.baseCaptureEnemyAction = function() {
     }
 
     if (this.enemy_typing_mark < this.enemy_word.length) {
-      this.baseCaptureAddLetter(this.enemy_word[this.enemy_typing_mark], 1);
-      this.enemy_typing_mark += 1;
+      if (this.enemy_palette.letters[this.enemy_word[this.enemy_typing_mark]].playable) {
+        this.baseCaptureAddLetter(this.enemy_word[this.enemy_typing_mark], 1);
+        this.enemy_typing_mark += 1;
+      } // otherwise just sit on your hands, opponent.
     } else {
       this.baseCaptureCheckWord(1);
       if (this.can_play_word[1]) {
@@ -1511,7 +1605,7 @@ Game.prototype.baseCaptureWordList = function(word, x_tile, y_tile, angle) {
 Game.prototype.updateRockets = function() {
   var self = this;
   var screen = this.screens["1p_base_capture"];
-  if (this.game_phase != "active") {
+  if (this.game_phase != "active" && this.game_phase != "gameover") {
     return;
   }
 
@@ -1524,8 +1618,10 @@ Game.prototype.updateRockets = function() {
       t = Math.pow(2.2222 * t, 1.8) / Math.pow(1.8, 1.8);// parametrized to go faster at the end
       let old_x = rocket.position.x;
       let old_y = rocket.position.y;
+      let x_width = 75;
+      if (rocket.player == 0) x_width = 37.5;
       rocket.position.y = rocket.original_y - rocket.a_val * t * t - rocket.b_val * t;
-      rocket.position.x = rocket.original_x + 75 * (-1 * (t - 2)*(t - 2) + 4);
+      rocket.position.x = rocket.original_x + x_width * (-1 * (t - 2)*(t - 2) + 4);
       let angle = Math.atan2(rocket.position.y - old_y, rocket.position.x - old_x) + Math.PI / 2;
       rocket.rotation = angle;
 
@@ -1550,20 +1646,27 @@ Game.prototype.updateRockets = function() {
       }
       new_active_rockets.push(rocket);
     } else {
+      let palette = this.player_palette;
+      let radius = 100;
+      if (rocket.player == 0) {
+        palette = this.enemy_palette;
+        radius = 50;
+      }
       for(let l = 0; l < letter_array.length; l++) {
         //player_palette.letters
-        let letter = this.player_palette.letters[letter_array[l]];
-        let letter_x = letter.x * this.player_palette.scale.x + this.player_palette.x;
-        let letter_y = letter.y * this.player_palette.scale.y + this.player_palette.y;
+        let letter = palette.letters[letter_array[l]];
+        let letter_x = letter.x * palette.scale.x + palette.x;
+        let letter_y = letter.y * palette.scale.y + palette.y;
         //console.log(letter_array[l] +"," + letter_x + "," + letter_y);
 
-        if (distance(rocket.position.x, rocket.position.y, letter_x, letter_y) < 100) {
+        if (distance(rocket.position.x, rocket.position.y, letter_x, letter_y) < radius) {
           // blow up this letter for a while
           if (letter.playable === true) {
             letter.disable();
             letter.playable = false;
             screen.shake = self.markTime();
             this.soundEffect("explosion_3");
+            if (rocket.player == 0 && this.game_phase != "gameover") this.swearing();
 
             let electric = this.makeElectric(letter, 
               0,
@@ -1573,10 +1676,10 @@ Game.prototype.updateRockets = function() {
             letter.tint = 0x4c4c4c;
             letter.angle = -10 + 20 * Math.random();
 
-            let explosion = this.makeExplosion(this.player_palette, 
+            let explosion = this.makeExplosion(palette, 
               letter.x,
               letter.y,
-            1, 1, function() {electric.visible = true; self.player_palette.removeChild(explosion);});
+            1, 1, function() {electric.visible = true; palette.removeChild(explosion);});
 
             delay(function() {
               letter.enable()
@@ -1606,12 +1709,16 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
   //   this.tutorial_screen.tutorial_text.hover();
   // }
 
-  // this.spellingHelp();
   this.baseCaptureUpdateCountdown();
   this.shakeDamage();
-  // this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);
-  // this.coolHotKeys();
+
+  if (this.timeSince(this.enemy_screen_texture_update) > 100) {
+    this.updateEnemyScreenTexture();
+    this.enemy_screen_texture_update = this.markTime();
+  }
+
+  this.updateRockets();
 
   // Skip the rest if we aren't in active gameplay
   if (this.game_phase != "active") {
@@ -1620,11 +1727,4 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
 
   this.baseCaptureUpdatePlayClock();
   this.baseCaptureEnemyAction();  
-  // this.spawnBomb();
-  this.updateRockets();
-  // this.checkBombCollisions();
-  // this.checkRocketScreenChange();
-  // this.checkRocketCollisions();
-  // this.checkRocketAttacks();
-  // this.cleanRockets();
 }

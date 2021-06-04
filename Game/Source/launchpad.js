@@ -283,6 +283,8 @@ class Launchpad {
         this.parent.removeChild(pad_item);
       }
 
+      game.wpm_history.push([word, game.markTime()]);
+
       this.tiles = [];
       this.cursor = 0;
     } else {

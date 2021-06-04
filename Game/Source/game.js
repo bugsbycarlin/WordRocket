@@ -1,13 +1,18 @@
 'use strict';
 
 var use_music = false;
-var use_sound = true;
+var use_sound = false;
+// var use_music = true;
+// var use_sound = true;
 var use_scores = false;
 var log_performance = true;
 
-var first_screen = "1p_base_capture";
+// open -a Google\ Chrome\ Canary --args --disable-web-security --autoplay-policy=no-user-gesture-required --user-data-dir=/Users/bugsbycarlin/Projects/Messy
+// 
+
+// var first_screen = "1p_base_capture";
 // var first_screen = "intro";
-// var first_screen = "title";
+var first_screen = "title";
 // var first_screen = "cutscene";
 
 var performance_result = null;
@@ -117,6 +122,7 @@ class Game {
 
     // Create the pixi application
     pixi = new PIXI.Application(this.width, this.height, {antialias: true});
+    this.renderer = pixi.renderer;
     document.getElementById("mainDiv").appendChild(pixi.view);
     pixi.renderer.backgroundColor = 0xFFFFFF;
     pixi.renderer.resize(this.width,this.height);
@@ -225,7 +231,7 @@ class Game {
                           // self.score = 999455;
                           self.initialize1pBaseCapture();
                         } else if (first_screen == "cutscene") {
-                          self.initializeCutscene("old_man");
+                          self.initializeCutscene();
                         }
                       });
                     }

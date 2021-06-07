@@ -133,3 +133,27 @@ function addDedupeSort(some_list, other_list) {
     })
   });
 }
+
+
+function flicker(item, duration, color_1, color_2) {
+  item.flicker_junker = 0
+  let color_counter = 0;
+  var tween = new TWEEN.Tween(item)
+    .to({flicker_junker: 80})
+    .duration(duration)
+    .onUpdate(function() {
+      if (color_counter % 2 == 0) {
+        item.tint = color_1;
+      } else {
+        item.tint = color_2;
+      }
+      color_counter += 1;
+    })
+    .onComplete(function() {
+      item.tint = color_1;
+    })
+    .start();
+}
+
+
+

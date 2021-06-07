@@ -75,6 +75,13 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         //   self.gotoCutscenePage(i+1);
         // });
         artifact = page.next;
+        if ("next_screen" in item) {
+          this.cutscene_next_screen = item.next_screen; // last one is default
+          page.next.on("pointerdown", function() {
+            self.cutscene_next_screen = item.next_screen; // but you could have two and click one
+            self.gotoCutscenePage(i+1);
+          });
+        }
       } else if ("square" in item) {
         let square = PIXI.Sprite.from(PIXI.Texture.WHITE);
         square.anchor.set(0.5, 0.5);
@@ -188,7 +195,7 @@ Game.prototype.gotoCutscenePage = function(page_num) {
     return;
   }
 
-  this.soundEffect("swipe");
+  //this.soundEffect("swipe");
   
   if (page_num >= this.cutscene_items.length) {
     //console.log("running over the end of the cutscene. don't do that. use the scene end button instead.");
@@ -251,11 +258,16 @@ Game.prototype.endCutscene = function() {
     this.cutscene_pages[p].next.interactive = false;
     this.cutscene_pages[p].next.visible = false;
   }
-  this.fadeMusic(0);
+  if (this.cutscene_next_screen != "title") {
+    this.fadeMusic(0);
+  }
 
-  // for now, it just goes directly into the game
-  this.initialize1pGame();
-  this.switchScreens("cutscene", "1p_game");
+  this.initializeScreen(this.cutscene_next_screen);
+  if (this.cutscene_next_screen != "title") {
+    this.switchScreens("cutscene", this.cutscene_next_screen);
+  } else {
+    this.fadeScreens("cutscene", this.cutscene_next_screen, true);
+  }
 }
 
 
@@ -333,7 +345,7 @@ scenes = {
       {text: "So we went up against the Russians. \nThey were bigger, they were stronger, \nthey were really good typists...", x: 430, y: 120},
       {text: "But god damnit*, we were Americans.", x: 850, y: 750, drift: "left"},
       {text: "*Sorry, Mom", x: 200, y: 900},
-      {button: "Ready?", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
+      {button: "Ready?", next_screen: "1p_word_rockets", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -356,7 +368,7 @@ scenes = {
       {appears: 10, text: "Moskva High student Georgy Zhukov.", size: 24, x: 640, y: 860},
       {appears: 10, image:"zhukov_2b.png", x: 640, y: 450},
       {appears: 11, image:"zhukov_2c.png", x: 1000, y: 545},
-      {appears: 12, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {appears: 12, button: "Ready?", next_screen: "1p_base_capture", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
     ],
   ],
 //---------------------------------------------------------------------------------------

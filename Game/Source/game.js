@@ -1,9 +1,7 @@
 'use strict';
 
 var use_music = false;
-var use_sound = false;
-// var use_music = true;
-// var use_sound = true;
+var use_sound = true;
 var use_scores = false;
 var log_performance = true;
 
@@ -11,8 +9,10 @@ var log_performance = true;
 // 
 
 // var first_screen = "1p_base_capture";
-// var first_screen = "intro";
-var first_screen = "title";
+// var first_screen = "1p_launch_code";
+var first_screen = "intro";
+// var first_screen = "1p_lobby";
+// var first_screen = "title";
 // var first_screen = "cutscene";
 
 var performance_result = null;
@@ -99,7 +99,6 @@ class Game {
     this.loadLocalHighScores();
 
     this.initializeScreens();
-    this.initializeAlertBox();
     this.initializeAnimations();
 
     // this.current_screen = "cutscene";
@@ -209,6 +208,32 @@ class Game {
   }
 
 
+  initializeScreen(screen_name, reset = false) {
+    if (screen_name == "intro") {
+      this.initializeIntro();
+    } else if (screen_name == "title") {
+      this.initializeTitle();
+    } else if (screen_name == "1p_lobby") {
+      this.initialize1pLobby();
+    } else if (screen_name == "high_score") {
+      this.initializeHighScore();
+    } else if (screen_name == "credits") {
+      this.initializeCredits();
+    } else if (screen_name == "1p_word_rockets") {
+      if (reset) this.resetGame();
+      this.initialize1pWordRockets();
+    } else if (screen_name == "1p_base_capture") {
+      if (reset) this.resetGame();
+      this.initialize1pBaseCapture();
+    } else if (screen_name == "1p_launch_code") {
+      if (reset) this.resetGame();
+      this.initialize1pLaunchCode();
+    } else if (screen_name == "cutscene") {
+      this.initializeCutscene();
+    }
+  }
+
+
   initializeAnimations() {
     var self = this;
     if (!PIXI.Loader.shared.resources["Art/intro.png"]) {
@@ -221,18 +246,7 @@ class Game {
                   PIXI.Loader.shared.add("Art/electric.json").load(function() {
                     if (!PIXI.Loader.shared.resources["Art/smoke.json"]) {
                       PIXI.Loader.shared.add("Art/smoke.json").load(function() {
-
-                        if (first_screen == "intro") {
-                          self.initializeIntro();
-                        } else if (first_screen == "title") {
-                          self.initializeTitle();
-                        } else if (first_screen == "1p_base_capture") {
-                          self.resetGame();
-                          // self.score = 999455;
-                          self.initialize1pBaseCapture();
-                        } else if (first_screen == "cutscene") {
-                          self.initializeCutscene();
-                        }
+                        self.initializeScreen(first_screen, true);
                       });
                     }
                   });
@@ -384,16 +398,20 @@ class Game {
 
 
   update(diff) {
-    if (this.current_screen == "1p_game") {
+    if (this.current_screen == "1p_word_rockets") {
       this.singlePlayerGameUpdate(diff);
     } else if (this.current_screen == "1p_base_capture") {
       this.singlePlayerBaseCaptureUpdate(diff);
+    } else if (this.current_screen == "1p_launch_code") {
+      this.singlePlayerLaunchCodeUpdate(diff);
     } else if(this.current_screen == "1p_lobby") {
       this.singlePlayerLobbyUpdate(diff);
     } else if (this.current_screen == "cutscene") {
       this.cutsceneUpdate(diff);
     } else if (this.current_screen == "intro") {
       this.introUpdate(diff);
+    } else if (this.current_screen == "title") {
+      this.titleUpdate(diff);
     }
   }
 

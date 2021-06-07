@@ -49,6 +49,8 @@ Game.prototype.initializeIntro = function() {
       voxel.x_dir = Math.cos(angle * (180 / Math.PI));
       voxel.y_dir = Math.sin(angle * (180 / Math.PI));
       voxel.position.set(voxel.orig_x + 1000 * voxel.x_dir, voxel.orig_y + 1000 * voxel.y_dir);
+      //voxel.alpha_wiggle = 1.5 + Math.random();
+      //voxel.alpha = 0;
       this.intro_voxels.push(voxel);
     }
 
@@ -68,8 +70,10 @@ Game.prototype.initializeIntro = function() {
   self.soundEffect("intro");
 
   delay(function() {
+    // self.initializeTitle();
+    // self.fadeScreens("intro", "title");
     self.initializeTitle();
-    self.fadeScreens("intro", "title");
+    self.popScreens("intro", "title");
   }, 4500);
 }
 
@@ -80,45 +84,23 @@ Game.prototype.introUpdate = function(diff) {
 
   if (this.intro_voxels != null && this.intro_started == true) {
     let t = this.timeSince(this.intro_start_time);
+
     let param = 1;
-    if (t <= 1300) {
-      param = Math.min(1,Math.pow(t / 1300, 2));
-    } else if (t <= 1800) {
-      param = 1 + Math.max(0,0.001 * Math.sin((t - 200) / 20));
+    if (t <= 1000) {
+      param = Math.min(1,Math.pow(t / 1000, 2));
     } else if (t <= 2000) {
-      param = 1;
+      param = 1 + Math.max(0,0.001 * Math.sin((t - 200) / 20));
     } else if (t > 2000) {
       param = Math.min(1,Math.pow((4000 - t) / 2000, 2));
     }
 
-    // if (t <= 1500) {
-    //   param = Math.min(1,Math.pow(t / 1500, 2));
-    // } else if (t <= 1500) {
-    //   // param = 1 + 0.002 * Math.sin(t / 500);
-    //   param = 1;
-    // } else if (t > 2000) {
-    //   param = Math.min(1,Math.pow((4000 - t) / 2000, 3));
-    // }
-
-    // if (t <= 2000) {
-    //   param = Math.min(1,Math.pow(t / 2000, 3));
-    //   if (param > 0.95) param = 1;
-    // } else if (t > 2000) {
-    //   param = Math.min(1,Math.pow((4000 - t) / 2000, 3));
-    // }
-
     for (var i = 0; i < this.intro_voxels.length; i++) {
       let voxel = this.intro_voxels[i];
-      // if (voxel.white == false || t > 2000) {
-      //   voxel.x = voxel.orig_x + 1000 * (1 - param) * voxel.x_dir;
-      //   voxel.y = voxel.orig_y + 1000 * (1 - param) * voxel.y_dir;
-      // } else {
-      //   voxel.x = voxel.orig_x;
-      //   voxel.y = voxel.orig_y;
-      //   voxel.alpha = (t / 2000);
-      // }
       voxel.x = voxel.orig_x + 1000 * (1 - param) * voxel.x_dir;
       voxel.y = voxel.orig_y + 1000 * (1 - param) * voxel.y_dir;
+      if (t > 3900) {
+        voxel.alpha = 0;
+      }
     }
     
   }

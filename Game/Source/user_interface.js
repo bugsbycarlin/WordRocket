@@ -358,6 +358,26 @@ Game.prototype.swearing = function() {
 }
 
 
+Game.prototype.updateEnemyScreenTexture = function() {
+  var self = this;
+  var screen = this.screens[this.current_screen];
+
+  let texture = PIXI.RenderTexture.create({width: 800, height: 600});
+
+  this.renderer.render(this.player_area, texture);
+
+  if (this.enemy_area.sprite == null) {
+    let sprite = PIXI.Sprite.from(texture);
+    sprite.position.set(-240,-520);
+    sprite.anchor.set(0, 0);
+    this.enemy_area.removeChild[0];
+    this.enemy_area.addChild(sprite);
+    this.enemy_area.sprite = sprite;
+  } else {
+    this.enemy_area.sprite.texture = texture;
+  }
+}
+
 
 //
 //
@@ -372,11 +392,17 @@ Game.prototype.initializeScreens = function() {
   this.makeScreen("intro");
   this.makeScreen("title");
   this.makeScreen("1p_lobby");
-  this.makeScreen("1p_game");
+  this.makeScreen("1p_word_rockets");
   this.makeScreen("1p_base_capture");
+  this.makeScreen("1p_launch_code");
   this.makeScreen("cutscene");
   this.makeScreen("high_score");
   this.makeScreen("credits");
+
+  this.black = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  this.black.width = 1280;
+  this.black.height = 960;
+  this.black.tint = 0x000000;
 
   this.screens[first_screen].position.x = 0;
   this.current_screen = first_screen;
@@ -385,6 +411,7 @@ Game.prototype.initializeScreens = function() {
   pixi.stage.addChild(this.alertMask);
   this.alertBox = new PIXI.Container();
   pixi.stage.addChild(this.alertBox);
+  this.initializeAlertBox();
 }
 
 
@@ -435,12 +462,16 @@ Game.prototype.switchScreens = function(old_screen, new_screen) {
 }
 
 
-Game.prototype.fadeScreens = function(old_screen, new_screen) {
+Game.prototype.fadeScreens = function(old_screen, new_screen, double_fade = false) {
   var self = this;
   console.log("switching from " + old_screen + " to " + new_screen);
   pixi.stage.removeChild(this.screens[old_screen]);
   pixi.stage.removeChild(this.screens[new_screen]);
   pixi.stage.addChild(this.screens[new_screen]);
+  if (double_fade) {  
+    pixi.stage.addChild(this.black);
+    this.black.alpha = 1;
+  }
   pixi.stage.addChild(this.screens[old_screen]);
   this.screens[old_screen].position.x = 0;
   this.screens[new_screen].position.x = 0;
@@ -452,12 +483,49 @@ Game.prototype.fadeScreens = function(old_screen, new_screen) {
       this.clearScreen(this.screens[i]);
     }
   }
+
   var tween = new TWEEN.Tween(this.screens[old_screen])
     .to({alpha: 0})
     .duration(1000)
     // .easing(TWEEN.Easing.Linear)
-    .onComplete(function() {self.clearScreen(self.screens[old_screen]);})
+    .onComplete(function() {
+      if (!double_fade) {
+        self.clearScreen(self.screens[old_screen]);
+      } else {
+        var tween2 = new TWEEN.Tween(self.black)
+        .to({alpha: 0})
+        .duration(1000)
+        .onComplete(function() {
+          self.clearScreen(self.screens[old_screen]);
+          self.current_screen = new_screen;
+          pixi.stage.removeChild(self.black);
+        })
+        .start();
+      }
+    })
     .start();
+  
+}
+
+
+Game.prototype.popScreens = function(old_screen, new_screen) {
+  var self = this;
+  console.log("switching from " + old_screen + " to " + new_screen);
+  pixi.stage.removeChild(this.screens[old_screen]);
+  pixi.stage.removeChild(this.screens[new_screen]);
+  pixi.stage.addChild(this.screens[old_screen]);
+  pixi.stage.addChild(this.screens[new_screen]);
+  this.screens[old_screen].position.x = 0;
+  this.screens[new_screen].position.x = 0;
+  for (var i = 0; i < this.screens.length; i++) {
+    if (this.screens[i] == new_screen) {
+      this.screens[i].visible = true;
+    } else {
+      this.screens[i].visible = false;
+      this.clearScreen(this.screens[i]);
+    }
+  }
+  this.clearScreen(this.screens[old_screen]);
   this.current_screen = new_screen;
 }
 
@@ -520,11 +588,17 @@ Game.prototype.initializeAlertBox = function() {
 
 Game.prototype.showAlert = function(text, action) {
   var self = this;
+  pixi.stage.addChild(this.alertMask);
+  pixi.stage.addChild(this.alertBox);
+  this.alert_last_screen = this.current_screen;
+  this.current_screen = "alert";
   this.alertBox.alertText.text = text;
+  this.alertBox.removeAllListeners();
   this.alertBox.on("pointertap", function() {
     action();
     self.alertBox.visible = false
     self.alertMask.visible = false
+    self.current_screen = self.alert_last_screen
   });
   this.alertBox.visible = true;
   this.alertMask.visible = true;

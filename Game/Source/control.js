@@ -2,8 +2,8 @@
 
 Game.prototype.keyAction = function(letter) {
   let self = this;
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
-    if (this.difficulty_level == "BEACON") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
+    if (this.difficulty_level === "BEACON") {
       if (this.player_palette.letters[letter].playable === true && !this.launchpad.full()) {
         this.launchpad.push(this.player_palette, letter);
       } else {
@@ -25,10 +25,10 @@ Game.prototype.keyAction = function(letter) {
 
 
 Game.prototype.deleteAction = function() {
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
     this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.pop();
-    if (this.game_phase == "tutorial" && this.tutorial_number == 3) {
+    if (this.game_phase === "tutorial" && this.tutorial_number === 3) {
       this.tutorial35();
     }
   }
@@ -36,10 +36,10 @@ Game.prototype.deleteAction = function() {
 
 
 Game.prototype.rightArrowAction = function() {
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
       this.launchpad.smallShiftRight();
-      if (this.game_phase == "tutorial" && this.tutorial_number == 2.5) {
+      if (this.game_phase === "tutorial" && this.tutorial_number === 2.5) {
         this.tutorial_conditions["right"] = 1;
         if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
           this.tutorial275();
@@ -51,10 +51,10 @@ Game.prototype.rightArrowAction = function() {
 
 
 Game.prototype.leftArrowAction = function() {
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.5) {
       this.launchpad.smallShiftLeft();
-      if (this.game_phase == "tutorial" && this.tutorial_number == 2.5) {
+      if (this.game_phase === "tutorial" && this.tutorial_number === 2.5) {
         this.tutorial_conditions["left"] = 1;
         if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
           this.tutorial275();
@@ -66,10 +66,10 @@ Game.prototype.leftArrowAction = function() {
 
 
 Game.prototype.rightShiftAction = function() {
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.75) {
       this.launchpad.bigShiftRight();
-      if (this.game_phase == "tutorial" && this.tutorial_number == 2.75) {
+      if (this.game_phase === "tutorial" && this.tutorial_number === 2.75) {
         this.tutorial_conditions["right"] = 1;
         if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
           this.tutorial3();
@@ -81,10 +81,10 @@ Game.prototype.rightShiftAction = function() {
 
 
 Game.prototype.leftShiftAction = function() {
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 2.75) {
       this.launchpad.bigShiftLeft();
-      if (this.game_phase == "tutorial" && this.tutorial_number == 2.75) {
+      if (this.game_phase === "tutorial" && this.tutorial_number === 2.75) {
         this.tutorial_conditions["left"] = 1;
         if (this.tutorial_conditions["right"] != null && this.tutorial_conditions["left"] != null) {
           this.tutorial3();
@@ -96,10 +96,10 @@ Game.prototype.leftShiftAction = function() {
 
 
 Game.prototype.clearAction = function() {
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
     this.soundEffect("keyboard_click_1", 1.0);
     this.launchpad.clear();
-    if (this.game_phase == "tutorial" && this.tutorial_number == 3.5) {
+    if (this.game_phase === "tutorial" && this.tutorial_number === 3.5) {
       this.tutorial4();
     }
   }
@@ -107,10 +107,10 @@ Game.prototype.clearAction = function() {
 
 
 Game.prototype.enterAction = function() {
-  if (this.game_phase == "active" || this.game_phase == "tutorial") {
+  if (this.game_phase === "active" || this.game_phase === "tutorial") {
     if (this.game_phase != "tutorial" || this.tutorial_number >= 5) {
       this.launchpad.launch(this.player_area);
-      if (this.game_phase == "tutorial" && this.tutorial_number == 5) {
+      if (this.game_phase === "tutorial" && this.tutorial_number === 5) {
         this.tutorial6();
       }
     }
@@ -119,7 +119,7 @@ Game.prototype.enterAction = function() {
 
 
 Game.prototype.bombAction = function() {
-  if (this.game_phase == "active" && this.player_bombs > 0) {
+  if (this.game_phase === "active" && this.player_bombs > 0) {
     this.player_bombs -= 1;
     this.explodeArea(this.player_area, 2);
     this.player_palette.setBombs(this.player_bombs);
@@ -190,7 +190,7 @@ Game.prototype.gameplayKeyDown = function(key) {
   if (!this.paused) {
     this.pressKey(this.player_palette, key);
 
-    if (this.game_phase == "tutorial" && this.tutorial_number == 1) {
+    if (this.game_phase === "tutorial" && this.tutorial_number === 1) {
       this.tutorial2();
     }
 
@@ -233,7 +233,7 @@ Game.prototype.gameplayKeyDown = function(key) {
     }
   }
 
-  if (key === "Tab" && (this.game_phase == "active" || this.game_phase == "countdown")) {
+  if (key === "Tab" && (this.game_phase === "active" || this.game_phase === "countdown")) {
     if (this.paused) {
       this.resume();
     } else {
@@ -247,76 +247,63 @@ Game.prototype.gameplayKeyDown = function(key) {
     this.game_phase = "none";
     this.resume();
     this.initialize1pLobby();
-    this.switchScreens("1p_game", "1p_lobby");
+    this.switchScreens("1p_word_rockets", "1p_lobby");
   }
 }
 
 
 Game.prototype.handleKeyDown = function(ev) {
-  if (ev.key == "Tab") {
+  if (ev.key === "Tab") {
     ev.preventDefault();
   }
 
-  if(this.current_screen == "1p_game") {
+  if(this.current_screen === "1p_word_rockets") {
 
     let key = ev.key;
-    if (key == "Shift") {
-      if (ev.code == "ShiftLeft") key = "LShift";
-      if (ev.code == "ShiftRight") key = "RShift";
+    if (key === "Shift") {
+      if (ev.code === "ShiftLeft") key = "LShift";
+      if (ev.code === "ShiftRight") key = "RShift";
     }
 
     this.gameplayKeyDown(key);
 
-  } else if(this.current_screen == "1p_base_capture") {
+  } else if(this.current_screen === "1p_base_capture") {
 
     let key = ev.key;
-    if (key == "Shift") {
-      if (ev.code == "ShiftLeft") key = "LShift";
-      if (ev.code == "ShiftRight") key = "RShift";
+    if (key === "Shift") {
+      if (ev.code === "ShiftLeft") key = "LShift";
+      if (ev.code === "ShiftRight") key = "RShift";
     }
 
     this.baseCaptureKeyDown(key);
 
-  } else if (this.current_screen == "1p_lobby") {
-    if (ev.key === "ArrowRight") {
-      this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
-      this.difficulty_choice = (this.difficulty_choice + 1) % 4;
-      this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
-      this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
-      this.updateHighScoreDisplay();
-    } else if (ev.key === "ArrowLeft") {
-      this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
-      this.difficulty_choice = (this.difficulty_choice + 3) % 4;
-      this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
-      this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
-      this.updateHighScoreDisplay();
-    } else if (ev.key === "Enter") {
-      this.difficulty_level = this.option_values[this.difficulty_choice];
-      localStorage.setItem("word_rockets_difficulty_level", this.difficulty_level);
-      this.resetGame();
-      this.initializeCutscene();
-      this.switchScreens("1p_lobby", "cutscene");
-    } else if (ev.key == "Escape") {
-      this.initializeTitle();
-      this.switchScreens("1p_lobby", "title");
+  } else if(this.current_screen === "1p_launch_code") {
+
+    let key = ev.key;
+    if (key === "Shift") {
+      if (ev.code === "ShiftLeft") key = "LShift";
+      if (ev.code === "ShiftRight") key = "RShift";
     }
-  } else if (this.current_screen == "credits") {
-    if (ev.key == "Escape") {
+
+    this.launchCodeKeyDown(key);
+
+  } else if (this.current_screen === "credits") {
+    if (ev.key === "Escape") {
       this.left_shark_tween.stop();
       this.right_shark_tween.stop();
       this.initializeTitle();
       this.switchScreens("credits", "title");
     }
-  } else if (this.current_screen == "high_score") {
+  } else if (this.current_screen === "high_score") {
     let key = ev.key;
-    if (key == "Shift") {
-      if (ev.code == "ShiftLeft") key = "LShift";
-      if (ev.code == "ShiftRight") key = "RShift";
+    if (key === "Shift") {
+      if (ev.code === "ShiftLeft") key = "LShift";
+      if (ev.code === "ShiftRight") key = "RShift";
     }
 
     this.pressKey(this.high_score_palette, key);
 
-    if (this.high_score_state == "entry") {
+    if (this.high_score_state === "entry") {
       for (i in lower_array) {
         if (ev.key === lower_array[i] || ev.key === letter_array[i]) {
           this.highScoreKey(letter_array[i]);
@@ -331,21 +318,103 @@ Game.prototype.handleKeyDown = function(ev) {
         this.highScoreEnter();
       }
     }
-  } else if (this.current_screen == "cutscene") {
+  } else if (this.current_screen === "cutscene") {
     if (ev.key === "Enter" || ev.key === " ") {
       this.gotoCutscenePage(this.cutscene_pagenum + 1);
     }
 
-    if (ev.key == "Escape") {
+    if (ev.key === "Escape") {
       this.endCutscene();
       // TO DO: go to the next scene
     }
-  }
+  } else if (this.current_screen === "title") {
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+      this.soundEffect("switch_option");
+      this.title_choice = this.title_choice === 0 ? 1 : 0;
+      if (this.title_choice === 0) {
+        this.single_player_button.tint = 0x67d8ef;
+        this.multiplayer_button.tint = 0xFFFFFF;
+      } else {
+        this.single_player_button.tint = 0xFFFFFF;
+        this.multiplayer_button.tint = 0x67d8ef;
+      }
+    } else if (ev.key === "Enter") {
+      this.single_player_button.tint = 0xFFFFFF;
+      this.multiplayer_button.tint = 0xFFFFFF;
+      if (this.title_choice === 0) {
+        this.single_player_button._events.pointerdown.fn()
+      } else {
+        this.multiplayer_button._events.pointerdown.fn()
+      }
+    }
+  } else if (this.current_screen === "alert") {
+    if (ev.key === "Enter" || ev.key === "Escape") {
+      this.alertBox._events.pointertap.fn()
+    }
+  } else if (this.current_screen === "1p_lobby") {
+    if (this.lobby_mode === "difficulty") {
+      if (ev.key === "ArrowRight") {
+        this.soundEffect("switch_option");
+        this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
+        this.difficulty_choice = (this.difficulty_choice + 1) % 4;
+        this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
+        this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
+        this.updateHighScoreDisplay();
+      } else if (ev.key === "ArrowLeft") {
+        this.soundEffect("switch_option");
+        this.option_markers[this.difficulty_choice].tint = 0xFFFFFF;
+        this.difficulty_choice = (this.difficulty_choice + 3) % 4;
+        this.option_markers[this.difficulty_choice].tint = 0x75d3fe;
+        this.option_info.setPartial(this.option_info_values[this.difficulty_choice].toUpperCase());
+        this.updateHighScoreDisplay();
+      } else if (ev.key === "Enter") {
+        this.lobby_go_button._events.pointertap.fn();
+      } else if (ev.key === "Escape") {
+        // this.initializeTitle();
+        // this.switchScreens("1p_lobby", "title");
+        this.lobby_difficulty_back_button._events.pointertap.fn();
+      }
+    } else if (this.lobby_mode === "game_type") {
+      if (ev.key === "ArrowRight") {
+        this.soundEffect("switch_option");
+        this.game_type_selection += 1;
+        this.game_type_selection = this.game_type_selection % 3;
+        this.game_type_story_text.tint = this.game_type_selection == 0 ? 0x67d8ef : 0xFFFFFF;
+        this.game_type_arcade_text.tint = this.game_type_selection == 1 ? 0x67d8ef : 0xFFFFFF;
+        this.game_type_tutorial_text.tint = this.game_type_selection == 2 ? 0x67d8ef : 0xFFFFFF;
+        let val = (this.game_type_selection == 0 ? 180 : (this.game_type_selection == 1 ? 500 : 820));
+        var tween = new TWEEN.Tween(this.game_type_selection_box.position)
+          .to({x: val + 140})
+          .duration(200)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+      } else if (ev.key === "ArrowLeft") {
+        this.soundEffect("switch_option");
+        this.game_type_selection += 2;
+        this.game_type_selection = this.game_type_selection % 3;
+        this.game_type_story_text.tint = this.game_type_selection == 0 ? 0x67d8ef : 0xFFFFFF;
+        this.game_type_arcade_text.tint = this.game_type_selection == 1 ? 0x67d8ef : 0xFFFFFF;
+        this.game_type_tutorial_text.tint = this.game_type_selection == 2 ? 0x67d8ef : 0xFFFFFF;
+        let val = (this.game_type_selection == 0 ? 180 : (this.game_type_selection == 1 ? 500 : 820));
+        var tween = new TWEEN.Tween(this.game_type_selection_box.position)
+          .to({x: val + 140})
+          .duration(200)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+      } else if (ev.key === "Enter") {
+        this.game_type_ok_button._events.pointertap.fn();
+      } else if (ev.key === "Escape") {
+        this.lobby_game_type_back_button._events.pointertap.fn();
+      }
+    }
+  } 
 }
 
 
 Game.prototype.handleMouseMove = function(ev) {
-  if(this.current_screen == "1p_base_capture" || this.current_screen == "1p_game") {
+  if(this.current_screen === "1p_base_capture" 
+    || this.current_screen === "1p_word_rockets"
+    || this.current_screen === "1p_launch_code") {
     this.mouseMove(ev);
   } 
 }
@@ -353,7 +422,9 @@ Game.prototype.handleMouseMove = function(ev) {
 
 Game.prototype.handleMouseDown = function(ev) {
   let self = this;
-  if(this.current_screen == "1p_base_capture" || this.current_screen == "1p_game") {
+  if(this.current_screen === "1p_base_capture" 
+    || this.current_screen === "1p_word_rockets"
+    || this.current_screen === "1p_launch_code") {
     if (ev.button >= 0 && ev.button <= 2) {
       let mouse_button = this.mouse_tester.buttons[ev.button];
 
@@ -369,7 +440,7 @@ Game.prototype.handleMouseDown = function(ev) {
     }
   }
 
-  if(this.current_screen == "1p_base_capture") {
+  if(this.current_screen === "1p_base_capture") {
     this.baseCaptureMouseDown(ev);
   } 
 }

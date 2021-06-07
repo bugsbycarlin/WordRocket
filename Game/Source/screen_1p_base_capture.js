@@ -29,8 +29,8 @@ Game.prototype.initialize1pBaseCapture = function() {
   // 900, 450: 3 - 6, and many of the games were *very* close.
   // 500, 250: pretty fun
   // 100, 100: nice and easy.
-  this.enemy_move_speed = 900 + 100 * this.level;
-  this.enemy_typing_speed = 400 + 50 * this.level;
+  this.enemy_move_speed = 100 + 100 * this.level;
+  this.enemy_typing_speed = 100 + 50 * this.level;
   this.enemy_phase = "moving"; // moving, typing
 
   this.play_clock = 15;
@@ -68,26 +68,6 @@ Game.prototype.initialize1pBaseCapture = function() {
   }, 1200);
 }
 
-Game.prototype.updateEnemyScreenTexture = function() {
-  var self = this;
-  var screen = this.screens["1p_base_capture"];
-
-  let texture = PIXI.RenderTexture.create({width: 800, height: 600});
-
-  this.renderer.render(this.player_area, texture);
-
-  if (this.enemy_area.sprite == null) {
-    let sprite = PIXI.Sprite.from(texture);
-    sprite.position.set(-240,-520);
-    sprite.anchor.set(0, 0);
-    this.enemy_area.removeChild[0];
-    this.enemy_area.addChild(sprite);
-    this.enemy_area.sprite = sprite;
-  } else {
-    this.enemy_area.sprite.texture = texture;
-  }
-}
-
 
 Game.prototype.resetBase = function() {
   var self = this;
@@ -116,8 +96,6 @@ Game.prototype.resetBase = function() {
     }
   });
   this.enemy_palette.scale.set(0.3125, 0.3125);
-
-
 
   this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/opponent_2.png"));
   this.opponent_image.anchor.set(0.5, 0.5);
@@ -159,9 +137,7 @@ Game.prototype.resetBase = function() {
   this.player_live_area.position.set(this.player_area.x, this.player_area.y);
   this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
 
-  //for (var p = 0; p < 2; p++) {
   let area = this.player_area;
-  //if (p == 1) area = this.enemy_area;
 
   // Sky and Ground
   let sky = new PIXI.Sprite(PIXI.Texture.from("Art/base_sky.png"));
@@ -209,17 +185,7 @@ Game.prototype.resetBase = function() {
       horizontal.alpha = 0.05;
       area.addChild(horizontal);
     }
-  //}
   }
-
-  // this.enemy_area.underlayer = new PIXI.Container();
-  // this.enemy_area.addChild(this.enemy_area.underlayer)
-  // this.enemy_area.layers = [];
-  // for (let i = 0; i < 13; i++) {
-  //   let c = new PIXI.Container();
-  //   this.enemy_area.addChild(c);
-  //   this.enemy_area.layers.push(c);
-  // }
 
   this.player_area.underlayer = new PIXI.Container();
   this.player_area.addChild(this.player_area.underlayer)
@@ -359,12 +325,6 @@ Game.prototype.resetBase = function() {
   player_monitor_mask.drawRect(129, 39, 669, 504);
   player_monitor_mask.endFill();
   this.player_area.mask = player_monitor_mask;
-
-  // let enemy_monitor_mask = new PIXI.Graphics();
-  // enemy_monitor_mask.beginFill(0xFF3300);
-  // enemy_monitor_mask.drawRect(894, 98, 334, 251);
-  // enemy_monitor_mask.endFill();
-  // this.enemy_area.mask = enemy_monitor_mask;
 
   let corners = [0, 1, 2, 3]; // bottom left, top left, top right, bottom right
   shuffleArray(corners);
@@ -1151,7 +1111,7 @@ Game.prototype.baseCaptureLegalWord = function(word) {
 }
 
 
-Game.prototype.baseCaptureUpdateCountdown = function() {
+Game.prototype.baseCaptureUpdateDisplayInfo = function() {
   var self = this;
   var screen = this.screens["1p_base_capture"];
 
@@ -1709,7 +1669,7 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
   //   this.tutorial_screen.tutorial_text.hover();
   // }
 
-  this.baseCaptureUpdateCountdown();
+  this.baseCaptureUpdateDisplayInfo();
   this.shakeDamage();
   this.freeeeeFreeeeeFalling(fractional);
 

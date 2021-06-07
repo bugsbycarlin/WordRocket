@@ -4,6 +4,8 @@ Game.prototype.initializeTitle = function() {
   var self = this;
   let screen = this.screens["title"];
 
+  this.title_choice = 0;
+
   let blue_bg = PIXI.Sprite.from(PIXI.Texture.WHITE);
   blue_bg.width = 1280;
   blue_bg.height = 960;
@@ -16,6 +18,11 @@ Game.prototype.initializeTitle = function() {
   right_flag.scale.set(3,3);
   right_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   right_flag.position.set(790, this.height - 710);
+    // new TWEEN.Tween(right_flag.position)
+    //     .to({y: this.height - 710})
+    //     .duration(9000)
+    //     .easing(TWEEN.Easing.Quadratic.Out)
+    //     .start();
   screen.addChild(right_flag);
 
   let left_flag = new PIXI.Sprite(PIXI.Texture.from("Art/Title/flag_american.png"));
@@ -23,6 +30,11 @@ Game.prototype.initializeTitle = function() {
   left_flag.scale.set(-3,3);
   left_flag.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   left_flag.position.set(485, this.height - 710);
+    // new TWEEN.Tween(left_flag.position)
+    //     .to({y: this.height - 710})
+    //     .duration(9000)
+    //     .easing(TWEEN.Easing.Quadratic.Out)
+    //     .start();
   screen.addChild(left_flag);
 
   // ! brandenburg
@@ -32,22 +44,12 @@ Game.prototype.initializeTitle = function() {
   brandenburg.anchor.set(0.5,0.5);
   brandenburg.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   brandenburg.position.set(this.width / 2, this.height - 520);
+  // new TWEEN.Tween(brandenburg.position)
+  //       .to({y: this.height - 520})
+  //       .duration(9000)
+  //       .easing(TWEEN.Easing.Quadratic.Out)
+  //       .start();
   screen.addChild(brandenburg);
-
-  // ! wall
-  // pure color
-  // let wall = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // wall.width = 1280;
-  // wall.height = 150;
-  // wall.position.set(0,650);
-  // wall.tint = 0x2c3674;
-  // screen.addChild(wall);
-  // texture
-  // let wall = new PIXI.Sprite(PIXI.Texture.from("Art/Title/wall_texture_pixelated.png"));
-  // wall.position.set(0, 650);
-  // wall.scale.set(1,0.70);
-  // wall.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  // screen.addChild(wall);
 
   // ! players
   let right_player = new PIXI.Sprite(PIXI.Texture.from("Art/Title/player.png"));
@@ -56,6 +58,11 @@ Game.prototype.initializeTitle = function() {
   right_player.anchor.set(0.5,0.5);
   right_player.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   right_player.position.set(this.width / 2 + 314, this.height - 192);
+  // new TWEEN.Tween(right_player.position)
+  //     .to({x: this.width / 2 + 314})
+  //     .duration(9000)
+  //     .easing(TWEEN.Easing.Quadratic.Out)
+  //     .start();
   screen.addChild(right_player);
 
   let left_player = new PIXI.Sprite(PIXI.Texture.from("Art/Title/player.png"));
@@ -64,54 +71,126 @@ Game.prototype.initializeTitle = function() {
   left_player.anchor.set(0.5,0.5);
   left_player.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   left_player.position.set(this.width / 2 - 314, this.height - 192);
+  // new TWEEN.Tween(left_player.position)
+  //     .to({x: this.width / 2 - 314})
+  //     .duration(9000)
+  //     .easing(TWEEN.Easing.Quadratic.Out)
+  //     .start();
   screen.addChild(left_player);
 
-  // ! word
-  let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_word.png"));
-  title_word.anchor.set(0,0);
-  title_word.position.set(320, 208);
-  screen.addChild(title_word);
+  this.cold_war_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 84, fill: 0x0e1744, letterSpacing: 2, align: "left",
+    dropShadow: true, dropShadowColor: 0x09102f, dropShadowDistance: 8, dropShadowAngle: Math.PI/4});
+  this.cold_war_text.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.cold_war_text.anchor.set(0.0,0.5);
+  this.cold_war_text.position.set(294, 364);
+  screen.addChild(this.cold_war_text);
 
-  // ! rockets
-  for (var i = 0; i < 7; i++) {
-    let x = 546 + 64 * i;
-    let y = 498;
-    let fire = this.makeFire(screen, x - 2, y + 43, 0.32*1.25, 0.24*1.25);
-    fire.animationSpeed = 0.2;
-  }
-  let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_rockets.png"));
-  title_rockets.anchor.set(0,0);
-  title_rockets.position.set(512, 336);
-  screen.addChild(title_rockets);
+  this.keyboards_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 84, fill: 0x0e1744, letterSpacing: 2, align: "left",
+    dropShadow: true, dropShadowColor: 0x09102f, dropShadowDistance: 8, dropShadowAngle: Math.PI/4});
+  this.keyboards_text.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.keyboards_text.anchor.set(0.0,0.5);
+  this.keyboards_text.position.set(253, 514);
+  screen.addChild(this.keyboards_text);
+
+  // let rate = 100;
+  // for (let i = 1; i <= 8; i++) {
+  //   delay(function() {
+  //     self.cold_war_text.text = "COLD WAR".slice(0, i);
+  //   }, rate * i);
+  // }
+  // for (let i = 1; i <= 9; i++) {
+  //   delay(function() {
+  //     self.keyboards_text.text = "KEYBOARDS".slice(0, i);
+  //   }, 8*rate + rate * i);
+  // }
+
+  this.cold_war_time = this.markTime() - 5000;
+
+
+  // // ! word
+  // let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_word.png"));
+  // title_word.anchor.set(0,0);
+  // title_word.position.set(320, 208);
+  // screen.addChild(title_word);
+
+  // // ! rockets
+  // for (var i = 0; i < 7; i++) {
+  //   let x = 546 + 64 * i;
+  //   let y = 498;
+  //   let fire = this.makeFire(screen, x - 2, y + 43, 0.32*1.25, 0.24*1.25);
+  //   fire.animationSpeed = 0.2;
+  // }
+  // let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_rockets.png"));
+  // title_rockets.anchor.set(0,0);
+  // title_rockets.position.set(512, 336);
+  // screen.addChild(title_rockets);
+
+
 
   // ! buttons
-  let tutorial_button = new PIXI.Text("TUTORIAL", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
-  tutorial_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  tutorial_button.anchor.set(0.5,0.5);
-  tutorial_button.position.set(this.width / 2, this.height - 320);
-  screen.addChild(tutorial_button);
-  tutorial_button.interactive = true;
-  tutorial_button.buttonMode = true;
-  tutorial_button.on("pointerdown", function() {
-    self.tutorial = true;
-    self.difficulty_level = "EASY";
-    if (self.network.uid == null) {
-      self.network.anonymousSignIn(function() {});
-    }
-    self.resetGame();
-    self.initialize1pGame();
-    self.blendHighScores(function() {});
-    self.switchScreens("title", "1p_game");
-  });
+  // let tutorial_button = new PIXI.Text("TUTORIAL", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
+  // tutorial_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  // tutorial_button.anchor.set(0.5,0.5);
+  // tutorial_button.position.set(this.width / 2, this.height - 320);
+  // screen.addChild(tutorial_button);
+  // tutorial_button.interactive = true;
+  // tutorial_button.buttonMode = true;
+  // tutorial_button.on("pointerdown", function() {
+  //   self.tutorial = true;
+  //   self.difficulty_level = "EASY";
+  //   if (self.network.uid == null) {
+  //     self.network.anonymousSignIn(function() {});
+  //   }
+  //   self.resetGame();
+  //   self.blendHighScores(function() {});
+  //   self.initialize1pWordRockets();
+  //   self.switchScreens("title", "1p_word_rockets");
+  // });
 
-  let new_game_button = new PIXI.Text("NEW GAME", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
-  new_game_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  new_game_button.anchor.set(0.5,0.5);
-  new_game_button.position.set(this.width / 2, this.height - 280);
-  screen.addChild(new_game_button);
-  new_game_button.interactive = true;
-  new_game_button.buttonMode = true;
-  new_game_button.on("pointerdown", function() {
+  // let new_game_button = new PIXI.Text("NEW GAME", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
+  // new_game_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  // new_game_button.anchor.set(0.5,0.5);
+  // new_game_button.position.set(this.width / 2, this.height - 280);
+  // screen.addChild(new_game_button);
+  // new_game_button.interactive = true;
+  // new_game_button.buttonMode = true;
+  // new_game_button.on("pointerdown", function() {
+  //   self.tutorial = false;
+  //   if (self.network.uid == null) {
+  //     self.network.anonymousSignIn(function() {});
+  //   }
+  //   self.initialize1pLobby();
+  //   self.blendHighScores(self.updateHighScoreDisplay());
+  //   self.switchScreens("title", "1p_lobby");
+  // });
+
+  // let multi_button = new PIXI.Text("INTERNET", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
+  // multi_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  // multi_button.anchor.set(0.5,0.5);
+  // multi_button.position.set(this.width / 2, this.height - 240);
+  // screen.addChild(multi_button);
+  // multi_button.interactive = true;
+  // multi_button.buttonMode = true;
+  // multi_button.on("pointerdown", function() {
+  //   // TO DO: multiplayer
+  //   self.blendHighScores(function() {});
+  //   self.initializeHighScore(10300);
+  //   self.switchScreens("title", "high_score");
+  // });
+
+  let single_player_button = new PIXI.Text("SINGLE", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
+  single_player_button.tint = 0x67d8ef;
+  single_player_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  single_player_button.anchor.set(0.5,0.5);
+  single_player_button.position.set(this.width / 2 - 5, this.height - 280);
+  screen.addChild(single_player_button);
+  single_player_button.interactive = true;
+  single_player_button.buttonMode = true;
+  single_player_button.on("pointerdown", function() {
+    self.soundEffect("button_accept");
+    self.single_player_button.tint = 0xFFFFFF;
+    self.multiplayer_button.tint = 0xFFFFFF;
+    flicker(single_player_button, 500, 0xFFFFFF, 0x67d8ef);
     self.tutorial = false;
     if (self.network.uid == null) {
       self.network.anonymousSignIn(function() {});
@@ -121,19 +200,23 @@ Game.prototype.initializeTitle = function() {
     self.switchScreens("title", "1p_lobby");
   });
 
-  let multi_button = new PIXI.Text("INTERNET", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
-  multi_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  multi_button.anchor.set(0.5,0.5);
-  multi_button.position.set(this.width / 2, this.height - 240);
-  screen.addChild(multi_button);
-  multi_button.interactive = true;
-  multi_button.buttonMode = true;
-  multi_button.on("pointerdown", function() {
-    // TO DO: multiplayer
-    self.blendHighScores(function() {});
-    self.initializeHighScore(10300);
-    self.switchScreens("title", "high_score");
+  let multiplayer_button = new PIXI.Text("MULTI (coming soon)", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
+  multiplayer_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  multiplayer_button.anchor.set(0.5,0.5);
+  multiplayer_button.position.set(this.width / 2 - 5, this.height - 240);
+  screen.addChild(multiplayer_button);
+  multiplayer_button.interactive = true;
+  multiplayer_button.buttonMode = true;
+  multiplayer_button.on("pointerdown", function() {
+    self.showAlert("Sorry! Multiplayer \nNot Yet Available.", function(){});
+    console.log("points");
   });
+
+
+  single_player_button.visible = false;
+  multiplayer_button.visible = false;
+  this.single_player_button = single_player_button;
+  this.multiplayer_button = multiplayer_button;
 
   // ! black bars
   let top_bar = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -293,8 +376,8 @@ Game.prototype.initializeTitle = function() {
 
   this.sign_in_button = new PIXI.Text(this.auth_user == null ? "SIGN-IN" : "SIGN-OUT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
   this.sign_in_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  this.sign_in_button.anchor.set(0,0);
-  this.sign_in_button.position.set(this.width - 180, this.height - 50);
+  this.sign_in_button.anchor.set(1,0);
+  this.sign_in_button.position.set(this.width - 140, this.height - 50);
   screen.addChild(this.sign_in_button);
 
   this.sign_in_button.interactive = true;
@@ -307,4 +390,54 @@ Game.prototype.initializeTitle = function() {
     }
   });
 
+  let bar_three = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  bar_three.width = 1;
+  bar_three.height = 50;
+  bar_three.position.set(this.width - 120, this.height - 65);
+  bar_three.tint = 0x404040;
+  screen.addChild(bar_three);
+
+  let quit_button = new PIXI.Text("QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
+  quit_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  quit_button.anchor.set(0,0);
+  quit_button.position.set(this.width - 100, this.height - 50);
+  screen.addChild(quit_button);
+  quit_button.interactive = true;
+  quit_button.buttonMode = true;
+  quit_button.on("pointerdown", function() {
+    console.log("Quit doesn't work in browsers.")
+    // TO DO: close this when it's a real app
+    // window.close();
+  });
+
+  this.setMusic("cutscene_song");
+}
+
+Game.prototype.titleUpdate = function(diff) {
+  var self = this;
+  var screen = this.screens["intro"];
+
+  if (this.timeSince(this.cold_war_time) > 4155) {
+    this.cold_war_time = this.markTime();
+    this.cold_war_text.text = "";
+    this.keyboards_text.text = "";
+
+    let rate = 100;
+    for (let i = 1; i <= 8; i++) {
+      delay(function() {
+        self.cold_war_text.text = "COLD WAR".slice(0, i);
+      }, rate * i);
+    }
+    for (let i = 1; i <= 9; i++) {
+      delay(function() {
+        self.keyboards_text.text = "KEYBOARDS".slice(0, i);
+      }, 8*rate + rate * i);
+    }
+
+    // add the buttons
+    delay(function() {
+      self.single_player_button.visible = true;
+      self.multiplayer_button.visible = true;
+    }, 2000);
+  }
 }

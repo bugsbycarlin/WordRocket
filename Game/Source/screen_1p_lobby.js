@@ -32,6 +32,36 @@ Game.prototype.initialize1pLobby = function() {
   let screen = this.screens["1p_lobby"];
   this.clearScreen(screen);
 
+  this.lobby_sections = {};
+
+  let background = new PIXI.Sprite(PIXI.Texture.from("Art/setup_background.png"));
+  background.anchor.set(0, 0);
+  screen.addChild(background);
+
+  this.lobby_monitor_mask = new PIXI.Graphics();
+  this.lobby_monitor_mask.beginFill(0xFF3300);
+  this.lobby_monitor_mask.drawRect(155, 84, 1010, 777);
+  this.lobby_monitor_mask.endFill();
+
+  this.initializeSectionDifficulty();
+  this.initializeSectionGameType();
+  this.initializeSectionArcadeType();
+
+  this.lobby_sections.game_type.x = 0;
+  this.lobby_sections.arcade_type.x = 1200;
+  this.lobby_sections.difficulty.x = 1200;
+
+  this.lobby_mode = "game_type";
+}
+
+Game.prototype.initializeSectionDifficulty = function() {
+  let self = this;
+  let screen = this.screens["1p_lobby"];
+  this.lobby_sections.difficulty = new PIXI.Container();
+  let section = this.lobby_sections.difficulty;
+  section.mask = this.lobby_monitor_mask;
+  screen.addChild(section);
+
   this.option_values = ["EASY", "MEDIUM", "HARD", "BEACON"];
 
 
@@ -42,16 +72,12 @@ Game.prototype.initialize1pLobby = function() {
     "So fast. 26 levels. Stunned keys stop working temporarily. Whoever you are, this is more than you can handle."
   ];
 
-  let background = new PIXI.Sprite(PIXI.Texture.from("Art/setup_background.png"));
-  background.anchor.set(0, 0);
-  screen.addChild(background);
-
   let center_x = 640;
 
-  let difficulty_label = new PIXI.Text("Difficulty", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+  let difficulty_label = new PIXI.Text("DIFFICULTY", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
   difficulty_label.anchor.set(0.5,0.5);
   difficulty_label.position.set(center_x,125);
-  screen.addChild(difficulty_label);
+  section.addChild(difficulty_label);
 
   this.option_info = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left", wordWrap: true, wordWrapWidth: 900});
   this.option_info.anchor.set(0,0);
@@ -70,7 +96,7 @@ Game.prototype.initialize1pLobby = function() {
     this.partial_value = 0;
     this.partial_text = new_str;
   }
-  screen.addChild(this.option_info);
+  section.addChild(this.option_info);
 
   console.log(this.option_values.length);
   this.option_markers = [];
@@ -88,50 +114,363 @@ Game.prototype.initialize1pLobby = function() {
     this.option_markers[i].interactive = true;
     this.option_markers[i].buttonMode = true;
     this.option_markers[i].on("pointertap", function() {
+      self.soundEffect("switch_option");
       self.option_markers[self.difficulty_choice].tint = 0xFFFFFF;
       self.difficulty_choice = i;
       self.option_markers[self.difficulty_choice].tint = 0x75d3fe;
       self.option_info.setPartial(self.option_info_values[self.difficulty_choice].toUpperCase());
       self.updateHighScoreDisplay();
     });
-    screen.addChild(this.option_markers[i]);
+    section.addChild(this.option_markers[i]);
   }
 
   let local_high_scores_label = new PIXI.Text("Local High Scores", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   local_high_scores_label.anchor.set(0,0.5);
   local_high_scores_label.position.set(180,420);
-  screen.addChild(local_high_scores_label);
+  section.addChild(local_high_scores_label);
 
   let global_high_scores_label = new PIXI.Text("Global High Scores", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
   global_high_scores_label.anchor.set(0,0.5);
   global_high_scores_label.position.set(703,420);
-  screen.addChild(global_high_scores_label);
+  section.addChild(global_high_scores_label);
 
   this.updateHighScoreDisplay();
 
-  let go_button = new PIXI.Text("GO?", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  let go_button = new PIXI.Text("GO!", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   go_button.anchor.set(0.5,0.5);
   go_button.position.set(center_x - 10,810);
-  screen.addChild(go_button);
+  section.addChild(go_button);
   go_button.interactive = true;
   go_button.buttonMode = true;
   go_button.on("pointertap", function() {
+    self.soundEffect("button_accept")
+    flicker(go_button, 500, 0xFFFFFF, 0x67d8ef);
     self.difficulty_level = self.option_values[self.difficulty_choice];
     localStorage.setItem("word_rockets_difficulty_level", self.difficulty_level);
     self.resetGame();
     self.initializeCutscene();
     self.switchScreens("1p_lobby", "cutscene");
   });
+  this.lobby_go_button = go_button;
 
-  let back_button = new PIXI.Text("<", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
-  back_button.anchor.set(0.5,0.5);
-  back_button.position.set(185, 125);
-  screen.addChild(back_button);
-  back_button.interactive = true;
-  back_button.buttonMode = true;
-  back_button.on("pointertap", function() {
+  this.lobby_difficulty_back_button = new PIXI.Text("<", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  this.lobby_difficulty_back_button.anchor.set(0.5,0.5);
+  this.lobby_difficulty_back_button.position.set(185, 125);
+  section.addChild(this.lobby_difficulty_back_button);
+  this.lobby_difficulty_back_button.interactive = true;
+  this.lobby_difficulty_back_button.buttonMode = true;
+  this.lobby_difficulty_back_button.on("pointertap", function() {
+    //self.initializeTitle();
+    //self.switchScreens("1p_lobby", "title");
+    if (self.game_type_selection == 0) {
+      self.lobby_mode = "game_type";
+      self.lobby_sections.difficulty.x = 0;
+      self.lobby_sections.game_type.x = - 1200;
+      var tween = new TWEEN.Tween(self.lobby_sections.difficulty.position)
+        .to({x: 1200})
+        .duration(800)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+      var tween = new TWEEN.Tween(self.lobby_sections.game_type.position)
+        .to({x: 0})
+        .duration(800)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+    } else if (self.game_type_selection == 1) {
+      self.lobby_mode = "arcade_type";
+    }
+  });
+}
+
+
+Game.prototype.initializeSectionGameType = function() {
+  let self = this;
+  let screen = this.screens["1p_lobby"];
+  this.lobby_sections.game_type = new PIXI.Container();
+  let section = this.lobby_sections.game_type;
+  section.mask = this.lobby_monitor_mask;
+  screen.addChild(section);
+
+  this.game_type_selection = 0;
+
+  let choose_game_type = new PIXI.Text("GAME TYPE", {fontFamily: "Press Start 2P", fontSize: 48, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  choose_game_type.anchor.set(0.5,0.5);
+  choose_game_type.position.set(this.width / 2, 160);
+  section.addChild(choose_game_type);
+
+  this.game_type_story_button = new PIXI.Sprite(PIXI.Texture.from("Art/game_type_story.png"));
+  this.game_type_story_button.anchor.set(0.5, 0.5);
+  this.game_type_story_button.position.set(180 + 128, 300 + 128);
+  section.addChild(this.game_type_story_button);
+  this.game_type_story_button.interactive = true;
+  this.game_type_story_button.buttonMode = true;
+  this.game_type_story_button.on("pointertap", function() {
+    self.soundEffect("switch_option");
+    self.game_type_selection = 0;
+    self.game_type_story_text.tint = 0x67d8ef;
+    self.game_type_arcade_text.tint = 0xFFFFFF;
+    self.game_type_tutorial_text.tint = 0xFFFFFF;
+    var tween = new TWEEN.Tween(self.game_type_selection_box.position)
+      .to({x: 180 + 140})
+      .duration(200)
+      .easing(TWEEN.Easing.Cubic.Out)
+      .start();
+  });
+
+  this.game_type_arcade_button = new PIXI.Sprite(PIXI.Texture.from("Art/game_type_arcade.png"));
+  this.game_type_arcade_button.anchor.set(0.5, 0.5);
+  this.game_type_arcade_button.position.set(500 + 128, 300 + 128);
+  section.addChild(this.game_type_arcade_button);
+  this.game_type_arcade_button.interactive = true;
+  this.game_type_arcade_button.buttonMode = true;
+  this.game_type_arcade_button.on("pointertap", function() {
+    self.soundEffect("switch_option");
+    self.game_type_selection = 1;
+    self.game_type_story_text.tint = 0xFFFFFF;
+    self.game_type_arcade_text.tint = 0x67d8ef;
+    self.game_type_tutorial_text.tint = 0xFFFFFF;
+    var tween = new TWEEN.Tween(self.game_type_selection_box.position)
+      .to({x: 500 + 140})
+      .duration(200)
+      .easing(TWEEN.Easing.Cubic.Out)
+      .start();
+  });
+
+  this.game_type_tutorial_button = new PIXI.Sprite(PIXI.Texture.from("Art/game_type_tutorial.png"));
+  this.game_type_tutorial_button.anchor.set(0.5, 0.5);
+  this.game_type_tutorial_button.position.set(820 + 128, 300 + 128);
+  section.addChild(this.game_type_tutorial_button);
+  this.game_type_tutorial_button.interactive = true;
+  this.game_type_tutorial_button.buttonMode = true;
+  this.game_type_tutorial_button.on("pointertap", function() {
+    self.soundEffect("switch_option");
+    self.game_type_selection = 2;
+    self.game_type_story_text.tint = 0xFFFFFF;
+    self.game_type_arcade_text.tint = 0xFFFFFF;
+    self.game_type_tutorial_text.tint = 0x67d8ef;
+    var tween = new TWEEN.Tween(self.game_type_selection_box.position)
+      .to({x: 820 + 140})
+      .duration(200)
+      .easing(TWEEN.Easing.Cubic.Out)
+      .start();
+  });
+
+  this.game_type_story_text = new PIXI.Text("STORY", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  this.game_type_story_text.anchor.set(0.5,0);
+  this.game_type_story_text.position.set(320, 630);
+  this.game_type_story_text.tint = 0x67d8ef;
+  section.addChild(this.game_type_story_text);
+
+  this.game_type_arcade_text = new PIXI.Text("ARCADE", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  this.game_type_arcade_text.anchor.set(0.5,0);
+  this.game_type_arcade_text.position.set(625, 630);
+  section.addChild(this.game_type_arcade_text);
+
+  this.game_type_tutorial_text = new PIXI.Text("TUTORIAL", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  this.game_type_tutorial_text.anchor.set(0.5,0);
+  this.game_type_tutorial_text.position.set(960, 630);
+  section.addChild(this.game_type_tutorial_text);
+
+  this.game_type_selection_box = new PIXI.Sprite(PIXI.Texture.from("Art/selection_box.png"));
+  this.game_type_selection_box.anchor.set(0.5, 0.5);
+  this.game_type_selection_box.position.set(180 + 140, 300 + 140);
+  this.game_type_selection.tint = 0x67d8ef;
+  section.addChild(this.game_type_selection_box);
+
+  let ok_button = new PIXI.Text("OK", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  ok_button.anchor.set(0.5,0.5);
+  ok_button.position.set(640 - 10,810);
+  section.addChild(ok_button);
+  ok_button.interactive = true;
+  ok_button.buttonMode = true;
+  ok_button.on("pointertap", function() {
+    self.soundEffect("button_accept");
+    flicker(ok_button, 500, 0xFFFFFF, 0x67d8ef);
+    flicker(self.game_type_selection_box, 500, 0xFFFFFF, 0x67d8ef);
+    if (self.game_type_selection == 0) {
+      flicker(self.game_type_story_text, 500, 0xFFFFFF, 0x67d8ef);
+      flicker(self.game_type_story_button, 500, 0xFFFFFF, 0x67d8ef);
+      // Proceed to difficulty screen
+      self.lobby_mode = "none";
+      delay(function() {
+        var tween = new TWEEN.Tween(self.lobby_sections.game_type.position)
+          .to({x: -1200})
+          .duration(800)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+        var tween = new TWEEN.Tween(self.lobby_sections.difficulty.position)
+          .to({x: 0})
+          .duration(800)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+        self.lobby_mode = "difficulty";
+      }, 200);
+    } else if (self.game_type_selection == 1) {
+      flicker(self.game_type_arcade_text, 500, 0xFFFFFF, 0x67d8ef);
+      flicker(self.game_type_arcade_button, 500, 0xFFFFFF, 0x67d8ef);
+      // Proceed to arcade type screen
+      self.lobby_mode = "none";
+      delay(function() {
+        var tween = new TWEEN.Tween(self.lobby_sections.game_type.position)
+          .to({x: -1200})
+          .duration(800)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+        var tween = new TWEEN.Tween(self.lobby_sections.arcade_type.position)
+          .to({x: 0})
+          .duration(800)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+        self.lobby_mode = "arcade_type";
+      }, 200);
+    } else if (self.game_type_selection == 2) {
+      flicker(self.game_type_tutorial_text, 500, 0xFFFFFF, 0x67d8ef);
+      flicker(self.game_type_tutorial_button, 500, 0xFFFFFF, 0x67d8ef);
+      // Proceed directly to tutorials
+
+    }
+  });
+  this.game_type_ok_button = ok_button;
+
+  this.lobby_game_type_back_button = new PIXI.Text("<", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  this.lobby_game_type_back_button.anchor.set(0.5,0.5);
+  this.lobby_game_type_back_button.position.set(185, 125);
+  section.addChild(this.lobby_game_type_back_button);
+  this.lobby_game_type_back_button.interactive = true;
+  this.lobby_game_type_back_button.buttonMode = true;
+  this.lobby_game_type_back_button.on("pointertap", function() {
     self.initializeTitle();
     self.switchScreens("1p_lobby", "title");
+  });
+}
+
+
+Game.prototype.initializeSectionArcadeType = function() {
+  let self = this;
+  let screen = this.screens["1p_lobby"];
+  this.lobby_sections.arcade_type = new PIXI.Container();
+  let section = this.lobby_sections.arcade_type;
+  section.mask = this.lobby_monitor_mask;
+  screen.addChild(section);
+
+  this.arcade_type_selection = 0;
+
+  let choose_game_type = new PIXI.Text("ARCADE TYPE", {fontFamily: "Press Start 2P", fontSize: 48, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  choose_game_type.anchor.set(0.5,0.5);
+  choose_game_type.position.set(this.width / 2, 160);
+  section.addChild(choose_game_type);
+
+  this.arcade_type_mixed_button = new PIXI.Sprite(PIXI.Texture.from("Art/arcade_type_base_capture.png"));
+  this.arcade_type_mixed_button.anchor.set(0.5, 0.5);
+  this.arcade_type_mixed_button.position.set(640 - 350, 450);
+  section.addChild(this.arcade_type_mixed_button);
+  this.arcade_type_mixed_button.interactive = true;
+  this.arcade_type_mixed_button.buttonMode = true;
+  this.arcade_type_mixed_button.on("pointertap", function() {
+    // self.soundEffect("switch_option");
+    // self.game_type_selection = 0;
+    // self.game_type_story_text.tint = 0x67d8ef;
+    // self.game_type_arcade_text.tint = 0xFFFFFF;
+    // self.game_type_tutorial_text.tint = 0xFFFFFF;
+    // var tween = new TWEEN.Tween(self.game_type_selection_box.position)
+    //   .to({x: 180 + 140})
+    //   .duration(200)
+    //   .easing(TWEEN.Easing.Cubic.Out)
+    //   .start();
+  });
+
+  this.arcade_type_word_rockets_button = new PIXI.Sprite(PIXI.Texture.from("Art/arcade_type_word_rockets.png"));
+  this.arcade_type_word_rockets_button.anchor.set(0.5, 0.5);
+  this.arcade_type_word_rockets_button.position.set(640 - 125, 450);
+  section.addChild(this.arcade_type_word_rockets_button);
+  this.arcade_type_word_rockets_button.interactive = true;
+  this.arcade_type_word_rockets_button.buttonMode = true;
+  this.arcade_type_word_rockets_button.on("pointertap", function() {
+  });
+
+  this.arcade_type_base_capture_button = new PIXI.Sprite(PIXI.Texture.from("Art/arcade_type_base_capture.png"));
+  this.arcade_type_base_capture_button.anchor.set(0.5, 0.5);
+  this.arcade_type_base_capture_button.position.set(640 + 125, 450);
+  section.addChild(this.arcade_type_base_capture_button);
+  this.arcade_type_base_capture_button.interactive = true;
+  this.arcade_type_base_capture_button.buttonMode = true;
+  this.arcade_type_base_capture_button.on("pointertap", function() {
+  });
+
+  this.arcade_type_launch_code_button = new PIXI.Sprite(PIXI.Texture.from("Art/arcade_type_base_capture.png"));
+  this.arcade_type_launch_code_button.anchor.set(0.5, 0.5);
+  this.arcade_type_launch_code_button.position.set(640 + 350, 450);
+  section.addChild(this.arcade_type_launch_code_button);
+  this.arcade_type_launch_code_button.interactive = true;
+  this.arcade_type_launch_code_button.buttonMode = true;
+  this.arcade_type_launch_code_button.on("pointertap", function() {
+  });
+
+  this.arcade_type_mixed_text = new PIXI.Text("MIXED", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  this.arcade_type_mixed_text.anchor.set(0.5,0);
+  this.arcade_type_mixed_text.position.set(640 - 350, 630);
+  this.arcade_type_mixed_text.tint = 0x67d8ef;
+  section.addChild(this.arcade_type_mixed_text);
+
+  this.arcade_type_word_rockets_text = new PIXI.Text("ROCKETS", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  this.arcade_type_word_rockets_text.anchor.set(0.5,0);
+  this.arcade_type_word_rockets_text.position.set(640 - 125, 630);
+  // this.arcade_type_word_rockets_text.tint = 0x67d8ef;
+  section.addChild(this.arcade_type_word_rockets_text);
+
+  this.arcade_type_base_capture_text = new PIXI.Text("BASE", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  this.arcade_type_base_capture_text.anchor.set(0.5,0);
+  this.arcade_type_base_capture_text.position.set(640 + 125, 630);
+  // this.arcade_type_base_capture_text.tint = 0x67d8ef;
+  section.addChild(this.arcade_type_base_capture_text);
+
+  this.arcade_type_launch_code_text = new PIXI.Text("LAUNCH", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "right"});
+  this.arcade_type_launch_code_text.anchor.set(0.5,0);
+  this.arcade_type_launch_code_text.position.set(640 + 350, 630);
+  // this.arcade_type_launch_code_text.tint = 0x67d8ef;
+  section.addChild(this.arcade_type_launch_code_text);
+
+
+  this.arcade_type_selection_box = new PIXI.Sprite(PIXI.Texture.from("Art/selection_box.png"));
+  this.arcade_type_selection_box.anchor.set(0.5, 0.5);
+  this.arcade_type_selection_box.scale.set(0.75, 0.75);
+  this.arcade_type_selection_box.position.set(640 - 350, 450);
+  this.arcade_type_selection.tint = 0x67d8ef;
+  section.addChild(this.arcade_type_selection_box);
+
+
+
+
+  let ok_button = new PIXI.Text("OK", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  ok_button.anchor.set(0.5,0.5);
+  ok_button.position.set(640 - 10,810);
+  section.addChild(ok_button);
+  ok_button.interactive = true;
+  ok_button.buttonMode = true;
+  ok_button.on("pointertap", function() {
+  });
+  this.arcade_type_ok_button = ok_button;
+
+  this.lobby_arcade_type_back_button = new PIXI.Text("<", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  this.lobby_arcade_type_back_button.anchor.set(0.5,0.5);
+  this.lobby_arcade_type_back_button.position.set(185, 125);
+  section.addChild(this.lobby_arcade_type_back_button);
+  this.lobby_arcade_type_back_button.interactive = true;
+  this.lobby_arcade_type_back_button.buttonMode = true;
+  this.lobby_arcade_type_back_button.on("pointertap", function() {
+    self.lobby_mode = "game_type";
+    self.lobby_sections.arcade_type.x = 0;
+    self.lobby_sections.game_type.x = - 1200;
+    var tween = new TWEEN.Tween(self.lobby_sections.arcade_type.position)
+      .to({x: 1200})
+      .duration(800)
+      .easing(TWEEN.Easing.Cubic.Out)
+      .start();
+    var tween = new TWEEN.Tween(self.lobby_sections.game_type.position)
+      .to({x: 0})
+      .duration(800)
+      .easing(TWEEN.Easing.Cubic.Out)
+      .start();
   });
 }
 
@@ -147,15 +486,16 @@ Game.prototype.singlePlayerLobbyUpdate = function(diff) {
 Game.prototype.updateHighScoreDisplay = function() {
   var self = this;
   var screen = this.screens["1p_lobby"];
+  var section = this.lobby_sections.difficulty;
 
   if (this.local_high_scores_texts != null) {
     for (let i = 0; i <= this.local_high_scores_texts.length; i++) {
-      screen.removeChild(this.local_high_scores_texts[i]);
+      section.removeChild(this.local_high_scores_texts[i]);
     }
   }
   if (this.global_high_scores_texts != null) {
     for (let i = 0; i <= this.global_high_scores_texts.length; i++) {
-      screen.removeChild(this.global_high_scores_texts[i]);
+      section.removeChild(this.global_high_scores_texts[i]);
     }
   }
 
@@ -171,7 +511,7 @@ Game.prototype.updateHighScoreDisplay = function() {
     let lhs = new PIXI.Text(text, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
     lhs.anchor.set(0,0.5);
     lhs.position.set(180,460 + 24*i);
-    screen.addChild(lhs);
+    section.addChild(lhs);
     this.local_high_scores_texts.push(lhs);
   }
 
@@ -185,7 +525,7 @@ Game.prototype.updateHighScoreDisplay = function() {
     let ghs = new PIXI.Text(text, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
     ghs.anchor.set(0,0.5);
     ghs.position.set(703,460 + 24*i);
-    screen.addChild(ghs);
+    section.addChild(ghs);
     this.global_high_scores_texts.push(ghs);
   }
 }

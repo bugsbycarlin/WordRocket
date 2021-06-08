@@ -410,7 +410,7 @@ Game.prototype.initializeTitle = function() {
     // window.close();
   });
 
-  this.setMusic("cutscene_song");
+  this.setMusic("title_song");
 }
 
 Game.prototype.titleUpdate = function(diff) {

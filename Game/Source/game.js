@@ -1,6 +1,6 @@
 'use strict';
 
-var use_music = false;
+var use_music = true;
 var use_sound = true;
 var use_scores = false;
 var log_performance = true;
@@ -97,6 +97,8 @@ class Game {
     }
 
     this.loadLocalHighScores();
+
+    this.initializeFlows();
 
     this.initializeScreens();
     this.initializeAnimations();
@@ -205,6 +207,124 @@ class Game {
       var fraction = this.tracking[label].total / sum_of_totals;
       console.log(label + ": " + Math.round(fraction * 100).toFixed(2) + "%");
     }
+  }
+
+
+  initializeFlows() {
+    this.flow = {};
+    this.flow_marker = -1;
+
+    // game type is story
+    this.flow[0] = {};
+    this.flow[0]["EASY"] = [
+      "cut:c1", "wr:1", "wr:2", "cut:c2", "bc:3", "bc:4",
+      "cut:c3", "lc:5", "lc:6", "cut:c4", "wr:7", "wr:8",
+      "cut:c5", "bc:9", "bc:10", "cut:c6", "lc:11", "lc:12",
+      "cut:c7", "wr:13", "wr:14", "cut:c8"
+    ];
+    this.flow[0]["MEDIUM"] = [
+      "cut:c1", "wr:1", "wr:2", "wr:3", "cut:c2", "bc:4", "bc:5", "bc:6",
+      "cut:c3", "lc:7", "lc:8", "lc:9", "cut:c4", "wr:10", "wr:11", "wr:12",
+      "cut:c5", "bc:13", "bc:14", "bc:15", "cut:c6", "lc:16", "lc:17", "lc:18",
+      "cut:c7", "wr:19", "wr:20", "wr:21", "cut:c8"
+    ];
+    this.flow[0]["HARD"] = [
+      "cut:c1", "wr:1", "wr:2", "wr:3", "cut:c2", "bc:4", "bc:5", "bc:6",
+      "cut:c3", "lc:7", "lc:8", "lc:9", "cut:c4", "wr:10", "wr:11", "wr:12",
+      "cut:c5", "bc:13", "bc:14", "bc:15", "cut:c6", "lc:16", "lc:17", "lc:18",
+      "cut:c7", "wr:19", "wr:20", "wr:21", "cut:c8"
+    ];
+    this.flow[0]["BEACON"] = [
+      "cut:c1", "wr:1", "wr:2", "wr:3", "cut:c2", "bc:4", "bc:5", "bc:6",
+      "cut:c3", "lc:7", "lc:8", "lc:9", "cut:c4", "wr:10", "wr:11", "wr:12",
+      "cut:c5", "bc:13", "bc:14", "bc:15", "cut:c6", "lc:16", "lc:17", "lc:18",
+      "cut:c7", "wr:19", "wr:20", "wr:21", "cut:c8"
+    ];
+
+    this.flow[2] = {};
+    this.flow[2]["EASY"] = [
+      "cut:t1", "wr:1", "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
+    ];
+  }
+
+
+  nextFlow() {
+    this.flow_marker += 1;
+    console.log("Marker: " + this.flow_marker);
+    console.log("Game type: " + this.game_type_selection);
+    console.log("Difficulty: " + this.difficulty_level);
+
+    if (this.game_type_selection == 0 || this.game_type_selection == 2) {
+      // Story mode
+      console.log("story mode");
+      if (this.flow_marker < this.flow[this.game_type_selection][this.difficulty_level].length) {
+        if (this.game_type_selection == 2) {
+          this.tutorial = true;
+          this.difficulty_level = "EASY";
+        }
+
+        let [next_type, next_value, extra_value] = this.flow[this.game_type_selection][this.difficulty_level][this.flow_marker].split(":");
+        
+        if (next_type == "wr") {
+          this.level = parseInt(next_value);
+          this.initializeScreen("1p_word_rockets");
+          this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
+          if (this.current_screen != "1p_word_rockets") {
+            this.fadeMusic(0);
+            this.switchScreens(this.current_screen, "1p_word_rockets");
+          }
+        } else if (next_type == "bc") {
+          this.level = parseInt(next_value);
+          this.initializeScreen("1p_base_capture");
+          this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
+          if (this.current_screen != "1p_base_capture") {
+            this.fadeMusic(0);
+            this.switchScreens(this.current_screen, "1p_base_capture");
+          }
+        } else if (next_type == "lc") {
+          this.level = parseInt(next_value);
+          this.initializeScreen("1p_launch_code");
+          this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
+          if (this.current_screen != "1p_launch_code") {
+            this.fadeMusic(0);
+            this.switchScreens(this.current_screen, "1p_launch_code");
+          }
+        } else if (next_type == "cut") {
+          this.initializeCutscene(next_value);
+          if (this.current_screen != "cutscene") {
+            this.fadeMusic(0);
+            this.switchScreens(this.current_screen, "cutscene");
+          }
+        }
+      } else {
+        // return to 1p_lobby
+        console.log("return to lobby");
+        this.initializeScreen("1p_lobby");
+        this.switchScreens(this.current_screen, "1p_lobby");
+      }
+    } else if (this.game_type_selection == 1) {
+      this.level += 1;
+      let type = "";
+      if (this.arcade_type_selection == 0) {
+        if (this.level % 9 == 1 || this.level % 9 == 2 || this.level % 9 == 3) {
+          type = "1p_word_rockets";
+        } else if (this.level % 9 == 4 || this.level % 9 == 5 || this.level % 9 == 6) {
+          type = "1p_base_capture";
+        } else if (this.level % 9 == 7 || this.level % 9 == 8 || this.level % 9 == 0) {
+          type = "1p_launch_code";
+        }
+      } else if (this.arcade_type_selection == 1) {
+        type = "1p_word_rockets";
+      } else if (this.arcade_type_selection == 2) {
+        type = "1p_base_capture";
+      } else if (this.arcade_type_selection == 3) {
+        type = "1p_launch_code";
+      }
+
+      this.initializeScreen(type);
+      this.switchScreens(this.current_screen, type);
+    }
+
   }
 
 
@@ -392,8 +512,6 @@ class Game {
 
     this.player_bombs = 0;
     this.enemy_bombs = 0;
-
-    console.log(this.difficulty_level);
   }
 
 

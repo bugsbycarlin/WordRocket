@@ -76,7 +76,7 @@ Game.prototype.resetBoard = function() {
   // enemy_mat.position.set(0, -32);
   // enemy_mat.tint = 0x303889;
   // this.enemy_area.addChild(enemy_mat);
-  
+
   var enemy_pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
   enemy_pad_mat.width = 32 * board_width;
   enemy_pad_mat.height = 32;
@@ -86,12 +86,18 @@ Game.prototype.resetBoard = function() {
   this.enemy_area.addChild(enemy_pad_mat);
 
 
-  this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/opponent_2.png"));
-  this.opponent_image.anchor.set(0.5, 0.5);
-  // this.opponent_image.scale.set(3,3);
-  this.opponent_image.position.set(1100, 304);
-  this.opponent_image.alpha = 0.8;
-  // this.opponent_image.tint = 0xFFFFFF;
+  if(this.opponent_name != null) {
+    let name = "";
+    if (this.opponent_name == "zh") {
+      name = "zhukov";
+    }
+    this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/Opponents/" + name + ".png"));
+    this.opponent_image.anchor.set(0.5, 0.5);
+    this.opponent_image.position.set(1100, 304);
+    this.opponent_image.alpha = 0.7;
+  } else {
+    this.opponent_image = new PIXI.Container();
+  }
   screen.addChild(this.opponent_image);
 
   var near_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_near_background.png"));
@@ -159,7 +165,7 @@ Game.prototype.resetBoard = function() {
     sky.anchor.set(0,1);
     sky.position.set(-32, 0);
     area.addChild(sky);
-    sky.visible = false;
+    // sky.visible = false;
 
     for (let i = 0; i < 50; i++) {
       let tree = new PIXI.Sprite(PIXI.Texture.from("Art/tree_" + Math.ceil(Math.random() * 2) + "_no_shadow.png"))
@@ -470,7 +476,12 @@ Game.prototype.updateDisplayInfo = function() {
       for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;
       }
-      this.setMusic("action_song");
+      if ((this.difficulty_level == "EASY" && this.level == 13)
+        || (this.difficulty_level != "EASY" && this.level == 19)) {
+        this.setMusic("putzen_song");
+      } else {
+        this.setMusic("action_song_1");
+      }
     }
   }
 
@@ -799,8 +810,11 @@ Game.prototype.checkEndCondition = function(bypass = false) {
         }, 4000);
       } else if (enemy_dead == true) {
         this.announcement.text = "VICTORY!";
-        this.level += 1;
-        delay(function() {self.initialize1pWordRockets();}, 4000);
+        // this.level += 1;
+        // delay(function() {self.initialize1pWordRockets();}, 4000);
+        delay(function() {
+          self.nextFlow();
+        }, 4000);
       }
 
       this.game_phase = "gameover";

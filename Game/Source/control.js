@@ -406,6 +406,40 @@ Game.prototype.handleKeyDown = function(ev) {
       } else if (ev.key === "Escape") {
         this.lobby_game_type_back_button._events.pointertap.fn();
       }
+    } else if (this.lobby_mode === "arcade_type") {
+      if (ev.key === "ArrowRight") {
+        this.soundEffect("switch_option");
+        this.arcade_type_selection += 1;
+        this.arcade_type_selection = this.arcade_type_selection % 4;
+        this.arcade_type_mixed_text.tint = this.arcade_type_selection == 0 ? 0x67d8ef : 0xFFFFFF;
+        this.arcade_type_word_rockets_text.tint = this.arcade_type_selection == 1 ? 0x67d8ef : 0xFFFFFF;
+        this.arcade_type_base_capture_text.tint = this.arcade_type_selection == 2 ? 0x67d8ef : 0xFFFFFF;
+        this.arcade_type_launch_code_text.tint = this.arcade_type_selection == 3 ? 0x67d8ef : 0xFFFFFF;
+        let val = (this.arcade_type_selection == 0 ? 640 - 360 : (this.arcade_type_selection == 1 ? 640 - 120 : (this.arcade_type_selection == 2 ? 640 + 120 : 640 + 360)));
+        var tween = new TWEEN.Tween(this.arcade_type_selection_box.position)
+          .to({x: val})
+          .duration(200)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+      } else if (ev.key === "ArrowLeft") {
+        this.soundEffect("switch_option");
+        this.arcade_type_selection += 3;
+        this.arcade_type_selection = this.arcade_type_selection % 4;
+        this.arcade_type_mixed_text.tint = this.arcade_type_selection == 0 ? 0x67d8ef : 0xFFFFFF;
+        this.arcade_type_word_rockets_text.tint = this.arcade_type_selection == 1 ? 0x67d8ef : 0xFFFFFF;
+        this.arcade_type_base_capture_text.tint = this.arcade_type_selection == 2 ? 0x67d8ef : 0xFFFFFF;
+        this.arcade_type_launch_code_text.tint = this.arcade_type_selection == 3 ? 0x67d8ef : 0xFFFFFF;
+        let val = (this.arcade_type_selection == 0 ? 640 - 360 : (this.arcade_type_selection == 1 ? 640 - 120 : (this.arcade_type_selection == 2 ? 640 + 120 : 640 + 360)));
+        var tween = new TWEEN.Tween(this.arcade_type_selection_box.position)
+          .to({x: val})
+          .duration(200)
+          .easing(TWEEN.Easing.Cubic.Out)
+          .start();
+      } else if (ev.key === "Enter") {
+        this.arcade_type_ok_button._events.pointertap.fn();
+      } else if (ev.key === "Escape") {
+        this.lobby_arcade_type_back_button._events.pointertap.fn();
+      }
     }
   } 
 }

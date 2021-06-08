@@ -154,7 +154,11 @@ Game.prototype.initializeCutscene = function(name = "intro") {
     self.gotoCutscenePage(self.cutscene_pagenum + 1);
   });
 
-  this.setMusic("cutscene_song");
+  if (name != "c8") {
+    this.setMusic("cutscene_song");
+  } else {
+    this.setMusic("final_song");
+  }
 }
 
 
@@ -258,16 +262,19 @@ Game.prototype.endCutscene = function() {
     this.cutscene_pages[p].next.interactive = false;
     this.cutscene_pages[p].next.visible = false;
   }
-  if (this.cutscene_next_screen != "title") {
-    this.fadeMusic(0);
-  }
+  
+  this.nextFlow();
 
-  this.initializeScreen(this.cutscene_next_screen);
-  if (this.cutscene_next_screen != "title") {
-    this.switchScreens("cutscene", this.cutscene_next_screen);
-  } else {
-    this.fadeScreens("cutscene", this.cutscene_next_screen, true);
-  }
+  // if (this.cutscene_next_screen != "title") {
+  //   this.fadeMusic(0);
+  // }
+
+  // this.initializeScreen(this.cutscene_next_screen);
+  // if (this.cutscene_next_screen != "title") {
+  //   this.switchScreens("cutscene", this.cutscene_next_screen);
+  // } else {
+  //   this.fadeScreens("cutscene", this.cutscene_next_screen, true);
+  // }
 }
 
 
@@ -293,7 +300,7 @@ Game.prototype.cutsceneUpdate = function(diff) {
 
 
 scenes = {
-  intro: [
+  c1: [
     [
       {image: "1988.png", x: 600, y: 440},
       {text: "1988", x: 180, y: 160, drift: "right"},
@@ -345,13 +352,13 @@ scenes = {
       {text: "So we went up against the Russians. \nThey were bigger, they were stronger, \nthey were really good typists...", x: 430, y: 120},
       {text: "But god damnit*, we were Americans.", x: 850, y: 750, drift: "left"},
       {text: "*Sorry, Mom", x: 200, y: 900},
-      {button: "Ready?", next_screen: "1p_word_rockets", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
+      {button: "Ready?", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
     ],
   ],
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
-  old_man: [
+  c2: [
     [
       {disappears: 1, text: "Moskva...", x: 640, y: 480},
       {appears: 1, disappears: 8, image: "zhukov.png", x: 690, y: 420},
@@ -368,53 +375,73 @@ scenes = {
       {appears: 10, text: "Moskva High student Georgy Zhukov.", size: 24, x: 640, y: 860},
       {appears: 10, image:"zhukov_2b.png", x: 640, y: 450},
       {appears: 11, image:"zhukov_2c.png", x: 1000, y: 545},
-      {appears: 12, button: "Ready?", next_screen: "1p_base_capture", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {appears: 12, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
     ],
   ],
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------  
-  blippin: [
+  c3: [
     [
-      ["square", 620, 450, 1080, 620],
-      ["text", "Wog wog wog", 430, 120],
-      ["text", "Wheedle doo!", 850, 750],
-      ["exit_to_game", "Go", 0, 1],
+      {disappears: 1, text: "More stuff...", x: 640, y: 480},
+      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
+      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
+      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
     ],
   ],
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
-  bloppin: [
+  c4: [
     [
-      ["square", 620, 450, 1080, 620],
-      ["text", "Sing the praises of wigs", 430, 120],
-      ["text", "Wala dee frickin da", 850, 750],
-      ["next", "Next", 1, 0],
-    ],
-    [
-      ["square", 600, 440, 720, 380],
-      ["text", "I am a wiggy wiggy wiggy wiggy wig", 700, 160],
-      ["text", "now let me go.", 890, 720],
-      ["next", "Go", 1, -1],
+      {disappears: 1, text: "More stuff...", x: 640, y: 480},
+      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
+      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
+      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
     ],
   ],
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
-  flappin: [
-
+  c5: [
+    [
+      {disappears: 1, text: "More stuff...", x: 640, y: 480},
+      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
+      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
+      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+    ],
   ],
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
-  pippin: [
-
+  c6: [
+    [
+      {disappears: 1, text: "More stuff...", x: 640, y: 480},
+      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
+      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
+      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+    ],
   ],
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
-  end: [
-
+  c7: [
+    [
+      {disappears: 1, text: "More stuff...", x: 640, y: 480},
+      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
+      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
+      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+    ],
+  ],
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+  c8: [
+    [
+      {disappears: 1, text: "More stuff...", x: 640, y: 480},
+      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
+      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
+      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+    ],
   ],
 }

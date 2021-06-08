@@ -29,6 +29,9 @@ Game.prototype.initialize1pBaseCapture = function() {
   // 900, 450: 3 - 6, and many of the games were *very* close.
   // 500, 250: pretty fun
   // 100, 100: nice and easy.
+  // Remember, it needs to go as high as level 15 on medium and still be eminently beatable.
+  // Hard can hit that barely beatable level around this same mark.
+  // Beacon whatever, make it however hard you want.
   this.enemy_move_speed = 100 + 100 * this.level;
   this.enemy_typing_speed = 100 + 50 * this.level;
   this.enemy_phase = "moving"; // moving, typing
@@ -97,12 +100,18 @@ Game.prototype.resetBase = function() {
   });
   this.enemy_palette.scale.set(0.3125, 0.3125);
 
-  this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/opponent_2.png"));
-  this.opponent_image.anchor.set(0.5, 0.5);
-  // this.opponent_image.scale.set(3,3);
-  this.opponent_image.position.set(1100, 304);
-  this.opponent_image.alpha = 0.8;
-  // this.opponent_image.tint = 0xFFFFFF;
+  if(this.opponent_name != null) {
+    let name = "";
+    if (this.opponent_name == "zh") {
+      name = "zhukov";
+    }
+    this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/Opponents/" + name + ".png"));
+    this.opponent_image.anchor.set(0.5, 0.5);
+    this.opponent_image.position.set(1100, 304);
+    this.opponent_image.alpha = 0.7;
+  } else {
+    this.opponent_image = new PIXI.Container();
+  }
   screen.addChild(this.opponent_image);
 
   var near_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_near_background.png"));
@@ -1191,9 +1200,12 @@ Game.prototype.baseCaptureGameOver = function() {
     winning_player = 1;
   } else {
     this.announcement.text = "VICTORY!";
-    this.level += 1;
-    delay(function() {self.initialize1pBaseCapture();}, 10000);
     winning_player = 0;
+    // this.level += 1;
+    // delay(function() {self.initialize1pBaseCapture();}, 10000);
+    delay(function() {
+      self.nextFlow();
+    }, 10000);
   }
 
   let i = 1;

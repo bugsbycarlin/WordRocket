@@ -51,12 +51,17 @@ Game.prototype.resetRace = function() {
     self.announcement.text = "GAME OVER";
     self.stopMusic();
     //this.soundEffect("game_over");
+    // delay(function() {
+    //   self.initialize1pLobby();
+    //   self.switchScreens("1p_launch_code", "1p_lobby");
+    // }, 500);
     delay(function() {
-      self.initialize1pLobby();
-      self.switchScreens("1p_launch_code", "1p_lobby");
+      self.nextFlow();
     }, 500);
-    
   });
+
+  this.mouse_cord = new PIXI.Container();
+  screen.addChild(this.mouse_cord);
 
   this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0x000000, letterSpacing: 3, align: "center"});
   this.announcement.anchor.set(0.5,0.5);
@@ -64,6 +69,39 @@ Game.prototype.resetRace = function() {
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.announcement.style.lineHeight = 36;
   screen.addChild(this.announcement);
+
+  this.mouse_tester = new PIXI.Container();
+  this.mouse_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/mouse.png"));
+  this.mouse_sprite.anchor.set(0.5,0.5);
+  this.mouse_tester.position.set(1084, 826);
+  screen.addChild(this.mouse_tester);
+  this.mouse_tester.addChild(this.mouse_sprite);
+
+  this.mouse_tester.buttons = [];
+  for (let i = 0; i < 3; i++) {
+    let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
+    mouse_button.anchor.set(0, 0);
+    mouse_button.position.set(1022.5 + 39.25*i - 1084, 748 - 826);
+    this.mouse_tester.addChild(mouse_button);
+    this.mouse_tester.buttons.push(mouse_button);
+
+    mouse_button.interactive = true;
+    mouse_button.buttonMode = true;
+    mouse_button.button_pressed = false;
+    mouse_button.on("pointerdown", function() {
+      self.soundEffect("keyboard_click_1", 1.0);
+      if (mouse_button.button_pressed != true) {
+        mouse_button.button_pressed = true;
+        mouse_button.position.y += 3;
+        delay(function() {
+          mouse_button.button_pressed = false;
+          mouse_button.position.y -= 3;
+        }, 50);
+      }
+    });
+  }
+
+  this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
 }
 
 
@@ -140,7 +178,7 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
       this.last_play = this.markTime();
 
       // TO DO: different song
-      this.setMusic("action_song_2");
+      this.setMusic("action_song_3");
 
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);

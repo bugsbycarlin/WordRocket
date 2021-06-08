@@ -172,6 +172,8 @@ Game.prototype.initializeSectionDifficulty = function() {
   go_button.buttonMode = true;
   go_button.on("pointertap", function() {
     self.soundEffect("button_accept");
+    //self.fadeMusic(0);
+    self.stopMusic();
     flicker(go_button, 500, 0xFFFFFF, 0x67d8ef);
     self.difficulty_level = self.option_values[self.difficulty_choice];
     localStorage.setItem("word_rockets_difficulty_level", self.difficulty_level);

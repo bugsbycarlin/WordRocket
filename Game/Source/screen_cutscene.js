@@ -27,6 +27,8 @@ Game.prototype.initializeCutscene = function(name = "intro") {
   screen.addChild(background);
 
   this.cutscene_pages = [];
+
+  this.score = 0;
   
   this.cutscene_container = new PIXI.Container();
   screen.addChild(this.cutscene_container);
@@ -100,6 +102,58 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         image.position.set(item.x, item.y);
         page.addChild(image);
         artifact = image;
+      } else if ("tournament_board" in item) {
+        let image = new PIXI.Sprite(PIXI.Texture.from("Art/Cutscenes/wng_computer_games_tournament.png"));
+        image.anchor.set(0.5, 0.5);
+        image.position.set(640, 480);
+        page.addChild(image);
+        artifact = image;
+
+        let usa_position = 9 - parseInt(name.replace("c", ""));
+
+        let country_list = ["USSR", "FRA", "GBR", "POL", "JPN", "CSK", "NOR"];
+        country_list.splice(usa_position, 0, "USA");
+        for (let i = 0; i < country_list.length; i++) {
+          let shadow_square = PIXI.Sprite.from(PIXI.Texture.WHITE);
+          shadow_square.anchor.set(0.5, 0.5);
+          shadow_square.position.set(640 + 3, 480 - 110 + 55 * i + 3);
+          shadow_square.width = 300;
+          shadow_square.height = 50;
+          shadow_square.alpha = 0.3;
+          shadow_square.tint = 0x000000;
+          page.addChild(shadow_square);
+
+          let black_square = PIXI.Sprite.from(PIXI.Texture.WHITE);
+          black_square.anchor.set(0.5, 0.5);
+          black_square.position.set(640, 480 - 110 + 55 * i);
+          black_square.width = 302;
+          black_square.height = 52;
+          black_square.tint = 0x000000;
+          page.addChild(black_square);
+
+          let square = PIXI.Sprite.from(PIXI.Texture.WHITE);
+          square.anchor.set(0.5, 0.5);
+          square.position.set(640, 480 - 110 + 55 * i);
+          square.width = 300;
+          square.height = 50;
+          page.addChild(square);
+
+          let text = new PIXI.Text(i + ".      " + country_list[i], {fontFamily: "Bebas Neue", fontSize: 36, fill: 0x000000, letterSpacing: 6, align: "left"});
+          text.anchor.set(0,0.5);
+          text.position.set(500, 480 - 110 + 55 * i + 4);
+          // text.text += country_list[i] == "USSR" ? "     " : "      ";
+          // text.text += this.score;
+          page.addChild(text);
+
+        }
+  //     {text: "       USSR       ", x: 640, y: 480 - 100},
+  //     {text: "       FRA        ", x: 640, y: 480 - 45},
+  //     {text: "       GBR        ", x: 640, y: 480 + 10},
+  //     {text: "       USA        ", x: 640, y: 480 + 65},
+  //     {text: "       POL        ", x: 640, y: 480 + 120},
+  //     {text: "       JPN        ", x: 640, y: 480 + 175},
+  //     {text: "       CSK        ", x: 640, y: 480 + 230},
+  //     {text: "       NOR        ", x: 640, y: 480 + 285},
       }
 
       if ("drift" in item) {
@@ -154,6 +208,7 @@ Game.prototype.initializeCutscene = function(name = "intro") {
     self.gotoCutscenePage(self.cutscene_pagenum + 1);
   });
 
+  console.log("about to set music");
   if (name != "c8") {
     this.setMusic("cutscene_song");
   } else {
@@ -300,7 +355,25 @@ Game.prototype.cutsceneUpdate = function(diff) {
 
 
 scenes = {
+  // c1: [
+  //   [
+  //     {image: "wng_computer_games_tournament.png", x: 640, y: 480, w: 1200, h: 660},
+  //     {text: "       USSR       ", x: 640, y: 480 - 100},
+  //     {text: "       FRA        ", x: 640, y: 480 - 45},
+  //     {text: "       GBR        ", x: 640, y: 480 + 10},
+  //     {text: "       USA        ", x: 640, y: 480 + 65},
+  //     {text: "       POL        ", x: 640, y: 480 + 120},
+  //     {text: "       JPN        ", x: 640, y: 480 + 175},
+  //     {text: "       CSK        ", x: 640, y: 480 + 230},
+  //     {text: "       NOR        ", x: 640, y: 480 + 285},
+  //   ],
+  // ],
   c1: [
+    [
+      {tournament_board: "okay!"},
+    ]
+  ],
+  cx: [
     [
       {image: "1988.png", x: 600, y: 440},
       {text: "1988", x: 180, y: 160, drift: "right"},

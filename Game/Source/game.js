@@ -10,10 +10,10 @@ var log_performance = true;
 
 // var first_screen = "1p_base_capture";
 // var first_screen = "1p_launch_code";
-var first_screen = "intro";
+// var first_screen = "intro";
 // var first_screen = "1p_lobby";
 // var first_screen = "title";
-// var first_screen = "cutscene";
+var first_screen = "cutscene";
 
 var performance_result = null;
 
@@ -267,33 +267,43 @@ class Game {
         
         if (next_type == "wr") {
           this.level = parseInt(next_value);
-          this.initializeScreen("1p_word_rockets");
           this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
           if (this.current_screen != "1p_word_rockets") {
-            this.fadeMusic(0);
+            console.log("switching to word rockets");
+            this.stopMusic();
+            this.initializeScreen("1p_word_rockets");
             this.switchScreens(this.current_screen, "1p_word_rockets");
+          } else {
+            this.initializeScreen("1p_word_rockets");
           }
         } else if (next_type == "bc") {
           this.level = parseInt(next_value);
-          this.initializeScreen("1p_base_capture");
           this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
           if (this.current_screen != "1p_base_capture") {
-            this.fadeMusic(0);
+            this.stopMusic();
+            this.initializeScreen("1p_base_capture");
             this.switchScreens(this.current_screen, "1p_base_capture");
+          } else {
+            this.initializeScreen("1p_base_capture");
           }
         } else if (next_type == "lc") {
           this.level = parseInt(next_value);
-          this.initializeScreen("1p_launch_code");
           this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
           if (this.current_screen != "1p_launch_code") {
-            this.fadeMusic(0);
+            this.stopMusic();
+            this.initializeScreen("1p_launch_code");
             this.switchScreens(this.current_screen, "1p_launch_code");
+          } else {
+            this.initializeScreen("1p_launch_code");
           }
         } else if (next_type == "cut") {
-          this.initializeCutscene(next_value);
           if (this.current_screen != "cutscene") {
-            this.fadeMusic(0);
+            console.log("switching to cutscene");
+            this.stopMusic();
+            this.initializeCutscene(next_value);
             this.switchScreens(this.current_screen, "cutscene");
+          } else {
+            this.initializeCutscene(next_value);
           }
         }
       } else {
@@ -303,7 +313,7 @@ class Game {
         this.switchScreens(this.current_screen, "1p_lobby");
       }
     } else if (this.game_type_selection == 1) {
-      this.level += 1;
+      this.level = this.flow_marker + 1;
       let type = "";
       if (this.arcade_type_selection == 0) {
         if (this.level % 9 == 1 || this.level % 9 == 2 || this.level % 9 == 3) {
@@ -321,8 +331,13 @@ class Game {
         type = "1p_launch_code";
       }
 
-      this.initializeScreen(type);
-      this.switchScreens(this.current_screen, type);
+      if (this.current_screen != type) {
+        this.stopMusic();
+        this.initializeScreen(type);
+        this.switchScreens(this.current_screen, type);
+      } else {
+        this.initializeScreen(type);
+      }
     }
 
   }
@@ -349,7 +364,7 @@ class Game {
       if (reset) this.resetGame();
       this.initialize1pLaunchCode();
     } else if (screen_name == "cutscene") {
-      this.initializeCutscene();
+      this.initializeCutscene("c1");
     }
   }
 
@@ -510,6 +525,8 @@ class Game {
     this.level = 1;
     this.score = 0;
 
+    this.flow_marker = -1;
+
     this.player_bombs = 0;
     this.enemy_bombs = 0;
   }
@@ -546,9 +563,13 @@ class Game {
   setMusic(music_name) {
     if (use_music) {
       var self = this;
+      if (this.music != null && this.music_name != music_name) {
+        this.stopMusic();
+      }
       this.music = document.getElementById(music_name);
       this.music.loop = true;
       this.music.volume = 0.6;
+      this.music_name = music_name;
       this.music.play();
     }
   }

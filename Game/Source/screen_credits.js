@@ -13,33 +13,38 @@ Game.prototype.initializeCredits = function() {
 
   let derp = new PIXI.Text("DESIGN, ART, PROGRAMMING", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   derp.anchor.set(0.5,0.5);
-  derp.position.set(this.width / 2, 250);
+  derp.position.set(this.width / 2, 230);
   screen.addChild(derp);
 
   let me_thang = new PIXI.Text("MATTSBY CARLIN", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   me_thang.anchor.set(0.5,0.5);
-  me_thang.position.set(this.width / 2, 290);
+  me_thang.position.set(this.width / 2, 270);
   screen.addChild(me_thang);
 
   let sound_derp = new PIXI.Text("SOUND", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   sound_derp.anchor.set(0.5,0.5);
-  sound_derp.position.set(this.width / 2, 450);
+  sound_derp.position.set(this.width / 2, 430);
   screen.addChild(sound_derp);
 
   let open_thang = new PIXI.Text("FREESOUND.ORG", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   open_thang.anchor.set(0.5,0.5);
-  open_thang.position.set(this.width / 2, 490);
+  open_thang.position.set(this.width / 2, 470);
   screen.addChild(open_thang);
 
   let music_derp = new PIXI.Text("MUSIC", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   music_derp.anchor.set(0.5,0.5);
-  music_derp.position.set(this.width / 2, 650);
+  music_derp.position.set(this.width / 2, 630);
   screen.addChild(music_derp);
 
-  let fes_thang = new PIXI.Text("FESLIYAN STUDIOS", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  let fes_thang = new PIXI.Text("FESLIYAN STUDIOS \n(DAVID FESLYIYAN AND DAVID RENDA)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
   fes_thang.anchor.set(0.5,0.5);
-  fes_thang.position.set(this.width / 2, 690);
+  fes_thang.position.set(this.width / 2, 680);
   screen.addChild(fes_thang);
+
+  let oga_thang = new PIXI.Text("OPENGAMEART.ORG \n(SPRING AND NENE)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+  oga_thang.anchor.set(0.5,0.5);
+  oga_thang.position.set(this.width / 2, 760);
+  screen.addChild(oga_thang);
 
 
   var left_shark = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_american.png"));

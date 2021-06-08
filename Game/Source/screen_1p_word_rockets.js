@@ -476,8 +476,8 @@ Game.prototype.updateDisplayInfo = function() {
       for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;
       }
-      if ((this.difficulty_level == "EASY" && this.level == 13)
-        || (this.difficulty_level != "EASY" && this.level == 19)) {
+      if ((this.difficulty_level == "EASY" && (this.level == 13 || this.level == 14))
+        || (this.difficulty_level != "EASY" && (this.level == 19 || this.level == 20 || this.level == 21))) {
         this.setMusic("putzen_song");
       } else {
         this.setMusic("action_song_1");

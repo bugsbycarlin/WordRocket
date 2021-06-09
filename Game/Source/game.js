@@ -10,10 +10,10 @@ var log_performance = true;
 
 // var first_screen = "1p_base_capture";
 // var first_screen = "1p_launch_code";
-// var first_screen = "intro";
+var first_screen = "intro";
 // var first_screen = "1p_lobby";
 // var first_screen = "title";
-var first_screen = "cutscene";
+// var first_screen = "cutscene";
 
 var performance_result = null;
 
@@ -364,7 +364,7 @@ class Game {
       if (reset) this.resetGame();
       this.initialize1pLaunchCode();
     } else if (screen_name == "cutscene") {
-      this.initializeCutscene("c1");
+      this.initializeCutscene("c8");
     }
   }
 

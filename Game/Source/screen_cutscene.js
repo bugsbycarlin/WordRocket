@@ -28,7 +28,16 @@ Game.prototype.initializeCutscene = function(name = "intro") {
 
   this.cutscene_pages = [];
 
+
+
+
+
   this.score = 0;
+
+
+
+
+
   
   this.cutscene_container = new PIXI.Container();
   screen.addChild(this.cutscene_container);
@@ -38,6 +47,7 @@ Game.prototype.initializeCutscene = function(name = "intro") {
 
   this.cutscene_state = "ready";
   this.cutscene_pagenum = 0;
+  this.cutscene_name = name;
 
   this.sequence_num = 0;
 
@@ -107,43 +117,83 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         image.anchor.set(0.5, 0.5);
         image.position.set(640, 480);
         page.addChild(image);
-        artifact = image;
+        page.next.visible = false;
 
-        let usa_position = 9 - parseInt(name.replace("c", ""));
+        this.tournament_board = new PIXI.Container();
+        this.tournament_board.boards = [];
+        this.tournament_board.complete = false;
+        this.tournament_board.usa = null;
+        this.tournament_board.above = null;
+        artifact = this.tournament_board;
+        page.addChild(this.tournament_board);
+
+        this.tournament_board.usa_position = 9 - parseInt(name.replace("c", ""));
+        let usa_position = this.tournament_board.usa_position;
+        this.tournament_board.above_position = this.tournament_board.usa_position - 1;
+        console.log("usa position " + usa_position);
 
         let country_list = ["USSR", "FRA", "GBR", "POL", "JPN", "CSK", "NOR"];
         country_list.splice(usa_position, 0, "USA");
         for (let i = 0; i < country_list.length; i++) {
+          let board = new PIXI.Container();
+          board.position.set(640, 480 - 110 + 55 * i)
+          this.tournament_board.addChild(board)
+          this.tournament_board.boards.push(board);
+          
           let shadow_square = PIXI.Sprite.from(PIXI.Texture.WHITE);
           shadow_square.anchor.set(0.5, 0.5);
-          shadow_square.position.set(640 + 3, 480 - 110 + 55 * i + 3);
-          shadow_square.width = 300;
+          shadow_square.position.set(3, 3);
+          shadow_square.width = 400;
           shadow_square.height = 50;
           shadow_square.alpha = 0.3;
           shadow_square.tint = 0x000000;
-          page.addChild(shadow_square);
+          board.addChild(shadow_square);
 
           let black_square = PIXI.Sprite.from(PIXI.Texture.WHITE);
           black_square.anchor.set(0.5, 0.5);
-          black_square.position.set(640, 480 - 110 + 55 * i);
-          black_square.width = 302;
+          black_square.position.set(0, 0);
+          black_square.width = 402;
           black_square.height = 52;
           black_square.tint = 0x000000;
-          page.addChild(black_square);
+          board.addChild(black_square);
 
           let square = PIXI.Sprite.from(PIXI.Texture.WHITE);
           square.anchor.set(0.5, 0.5);
-          square.position.set(640, 480 - 110 + 55 * i);
-          square.width = 300;
+          square.position.set(0, 0);
+          square.width = 400;
           square.height = 50;
-          page.addChild(square);
+          board.addChild(square);
 
-          let text = new PIXI.Text(i + ".      " + country_list[i], {fontFamily: "Bebas Neue", fontSize: 36, fill: 0x000000, letterSpacing: 6, align: "left"});
+          let text = new PIXI.Text((i+1) + ".      " + country_list[i], {fontFamily: "Bebas Neue", fontSize: 36, fill: 0x000000, letterSpacing: 6, align: "left"});
           text.anchor.set(0,0.5);
-          text.position.set(500, 480 - 110 + 55 * i + 4);
+          text.position.set(-190, 4);
           // text.text += country_list[i] == "USSR" ? "     " : "      ";
           // text.text += this.score;
-          page.addChild(text);
+          board.addChild(text);
+          board.text = text;
+
+          let flag = new PIXI.Sprite(PIXI.Texture.from("Art/Cutscenes/flag_" + country_list[i] + ".png"));
+          flag.anchor.set(0.5, 0.5);
+          flag.position.set(-128, 1);
+          flag.scale.set(0.9, 0.9);
+          board.addChild(flag);
+
+          let score = Math.floor((this.score) * Math.pow(1.1, usa_position - i));
+          if (i > usa_position) {
+            score = Math.floor((this.score) / Math.pow(1.1, i - usa_position));
+          }
+          //score = Math.max(score, 100 * (9 - i));
+          if (i == usa_position) score = this.score;
+          let score_text = new PIXI.Text(score, {fontFamily: "Bebas Neue", fontSize: 36, fill: 0x000000, letterSpacing: 6, align: "right"});
+          score_text.anchor.set(1,0.5);
+          score_text.position.set(190, 4);
+          board.addChild(score_text);
+
+          if (i == usa_position) this.tournament_board.usa = board;
+          if (i == this.tournament_board.above_position) {
+            this.tournament_board.above = board;
+            this.tournament_board.above_country = country_list[i];
+          }
 
         }
   //     {text: "       USSR       ", x: 640, y: 480 - 100},
@@ -220,6 +270,41 @@ Game.prototype.initializeCutscene = function(name = "intro") {
 Game.prototype.gotoCutscenePage = function(page_num) {
   var self = this;
   if (this.cutscene_state != "ready") {
+    return;
+  }
+
+  console.log(this.cutscene_name)
+  console.log(this.tournament_board.visible)
+  console.log(this.tournament_board.complete)
+  if (this.cutscene_name != "c1" && this.tournament_board.visible == true && this.tournament_board.complete == false) {
+    this.tournament_board.complete = true;
+    this.cutscene_state = "transitioning";
+
+    let y1 = this.tournament_board.usa.position.y;
+    let y2 = this.tournament_board.above.position.y;
+    let tween = new TWEEN.Tween(this.tournament_board.usa.position)
+      .to({y: y2})
+      .duration(500)
+      .easing(TWEEN.Easing.Cubic.InOut)
+      .onComplete(function() {
+        self.cutscene_state = "ready";
+      })
+      .start();
+    let tween2 = new TWEEN.Tween(this.tournament_board.above.position)
+      .to({y: y1})
+      .duration(500)
+      .easing(TWEEN.Easing.Cubic.InOut)
+      .onComplete(function() {
+      })
+      .start();
+    delay(function() {
+      self.tournament_board.usa.text.text = (self.tournament_board.above_position+1) + ".      " + "USA";
+      self.tournament_board.above.text.text = (self.tournament_board.usa_position+1) + ".      " + self.tournament_board.above_country;
+    }, 250);
+    // delay(function() {
+    //   self.tournament_board.parent.next.visible = true;
+    // }, 1000)
+
     return;
   }
 
@@ -362,18 +447,27 @@ scenes = {
   //     {text: "       FRA        ", x: 640, y: 480 - 45},
   //     {text: "       GBR        ", x: 640, y: 480 + 10},
   //     {text: "       USA        ", x: 640, y: 480 + 65},
-  //     {text: "       POL        ", x: 640, y: 480 + 120},
   //     {text: "       JPN        ", x: 640, y: 480 + 175},
   //     {text: "       CSK        ", x: 640, y: 480 + 230},
   //     {text: "       NOR        ", x: 640, y: 480 + 285},
   //   ],
   // ],
-  c1: [
+  c8: [
     [
-      {tournament_board: "okay!"},
-    ]
+      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+      
+    ],
+    [
+      {image: "1988.png", x: 600, y: 440},
+      {text: "1988", x: 180, y: 160, drift: "right"},
+      {text: "Crazy time to live in Berlin.", x: 890, y: 720, drift: "left"},
+      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1}
+    ],
   ],
-  cx: [
+}
+nonscenes = {
+  c1: [
     [
       {image: "1988.png", x: 600, y: 440},
       {text: "1988", x: 180, y: 160, drift: "right"},

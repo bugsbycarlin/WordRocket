@@ -131,6 +131,18 @@ class Game {
     //     self.resetTitle();
     //   }
     // })
+
+
+    let mu = firebase.auth().currentUser;
+    if (mu != null && mu.uid != null) {
+      this.auth_user = mu;
+      this.network.uid = mu.uid;
+    }
+    if (this.network.uid == null) {
+      this.network.anonymousSignIn(function() {
+        self.network.loadGlobalHighScores();
+      });
+    }
   }
 
 
@@ -682,76 +694,63 @@ class Game {
 
   loadLocalHighScores() {
     var self = this;
-    this.high_scores = JSON.parse(localStorage.getItem("cold_war_keyboards_high_scores"));
-    if (this.high_scores == null) this.high_scores = {};
+    this.local_high_scores = JSON.parse(localStorage.getItem("cold_war_keyboards_local_high_scores"));
+    
+    if (this.local_high_scores == null) {
+      this.local_high_scores = {};
 
-    ["individual", "global"].forEach((val) => {
-      if (self.high_scores[val] == null) self.high_scores[val] = {};
-      ["story", "mixed", "wr", "bc", "lc"].forEach((val2) => {
-        if (self.high_scores[val][val2] == null) self.high_scores[val][val2] = {};
-        ["easy", "medium", "hard", "beacon"].forEach((val3) => {
-          if (self.high_scores[val][val2][val3] == null) self.high_scores[val][val2][val3] = [];
+      ["story", "mixed", "wr", "bc", "lc"].forEach((val) => {
+        if (self.local_high_scores[val] == null) self.local_high_scores[val] = {};
+        ["easy", "medium", "hard", "beacon"].forEach((val2) => {
+          if (self.local_high_scores[val][val2] == null) self.local_high_scores[val][val2] = [];
         });
       });
-    })
+    }
   }
 
 
-  blendHighScores(callback) {
-    var self = this;
-    // load in cloud
-    this.cloud_high_scores = {};
-    this.network.getGlobalHighScores(function(value) {
-      self.cloud_high_scores["global"] = value
-      self.network.getIndividualHighScores(function(value) {
-        self.cloud_high_scores["individual"] = value
+  // loadGlobalHighScores(callback) {
+  //   var self = this;
+  //   // load in cloud
+  //   this.global_high_scores = {};
+  //   this.network.getGlobalHighScores(function(value) {
+  //     self.global_high_scores = value
 
-        console.log(self.cloud_high_scores["global"]);
-        console.log(self.cloud_high_scores["individual"]);
+  //     console.log(self.global_high_scores);
 
-        ["individual", "global"].forEach((val) => {
-          if (self.cloud_high_scores[val] == null) self.cloud_high_scores[val] = {};
-          ["story", "mixed", "wr", "bc", "lc"].forEach((val2) => {
-            if (self.cloud_high_scores[val][val2] == null) self.cloud_high_scores[val][val2] = {};
-            ["easy", "medium", "hard", "beacon"].forEach((val3) => {
-              if (self.cloud_high_scores[val][val2][val3] == null) self.cloud_high_scores[val][val2][val3] = [];
-            });
-          });
-        })
-
-        // blend scores
-        // I think I can skip global blending, just straight overwriting.
-        self.high_scores["global"] = self.cloud_high_scores["global"];
-        ["story", "mixed", "wr", "bc", "lc"].forEach((val) => {
-          ["easy", "medium", "hard", "beacon"].forEach((val2) => {
-            addDedupeSort(self.high_scores["individual"][val][val2], self.cloud_high_scores["individual"][val][val2]);
-          });
-        });
-
-        // save all scores locally, and save individual scores to the cloud
-        localStorage.setItem("cold_war_keyboards_high_scores", JSON.stringify(self.high_scores));
-        self.network.saveIndividualHighScores(self.high_scores["individual"], function() {});
-
-        callback();
-
-        console.log("done blending local and cloud high scores");
-      })
-    });
-  }
+  //     if (self.global_high_scores == null) {
+  //       self.global_high_scores = {};
+  //       ["story", "mixed", "wr", "bc", "lc"].forEach((val) => {
+  //         if (self.global_high_scores[val] == null) self.global_high_scores[val] = {};
+  //         ["easy", "medium", "hard", "beacon"].forEach((val2) => {
+  //           if (self.global_high_scores[val][val2] == null) self.global_high_scores[val][val2] = [];
+  //         });
+  //       });
+  //     }
+  //   });
+  // }
 
  
   addHighScore(name, score, callback, error_callback = null) {
     var self = this;
-    console.log(name);
-    console.log(score);
     let mode = this.getModeName();
     let diff = this.difficulty_level.toLowerCase();
-    addDedupeSort(this.high_scores["individual"][mode][diff], [{name: name, score: score, uid: this.network.uid}]);
-    localStorage.setItem("cold_war_keyboards_high_scores", JSON.stringify(this.high_scores));
+    console.log("Adding high score.");
+    console.log(name);
+    console.log(score);
+    console.log(mode);
+    console.log(diff);
 
-    let low_high = this.high_scores["global"][mode][diff][9];
+    localStorage.setItem("cold_war_keyboards_local_high_scores", JSON.stringify(this.local_high_scores));
+    
 
-    if (low_high == null || low_high.score < score) {
+    //addDedupeSort(this.high_scores["individual"][mode][diff], [{name: name, score: score, uid: this.network.uid}]);
+    
+
+    let low_high = this.global_high_scores[mode][diff][9];
+
+    if (low_high == null || low_high.score < score) { // submit a global high score
+      
       addDedupeSort(this.high_scores["global"][mode][diff], this.high_scores["individual"][mode][diff]);
       this.network.saveGlobalHighScores(this.high_scores["global"], function() {
         self.network.saveIndividualHighScores(self.high_scores["individual"], function() {
@@ -768,15 +767,7 @@ class Game {
           error_callback();
         }
       });
-    } else {
-      this.network.saveIndividualHighScores(this.high_scores["individual"], function() {
-        callback();
-      }, function() {
-        console.log("Error saving individual high scores");
-        if (error_callback != null) {
-          error_callback();
-        }
-      });
     }
   }
+
 }

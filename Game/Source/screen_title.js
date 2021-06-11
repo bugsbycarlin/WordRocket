@@ -92,91 +92,7 @@ Game.prototype.initializeTitle = function() {
   this.keyboards_text.position.set(253, 514);
   screen.addChild(this.keyboards_text);
 
-  // let rate = 100;
-  // for (let i = 1; i <= 8; i++) {
-  //   delay(function() {
-  //     self.cold_war_text.text = "COLD WAR".slice(0, i);
-  //   }, rate * i);
-  // }
-  // for (let i = 1; i <= 9; i++) {
-  //   delay(function() {
-  //     self.keyboards_text.text = "KEYBOARDS".slice(0, i);
-  //   }, 8*rate + rate * i);
-  // }
-
   this.cold_war_time = this.markTime() - 5000;
-
-
-  // // ! word
-  // let title_word = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_word.png"));
-  // title_word.anchor.set(0,0);
-  // title_word.position.set(320, 208);
-  // screen.addChild(title_word);
-
-  // // ! rockets
-  // for (var i = 0; i < 7; i++) {
-  //   let x = 546 + 64 * i;
-  //   let y = 498;
-  //   let fire = this.makeFire(screen, x - 2, y + 43, 0.32*1.25, 0.24*1.25);
-  //   fire.animationSpeed = 0.2;
-  // }
-  // let title_rockets = new PIXI.Sprite(PIXI.Texture.from("Art/Title/title_rockets.png"));
-  // title_rockets.anchor.set(0,0);
-  // title_rockets.position.set(512, 336);
-  // screen.addChild(title_rockets);
-
-
-
-  // ! buttons
-  // let tutorial_button = new PIXI.Text("TUTORIAL", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
-  // tutorial_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  // tutorial_button.anchor.set(0.5,0.5);
-  // tutorial_button.position.set(this.width / 2, this.height - 320);
-  // screen.addChild(tutorial_button);
-  // tutorial_button.interactive = true;
-  // tutorial_button.buttonMode = true;
-  // tutorial_button.on("pointerdown", function() {
-  //   self.tutorial = true;
-  //   self.difficulty_level = "EASY";
-  //   if (self.network.uid == null) {
-  //     self.network.anonymousSignIn(function() {});
-  //   }
-  //   self.resetGame();
-  //   self.blendHighScores(function() {});
-  //   self.initialize1pWordRockets();
-  //   self.switchScreens("title", "1p_word_rockets");
-  // });
-
-  // let new_game_button = new PIXI.Text("NEW GAME", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
-  // new_game_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  // new_game_button.anchor.set(0.5,0.5);
-  // new_game_button.position.set(this.width / 2, this.height - 280);
-  // screen.addChild(new_game_button);
-  // new_game_button.interactive = true;
-  // new_game_button.buttonMode = true;
-  // new_game_button.on("pointerdown", function() {
-  //   self.tutorial = false;
-  //   if (self.network.uid == null) {
-  //     self.network.anonymousSignIn(function() {});
-  //   }
-  //   self.initialize1pLobby();
-  //   self.blendHighScores(self.updateHighScoreDisplay());
-  //   self.switchScreens("title", "1p_lobby");
-  // });
-
-  // let multi_button = new PIXI.Text("INTERNET", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
-  // multi_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  // multi_button.anchor.set(0.5,0.5);
-  // multi_button.position.set(this.width / 2, this.height - 240);
-  // screen.addChild(multi_button);
-  // multi_button.interactive = true;
-  // multi_button.buttonMode = true;
-  // multi_button.on("pointerdown", function() {
-  //   // TO DO: multiplayer
-  //   self.blendHighScores(function() {});
-  //   self.initializeHighScore(10300);
-  //   self.switchScreens("title", "high_score");
-  // });
 
   let single_player_button = new PIXI.Text("SINGLE", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
   single_player_button.tint = 0x67d8ef;
@@ -194,11 +110,10 @@ Game.prototype.initializeTitle = function() {
     self.tutorial = false;
     if (self.network.uid == null) {
       self.network.anonymousSignIn(function() {
-        console.log("here doing high scores");
-        self.blendHighScores(function() {});
+        self.network.loadGlobalHighScores();
       });
     } else {
-      self.blendHighScores(function() {});
+      self.network.loadGlobalHighScores();
     }
     self.initialize1pLobby();
     self.switchScreens("title", "1p_lobby");
@@ -378,35 +293,28 @@ Game.prototype.initializeTitle = function() {
     self.switchScreens("title", "credits");
   });
 
-  // sign-in is off to the right so it's always visible.
-  let mu = firebase.auth().currentUser;
-  if (mu != null && mu.uid != null) {
-    this.auth_user = mu;
-    this.network.uid = mu.uid;
-  }
+  // this.sign_in_button = new PIXI.Text(this.auth_user == null ? "SIGN-IN" : "SIGN-OUT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
+  // this.sign_in_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  // this.sign_in_button.anchor.set(1,0);
+  // this.sign_in_button.position.set(this.width - 140, this.height - 50);
+  // screen.addChild(this.sign_in_button);
 
-  this.sign_in_button = new PIXI.Text(this.auth_user == null ? "SIGN-IN" : "SIGN-OUT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
-  this.sign_in_button.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  this.sign_in_button.anchor.set(1,0);
-  this.sign_in_button.position.set(this.width - 140, this.height - 50);
-  screen.addChild(this.sign_in_button);
+  // this.sign_in_button.interactive = true;
+  // this.sign_in_button.buttonMode = true;
+  // this.sign_in_button.on("pointerdown", function() {
+  //   if (self.auth_user == null) {
+  //     self.network.googleSignIn();
+  //   } else {
+  //     self.network.signOut();
+  //   }
+  // });
 
-  this.sign_in_button.interactive = true;
-  this.sign_in_button.buttonMode = true;
-  this.sign_in_button.on("pointerdown", function() {
-    if (self.auth_user == null) {
-      self.network.googleSignIn();
-    } else {
-      self.network.signOut();
-    }
-  });
-
-  let bar_three = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  bar_three.width = 1;
-  bar_three.height = 50;
-  bar_three.position.set(this.width - 120, this.height - 65);
-  bar_three.tint = 0x404040;
-  screen.addChild(bar_three);
+  // let bar_three = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  // bar_three.width = 1;
+  // bar_three.height = 50;
+  // bar_three.position.set(this.width - 120, this.height - 65);
+  // bar_three.tint = 0x404040;
+  // screen.addChild(bar_three);
 
   let quit_button = new PIXI.Text("QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0x404040, letterSpacing: 2, align: "center"});
   quit_button.scaleMode = PIXI.SCALE_MODES.NEAREST;

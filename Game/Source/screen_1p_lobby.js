@@ -606,7 +606,7 @@ Game.prototype.updateHighScoreDisplay = function() {
   this.local_high_scores_texts = [];
   for (let i = 0; i <= 9; i++) {
     let text = (i+1) + ".------ --------";
-    let entry = this.high_scores["individual"][mode][difficulty][i]
+    let entry = this.local_high_scores[mode][difficulty][i]
     if (entry != null) {
       text = (i+1) + "." + entry.name.padEnd(6) + " " + entry.score;
     }
@@ -620,7 +620,7 @@ Game.prototype.updateHighScoreDisplay = function() {
   this.global_high_scores_texts = [];
   for (let i = 0; i <= 9; i++) {
     let text = (i+1) + ".------ --------";
-    let entry = this.high_scores["global"][mode][difficulty][i]
+    let entry = this.global_high_scores[mode][difficulty][i]
     if (entry != null) {
       text = (i+1) + "." + entry.name.padEnd(6) + " " + entry.score;
     }

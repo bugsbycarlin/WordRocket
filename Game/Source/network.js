@@ -134,23 +134,24 @@ class Network {
   saveGlobalHighScores(scores, callback, error_callback = null) {
     var self = this;
 
-    let can_save = true;
-    ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
-      for (var i = 0; i < 50; i++) {
-        if (scores[difficulty][i] == null || scores[difficulty][i].score < 5000 - 100 * i) {
-          console.log("High scores does not have element " + i);
-          can_save = false;
-        }
-        
-      }
-    });
+    //let can_save = true;
+    // ["story", "mixed", "wr", "bc", "lc"].forEach((mode) => {
+    //   ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
+    //     for (var i = 0; i < 50; i++) {
+    //       if (scores[mode][difficulty][i] == null || scores[mode][difficulty][i].score < 5000 - 100 * i) {
+    //         console.log("High scores does not have element " + i);
+    //         can_save = false;
+    //       }
+    //     }
+    //   });
+    // });
     
-    if(!can_save) {
-      return;
-    }
-    var connectedRef = firebase.database().ref(".info/connected");
-    connectedRef.on("value", (healthCheck) => {
-      if (healthCheck.val() === true) {
+    // if(!can_save) {
+    //   return;
+    // }
+    // var connectedRef = firebase.database().ref(".info/connected");
+    // connectedRef.on("value", (healthCheck) => {
+    //   if (healthCheck.val() === true) {
         this.database.ref("high_scores/global").update(scores, (error) => {
           if (error) {
             console.log("Failed to save global high scores to the cloud.");
@@ -163,14 +164,15 @@ class Network {
             callback();
           }
         });
-      } else {
-        console.log("Not connected to the internet!");
-        if (error_callback != null) {
-          console.log("here");
-          error_callback();
-        }
-      }
-    });
+    //   } else {
+    //     console.log(healthCheck);
+    //     console.log("Not connected to the internet!");
+    //     if (error_callback != null) {
+    //       console.log("here");
+    //       error_callback();
+    //     }
+    //   }
+    // });
     
   }
 

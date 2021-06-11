@@ -27,17 +27,6 @@ Game.prototype.initializeCutscene = function(name = "intro") {
   screen.addChild(background);
 
   this.cutscene_pages = [];
-
-
-
-
-
-  this.score = 0;
-
-
-
-
-
   
   this.cutscene_container = new PIXI.Container();
   screen.addChild(this.cutscene_container);
@@ -61,6 +50,7 @@ Game.prototype.initializeCutscene = function(name = "intro") {
     page.disappears = [];
     page.sequence_max = 0;
     page.next = null;
+    page.has_tournament_board = false;
     this.cutscene_container.addChild(page);
     this.cutscene_pages.push(page);
 
@@ -117,7 +107,7 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         image.anchor.set(0.5, 0.5);
         image.position.set(640, 480);
         page.addChild(image);
-        page.next.visible = false;
+        page.has_tournament_board = true;
 
         this.tournament_board = new PIXI.Container();
         this.tournament_board.boards = [];
@@ -276,7 +266,7 @@ Game.prototype.gotoCutscenePage = function(page_num) {
   console.log(this.cutscene_name)
   console.log(this.tournament_board.visible)
   console.log(this.tournament_board.complete)
-  if (this.cutscene_name != "c1" && this.tournament_board.visible == true && this.tournament_board.complete == false) {
+  if (this.cutscene_pages[this.cutscene_pagenum].has_tournament_board == true && this.cutscene_name != "c1" && this.tournament_board.visible == true && this.tournament_board.complete == false) {
     this.tournament_board.complete = true;
     this.cutscene_state = "transitioning";
 
@@ -378,7 +368,7 @@ Game.prototype.gotoCutscenePage = function(page_num) {
         for (var p = 0; p < self.cutscene_items.length; p++) {
           if (self.cutscene_pages[p].next != null) {
             self.cutscene_pages[p].next.interactive = true;
-            if (self.cutscene_pages[p].sequence_max == 0) {
+            if (self.cutscene_pages[p].sequence_max == 0 && self.cutscene_pages[p].has_tournament_board != true) {
               self.cutscene_pages[p].next.visible = true;
             }
           }
@@ -439,34 +429,22 @@ Game.prototype.cutsceneUpdate = function(diff) {
 
 
 
-scenes = {
-  // c1: [
-  //   [
-  //     {image: "wng_computer_games_tournament.png", x: 640, y: 480, w: 1200, h: 660},
-  //     {text: "       USSR       ", x: 640, y: 480 - 100},
-  //     {text: "       FRA        ", x: 640, y: 480 - 45},
-  //     {text: "       GBR        ", x: 640, y: 480 + 10},
-  //     {text: "       USA        ", x: 640, y: 480 + 65},
-  //     {text: "       JPN        ", x: 640, y: 480 + 175},
-  //     {text: "       CSK        ", x: 640, y: 480 + 230},
-  //     {text: "       NOR        ", x: 640, y: 480 + 285},
-  //   ],
-  // ],
-  c8: [
-    [
-      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
-      {tournament_board: "okay!"}
+// scenes = {
+//   c8: [
+//     [
+//       {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
+//       {tournament_board: "okay!"}
       
-    ],
-    [
-      {image: "1988.png", x: 600, y: 440},
-      {text: "1988", x: 180, y: 160, drift: "right"},
-      {text: "Crazy time to live in Berlin.", x: 890, y: 720, drift: "left"},
-      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1}
-    ],
-  ],
-}
-nonscenes = {
+//     ],
+//     [
+//       {image: "1988.png", x: 600, y: 440},
+//       {text: "1988", x: 180, y: 160, drift: "right"},
+//       {text: "Crazy time to live in Berlin.", x: 890, y: 720, drift: "left"},
+//       {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1}
+//     ],
+//   ],
+// }
+scenes = {
   c1: [
     [
       {image: "1988.png", x: 600, y: 440},
@@ -520,6 +498,11 @@ nonscenes = {
       {text: "But god damnit*, we were Americans.", x: 850, y: 750, drift: "left"},
       {text: "*Sorry, Mom", x: 200, y: 900},
       {button: "Ready?", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
+    ],
+    [
+      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+      
     ],
   ],
 //---------------------------------------------------------------------------------------

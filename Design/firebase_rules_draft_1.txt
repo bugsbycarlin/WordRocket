@@ -1,0 +1,70 @@
+
+// Draft One, with only high scores
+// 
+// 
+// {
+//   "rules": {
+//     ".read": "auth != null",
+//     ".write": "auth != null",
+//   }
+// }
+
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "high_scores": {
+      ".read": "auth != null",
+      ".write": "!data.exists() && auth != null",
+      "individual": {
+        "$uid": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid",
+          "$difficulty": {
+            ".validate": "$difficulty === 'easy' || $difficulty === 'medium' || $difficulty === 'hard' || $difficulty === 'beacon'",
+            "$score": {
+              ".validate": "$score.matches(/^[0-9]+$/) && newData.hasChildren([
+                'name',
+                'score',
+              ])",
+              "name": {
+                ".write": true,
+                ".validate": "newData.val().matches(/^[A-Z]{1,6}$/)",
+              },
+              "score": {
+                ".write": true,
+                ".validate": "newData.isNumber() && newData.val() % 1 === 0.0 && newData.val() >= 0",
+              },
+            },
+          },
+        },
+      },
+      "global": {
+        ".read": true,
+        ".write": "auth != null",
+        "$difficulty": {
+          ".validate": "$difficulty === 'easy' || $difficulty === 'medium' || $difficulty === 'hard' || $difficulty === 'beacon'",
+          "$score": {
+            ".validate": "$score.matches(/^[0-9]+$/) && newData.hasChildren([
+              'name',
+              'score',
+              'uid',
+            ])",
+            "name": {
+              ".write": true,
+              ".validate": "newData.val().matches(/^[A-Z]{1,6}$/)",
+            },
+            "score": {
+              ".write": true,
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0.0 && newData.val() >= 0",
+            },
+            "uid": {
+              ".write": true,
+            },
+          },
+        },
+      },
+    },
+  }
+}
+

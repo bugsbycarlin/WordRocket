@@ -127,44 +127,6 @@ Game.prototype.bombAction = function() {
 }
 
 
-Game.prototype.highScoreKey = function(letter) {
-  let self = this;
-  if (this.high_score_name_cursor <= 5) {
-    this.high_score_name[this.high_score_name_cursor].text = letter;
-    this.high_score_name_cursor += 1;
-  }
-}
-
-
-Game.prototype.highScoreDelete = function() {
-  if (this.high_score_name_cursor > 0) {
-    this.high_score_name_cursor -= 1;
-    this.high_score_name[this.high_score_name_cursor].text = "";
-  }
-}
-
-
-Game.prototype.highScoreEnter = function() {
-  var self = this;
-  this.high_score_state = "finished";
-  let name = "";
-  for (var i = 0; i < 6; i++) {
-    name += this.high_score_name[i].text;
-  }
-  this.addHighScore(name, this.new_high_score, function() {
-    console.log("hiyo");
-    self.initialize1pLobby();
-    self.switchScreens("high_score", "1p_lobby");
-  }, function() {
-    console.log("lastly here");
-    self.showAlert("Oh no! Can't send high scores to server.", function() {
-      self.initialize1pLobby();
-      self.switchScreens("high_score", "1p_lobby");
-    });
-  })
-}
-
-
 Game.prototype.pressKey = function(palette, key) {
   if (key in palette.keys) {
     let keyboard_key = palette.keys[key];

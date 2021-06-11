@@ -36,9 +36,14 @@ Game.prototype.initializeHighScore = function(new_score) {
     }
   });
 
+  let high_score_label = new PIXI.Text("YOU GOT A HIGH SCORE!", {fontFamily: "Press Start 2P", fontSize: 48, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  high_score_label.anchor.set(0.5,0.5);
+  high_score_label.position.set(this.width / 2, 100);
+  screen.addChild(high_score_label);
+
   let score_text = new PIXI.Text(this.new_high_score + " POINTS", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   score_text.anchor.set(0.5,0.5);
-  score_text.position.set(this.width / 2, this.height * 1/5);
+  score_text.position.set(this.width / 2, 300);
   screen.addChild(score_text);
 
   this.high_score_name = [];
@@ -60,6 +65,46 @@ Game.prototype.initializeHighScore = function(new_score) {
     screen.addChild(letter);
     this.high_score_name.push(letter);
   }
+}
+
+
+Game.prototype.highScoreKey = function(letter) {
+  let self = this;
+  if (this.high_score_name_cursor <= 5) {
+    this.high_score_name[this.high_score_name_cursor].text = letter;
+    this.high_score_name_cursor += 1;
+  }
+}
+
+
+Game.prototype.highScoreDelete = function() {
+  if (this.high_score_name_cursor > 0) {
+    this.high_score_name_cursor -= 1;
+    this.high_score_name[this.high_score_name_cursor].text = "";
+  }
+}
+
+
+Game.prototype.highScoreEnter = function() {
+  var self = this;
+  this.high_score_state = "finished";
+  let name = "";
+  for (var i = 0; i < 6; i++) {
+    name += this.high_score_name[i].text;
+  }
+  this.addHighScore(name, this.new_high_score, function() {
+    console.log("hiyo");
+    self.initialize1pLobby();
+    self.updateHighScoreDisplay();
+    self.switchScreens("high_score", "1p_lobby");
+  }, function() {
+    console.log("lastly here");
+    self.showAlert("Oh no! Can't send \nhigh scores to server.", function() {
+      self.initialize1pLobby();
+      self.updateHighScoreDisplay();
+      self.switchScreens("high_score", "1p_lobby");
+    });
+  })
 }
 
 

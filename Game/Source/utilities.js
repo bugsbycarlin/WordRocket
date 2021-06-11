@@ -121,7 +121,7 @@ function addDedupeSort(some_list, other_list) {
   other_list.forEach((score) => {
     let dupe = false;
     some_list.forEach((score2) => {
-      if (score.name == score2.name && score.score == score2.score) {
+      if (score.name == score2.name && score.score == score2.score && score.uid == score2.uid) {
         dupe = true;
       }
     });

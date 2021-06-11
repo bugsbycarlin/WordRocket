@@ -193,10 +193,14 @@ Game.prototype.initializeTitle = function() {
     flicker(single_player_button, 500, 0xFFFFFF, 0x67d8ef);
     self.tutorial = false;
     if (self.network.uid == null) {
-      self.network.anonymousSignIn(function() {});
+      self.network.anonymousSignIn(function() {
+        console.log("here doing high scores");
+        self.blendHighScores(function() {});
+      });
+    } else {
+      self.blendHighScores(function() {});
     }
     self.initialize1pLobby();
-    self.blendHighScores(self.updateHighScoreDisplay());
     self.switchScreens("title", "1p_lobby");
   });
 
@@ -292,6 +296,12 @@ Game.prototype.initializeTitle = function() {
   music_button.buttonMode = true;
   music_button.on("pointerdown", function() {
     use_music = !use_music;
+    if (use_music == false) {
+      self.stopMusic();
+    } else {
+      self.setMusic("title_song");
+    }
+    localStorage.setItem("cold_war_keyboards_use_music", use_music);
     music_button_no_bar.visible = !use_music;
   });
 
@@ -314,6 +324,7 @@ Game.prototype.initializeTitle = function() {
   sound_button.buttonMode = true;
   sound_button.on("pointerdown", function() {
     use_sound = !use_sound;
+    localStorage.setItem("cold_war_keyboards_use_sound", use_sound);
     sound_button_no_bar.visible = !use_sound;
   });
 

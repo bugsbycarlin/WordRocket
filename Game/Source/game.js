@@ -274,7 +274,8 @@ class Game {
 
     this.flow[2] = {};
     this.flow[2]["EASY"] = [
-      "cut:t1", "wr:1", "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
+      //"cut:t1", "wr:1", "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
+      "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
     ];
   }
 
@@ -344,6 +345,7 @@ class Game {
         this.switchScreens(this.current_screen, "1p_lobby");
       }
     } else if (this.game_type_selection == 1) {
+      console.log("Picked arcade mode");
       this.level = this.flow_marker + 1;
       let type = "";
       if (this.arcade_type_selection == 0) {
@@ -405,7 +407,7 @@ class Game {
       if (reset) this.resetGame();
       this.initialize1pLaunchCode();
     } else if (screen_name == "cutscene") {
-      this.initializeCutscene("c8");
+      this.initializeCutscene("t4");
     }
   }
 
@@ -734,39 +736,29 @@ class Game {
   addHighScore(name, score, callback, error_callback = null) {
     var self = this;
     let mode = this.getModeName();
-    let diff = this.difficulty_level.toLowerCase();
+    let difficulty = this.difficulty_level.toLowerCase();
     console.log("Adding high score.");
     console.log(name);
     console.log(score);
     console.log(mode);
-    console.log(diff);
+    console.log(difficulty);
+
+    this.local_high_scores[mode][difficulty].push({name: name, score: score})
+    this.local_high_scores[mode][difficulty].sort((a,b) => (a.score < b.score) ? 1 : -1)
+    this.local_high_scores[mode][difficulty] = this.local_high_scores[mode][difficulty].slice(0,10);
 
     localStorage.setItem("cold_war_keyboards_local_high_scores", JSON.stringify(this.local_high_scores));
     
-
-    //addDedupeSort(this.high_scores["individual"][mode][diff], [{name: name, score: score, uid: this.network.uid}]);
-    
-
-    let low_high = this.global_high_scores[mode][diff][9];
+    let low_high = this.global_high_scores[mode][difficulty][9];
 
     if (low_high == null || low_high.score < score) { // submit a global high score
-      
-      addDedupeSort(this.high_scores["global"][mode][diff], this.high_scores["individual"][mode][diff]);
-      this.network.saveGlobalHighScores(this.high_scores["global"], function() {
-        self.network.saveIndividualHighScores(self.high_scores["individual"], function() {
-          callback();
-        }, function() {
-          console.log("Error saving individual high scores");
-          if (error_callback != null) {
-            error_callback();
-          }
-        });
-      }, function() {
-        console.log("Error saving global high scores");
-        if (error_callback != null) {
-          error_callback();
-        }
-      });
+      this.global_high_scores[mode][difficulty].push({name: name, score: score})
+      this.global_high_scores[mode][difficulty].sort((a,b) => (a.score < b.score) ? 1 : -1)
+      this.global_high_scores[mode][difficulty] = this.global_high_scores[mode][difficulty].slice(0,10);
+
+      this.network.addGlobalHighScore(name, score, mode, difficulty, callback, error_callback);
+    } else {
+      if (callback != null) callback();
     }
   }
 

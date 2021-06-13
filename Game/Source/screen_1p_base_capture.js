@@ -22,6 +22,12 @@ Game.prototype.initialize1pBaseCapture = function() {
 
   this.active_rockets = [];
 
+  let difficulty_multiplier = this.difficulty_level == "EASY" ? 1 :
+    this.difficulty_level == "MEDIUM" ? 2 :
+    this.difficulty_level == "HARD" ? 3 : 5;
+  console.log(this.difficulty_level);
+  console.log("Difficulty multiplier " + difficulty_multiplier);
+
   // Enemy speeds
   // 1200, 600 is pretty hard to play against.
   // 1800, 900 is inhuman
@@ -32,9 +38,12 @@ Game.prototype.initialize1pBaseCapture = function() {
   // Remember, it needs to go as high as level 15 on medium and still be eminently beatable.
   // Hard can hit that barely beatable level around this same mark.
   // Beacon whatever, make it however hard you want.
-  this.enemy_move_speed = 100 + 100 * this.level;
-  this.enemy_typing_speed = 100 + 50 * this.level;
+  this.enemy_move_speed = 100 + 50 * difficulty_multiplier + 25 * this.level * difficulty_multiplier;
+  this.enemy_typing_speed = 50 + 25 * difficulty_multiplier + 10 * this.level * difficulty_multiplier;
   this.enemy_phase = "moving"; // moving, typing
+  if (this.difficulty_level == "EASY" || this.difficulty_level == "MEDIUM") this.enemy_start_len = 3;
+  if (this.difficulty_level == "HARD") this.enemy_start_len = 4;
+  if (this.difficulty_level == "BEACON") this.enemy_start_len = 5;
 
   this.play_clock = 15;
   this.last_play = this.markTime();
@@ -62,13 +71,17 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.updateEnemyScreenTexture();
   this.enemy_screen_texture_update = this.markTime();
   
-  delay(function() {
-    self.paused = false;
-    self.pause_time = 0;
-    self.start_time = self.markTime();
-    self.game_phase = "countdown";
-    self.soundEffect("countdown");
-  }, 1200);
+  if (this.tutorial) {
+    this.bc_tutorial1();
+  } else {
+    delay(function() {
+      self.paused = false;
+      self.pause_time = 0;
+      self.start_time = self.markTime();
+      self.game_phase = "countdown";
+      self.soundEffect("countdown");
+    }, 1200);
+  }
 }
 
 
@@ -751,7 +764,7 @@ Game.prototype.baseCaptureEnterAction = function(player) {
     }, 2000);
   }
 
-  if (this.tile_score[0] >= 75 || this.tile_score[1] >= 75) {
+  if (this.tile_score[0] >= 70 || this.tile_score[1] >= 70) {
     this.baseCaptureGameOver();
   }
 
@@ -1188,7 +1201,7 @@ Game.prototype.baseCaptureGameOver = function() {
     this.stopMusic();
     //this.soundEffect("game_over");
     delay(function() {
-      let low_high = self.high_scores["individual"][self.difficulty_level.toLowerCase()][9];
+      let low_high = self.local_high_scores[self.getModeName()][self.difficulty_level.toLowerCase()][9];
       if (low_high == null || low_high.score < self.score) {
         self.initializeHighScore(self.score);
         self.switchScreens("1p_base_capture", "high_score");
@@ -1241,7 +1254,11 @@ Game.prototype.baseCaptureInBounds = function(x, y) {
 
 
 Game.prototype.baseCaptureEnemyAction = function() {
-  if (this.game_phase != "active") {
+  if (this.game_phase != "active" && this.game_phase != "tutorial") {
+    return;
+  }
+
+  if (this.game_phase == "tutorial" && this.tutorial_number < 8) {
     return;
   }
 
@@ -1284,12 +1301,21 @@ Game.prototype.baseCaptureEnemyAction = function() {
     let tiles = null;
     let word = null;
     if (this.baseCaptureBoard[this.cursor[1].x_tile][this.cursor[1].y_tile] == "") {
+      let move_set = [];
+      move_set.push(this.cursor[1].favor[0]);
+      move_set.push(this.cursor[1].favor[1]);
+      let direction = move_set[Math.floor(Math.random() * move_set.length)];
+      this.baseCaptureMoveCursor(direction, 1);
+
       // We're at the beginning of the game. Make a big word right away.
-      let word_size = 5 + Math.floor(Math.random() * 7);
+      let word_size = this.enemy_start_len + Math.floor(Math.random() * (this.enemy_start_len + 2));
       let word_list = this.enemy_words[word_size];
       word = word_list[Math.floor(Math.random() * word_list.length)];
 
-      tiles = this.baseCaptureWordList(word, this.cursor[1].x_tile, this.cursor[1].y_tile, this.cursor[1].angle)
+      tiles = this.baseCaptureWordList(word, this.cursor[1].x_tile, this.cursor[1].y_tile, this.cursor[1].angle);
+
+      // if we fail to make the big word, because we got scooped, we've got to go a lot smaller.
+      this.enemy_start_len = 2;
     } else {
       // Move, probably in the same direction as before, with a tiny chance of jumping around the board
       // and a larger chance of just changing direction.

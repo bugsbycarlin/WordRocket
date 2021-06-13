@@ -799,7 +799,7 @@ Game.prototype.checkEndCondition = function(bypass = false) {
         this.stopMusic();
         this.soundEffect("game_over");
         delay(function() {
-          let low_high = self.high_scores["individual"][self.getModeName()][self.difficulty_level.toLowerCase()][9];
+          let low_high = self.local_high_scores[self.getModeName()][self.difficulty_level.toLowerCase()][9];
           if (low_high == null || low_high.score < self.score) {
             self.initializeHighScore(self.score);
             self.switchScreens("1p_word_rockets", "high_score");

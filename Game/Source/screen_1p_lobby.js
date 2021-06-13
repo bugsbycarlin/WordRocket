@@ -197,7 +197,6 @@ Game.prototype.initializeSectionDifficulty = function() {
     self.stopMusic();
     flicker(go_button, 500, 0xFFFFFF, 0x67d8ef);
     self.difficulty_level = self.option_values[self.difficulty_choice];
-    localStorage.setItem("cold_war_keyboards_difficulty_level", self.difficulty_level);
     self.resetGame();
     // self.initializeCutscene();
     // self.switchScreens("1p_lobby", "cutscene");
@@ -353,10 +352,16 @@ Game.prototype.initializeSectionGameType = function() {
         self.lobby_mode = "arcade_type";
       }, 200);
     } else if (self.game_type_selection == 2) {
+      // Proceed directly to tutorials
+      self.tutorial = true;
+      self.difficulty_level = "EASY";
       flicker(self.game_type_tutorial_text, 500, 0xFFFFFF, 0x67d8ef);
       flicker(self.game_type_tutorial_button, 500, 0xFFFFFF, 0x67d8ef);
-      // Proceed directly to tutorials
-
+      self.soundEffect("button_accept");
+      self.stopMusic();
+      localStorage.setItem("cold_war_keyboards_difficulty_level", self.difficulty_level);
+      self.resetGame();
+      self.nextFlow();
     }
   });
   this.game_type_ok_button = ok_button;

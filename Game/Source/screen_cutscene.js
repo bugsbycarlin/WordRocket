@@ -95,7 +95,9 @@ Game.prototype.initializeCutscene = function(name = "intro") {
       } else if ("text" in item) {
         let size = 36;
         if ("size" in item) size = item.size;
-        artifact = this.comicBubble(page, item.text, item.x, item.y, size);
+        let font_family = "Bangers";
+        if ("font_family" in item) font_family = item.font_family;
+        artifact = this.comicBubble(page, item.text, item.x, item.y, size, font_family);
       } else if ("image" in item) {
         let image = new PIXI.Sprite(PIXI.Texture.from("Art/Cutscenes/" + item.image));
         image.anchor.set(0.5, 0.5);
@@ -263,10 +265,11 @@ Game.prototype.gotoCutscenePage = function(page_num) {
     return;
   }
 
-  console.log(this.cutscene_name)
-  console.log(this.tournament_board.visible)
-  console.log(this.tournament_board.complete)
-  if (this.cutscene_pages[this.cutscene_pagenum].has_tournament_board == true && this.cutscene_name != "c1" && this.tournament_board.visible == true && this.tournament_board.complete == false) {
+  if (this.cutscene_pages[this.cutscene_pagenum].has_tournament_board == true 
+    && this.tournament_board != null
+    && this.cutscene_name != "c1"
+    && this.tournament_board.visible == true
+    && this.tournament_board.complete == false) {
     this.tournament_board.complete = true;
     this.cutscene_state = "transitioning";
 
@@ -445,6 +448,40 @@ Game.prototype.cutsceneUpdate = function(diff) {
 //   ],
 // }
 scenes = {
+  t1: [
+    [
+      {text: "Welcome to Cold War Keyboards!", x: 640, y: 200},
+      {text: "In this retro typing game, a group of \nAmerican teenagers are thrown into \n a video game tournament against the USSR.", x: 640, y: 375},
+      {text: "There are three games within the game.", x: 640, y: 550},
+      {text: "The first is Word Rockets. \nLet's go learn to play it.", x: 640, y: 700},
+      {button: "OK", x: 90, y: 50, swipe_x: 1, swipe_y: 0}
+    ],
+  ],
+  t2: [
+    [
+      {text: "Good job!", x: 640, y: 200},
+      {text: "The second game is Base Capture.", x: 640, y: 375},
+      {text: "Let's learn that too.", x: 640, y: 550},
+      {button: "OK", x: 90, y: 50, swipe_x: 1, swipe_y: 0}
+    ],
+  ],
+  t3: [
+    [
+      {text: "Excellent.", x: 640, y: 200},
+      {text: "I particularly liked that one play you made.", x: 640, y: 375},
+      {text: "The last game is Launch Code.", x: 640, y: 550},
+      {text: "Ready to learn it?", x: 640, y: 700},
+      {button: "YEP", x: 90, y: 50, swipe_x: 1, swipe_y: 0}
+    ],
+  ],
+  t4: [
+    [
+      {text: "Nice work!", x: 640, y: 200},
+      {text: "You now have the skills you need \nto play Cold War Keyboards.", x: 640, y: 375},
+      {text: "Good luck!", x: 640, y: 550},
+      {button: "BYE", x: 90, y: 50, swipe_x: 1, swipe_y: 0}
+    ],
+  ],
   c1: [
     [
       {image: "1988.png", x: 600, y: 440},

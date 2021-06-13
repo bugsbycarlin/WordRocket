@@ -93,12 +93,12 @@ Game.prototype.highScoreEnter = function() {
     name += this.high_score_name[i].text;
   }
   this.addHighScore(name, this.new_high_score, function() {
-    console.log("hiyo");
+    console.log("Successfully added a high score.");
     self.initialize1pLobby();
     self.updateHighScoreDisplay();
     self.switchScreens("high_score", "1p_lobby");
   }, function() {
-    console.log("lastly here");
+    console.log("Failed to add a high score");
     self.showAlert("Oh no! Can't send \nhigh scores to server.", function() {
       self.initialize1pLobby();
       self.updateHighScoreDisplay();

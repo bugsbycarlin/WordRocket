@@ -329,11 +329,35 @@ Game.prototype.tutorial12 = function() {
 
   delay(function() {
     self.tutorial = false;
-    self.initialize1pGame();
+    self.initialize1pWordRockets();
   }, 28000); 
 }
 
 
+
+////
+////
+////
+////
+
+
+Game.prototype.bc_tutorial1 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 1;
+
+  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 80, 0, 860, 585, "WELCOME TO BASE CAPTURE!", this.width / 2, 620);
+
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "IN THIS GAME, YOU WILL BUILD A BASE OUT OF \nCROSSWORD PUZZLE STYLE WORDS.";
+  }, 4000);
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "PLEASE START TYPING TO MAKE YOUR FIRST WORD.";
+  }, 8000);
+}
 
 
 

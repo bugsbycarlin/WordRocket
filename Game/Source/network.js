@@ -5,6 +5,7 @@ class Network {
   constructor(game) {
     this.database = firebase.database();
     this.game = game;
+    this.high_scores_last_loaded = 0;
   }
 
 
@@ -25,6 +26,12 @@ class Network {
 
   loadGlobalHighScores() {
     var self = this;
+    console.log("Loading global high scores");
+
+    if (Date.now() - this.high_scores_last_loaded < 60000) {
+      console.log("Skipping because global high scores were successfully loaded within the last minute");
+      return;
+    }
     
     this.game.global_high_scores = {};
     ["story", "mixed", "wr", "bc", "lc"].forEach((mode) => {
@@ -32,11 +39,12 @@ class Network {
       ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
         self.game.global_high_scores[mode][difficulty] = [];
 
-        console.log("/high_scores/" + mode + "/" + difficulty);
+        console.log("making a high score call");
         this.database.ref("/high_scores/" + mode + "/" + difficulty).orderByChild("score").limitToLast(10).once("value").then((result) => {
-          console.log(result);
           if (result.exists()) {
-            self.game.global_high_scores[mode][difficulty] = result.val();
+            self.game.global_high_scores[mode][difficulty] = Object.values(result.val());
+            self.game.global_high_scores[mode][difficulty].sort((a,b) => (a.score < b.score) ? 1 : -1);
+            self.high_scores_last_loaded = Date.now();
           } else {
             console.log("Could not look up global high scores for " + mode + "/" + difficulty);
           }

@@ -125,7 +125,7 @@ Game.prototype.tutorial2 = function() {
   delay(function() {
     self.tutorial_screen.fade(500);
     self.tutorial_number = 2;
-    self.tutorial_screen = self.makeTutorialScreen(screen, 500, 264, 479, 675, 535, "THIS IS THE LAUNCHPAD.", self.width / 2, 600);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 500, 264, 479, 662, 545, "THIS IS THE LAUNCHPAD.", self.width / 2, 600);
   }, 2000);
 
 
@@ -262,7 +262,7 @@ Game.prototype.tutorial10 = function() {
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 260, 30, 671, 531, "WHICH COME DOWN ON YOU!", 470, 275);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 260, 30, 666, 531, "WHICH COME DOWN ON YOU!", 470, 275);
   }, 500);
 }
 
@@ -307,7 +307,7 @@ Game.prototype.tutorial12 = function() {
 
   delay(function() {
     self.tutorial_screen.fade(250);
-    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 264, 479, 675, 535, "HEY, GO GO GO! MAKE SOME WORDS!", self.width / 2, 600);
+    self.tutorial_screen = self.makeTutorialScreen(screen, 250, 264, 479, 662, 545, "HEY, GO GO GO! MAKE SOME WORDS!", self.width / 2, 600);
   }, 12000);
 
 
@@ -347,17 +347,244 @@ Game.prototype.bc_tutorial1 = function() {
   this.game_phase = "tutorial";
   this.tutorial_number = 1;
 
-  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 80, 0, 860, 585, "WELCOME TO BASE CAPTURE!", this.width / 2, 620);
+  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 80, 0, 860, 585, "WELCOME TO BASE CAPTURE!", this.width / 2, 720);
 
 
   delay(function() {
-    self.tutorial_screen.tutorial_text.text = "IN THIS GAME, YOU WILL BUILD A BASE OUT OF \nCROSSWORD PUZZLE STYLE WORDS.";
+    self.tutorial_screen.tutorial_text.text = "IN THIS GAME, YOU BUILD A BASE OUT OF \nCROSSWORD PUZZLE STYLE WORDS.";
   }, 4000);
 
   delay(function() {
+    self.tutorial_number = 1.1;
     self.tutorial_screen.tutorial_text.text = "PLEASE START TYPING TO MAKE YOUR FIRST WORD.";
-  }, 8000);
+  }, 10000);
 }
+
+
+Game.prototype.bc_tutorial2 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_number = 1.5;
+  this.tutorial_screen.tutorial_text.text = "OKAY!";
+
+  delay(function() {
+    self.tutorial_number = 2;
+    self.tutorial_screen.tutorial_text.text = "WHEN YOU LIKE YOUR WORD, \nYOU CAN HIT ENTER TO PLACE IT ON THE BOARD."
+  }, 2000);
+}
+
+
+Game.prototype.bc_tutorial3 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_number = 3;
+  this.tutorial_screen.tutorial_text.text = "YOUR WORD HAS TURNED INTO BUILDINGS. \nTHESE ARE YOUR TERRITORY.";
+
+  delay(function() {
+    self.tutorial_number = 3.1;
+    self.tutorial_screen.tutorial_text.text = "YOU CAN CROSS THIS WORD WITH ANOTHER WORD."
+  }, 4000);
+
+  delay(function() {
+    self.tutorial_number = 3.2;
+    self.tutorial_screen.tutorial_text.text = "FIRST, YOU'LL NEED TO FIND A GOOD SPOT."
+  }, 8000);
+
+  delay(function() {
+    self.bc_tutorial4();
+    
+  }, 12000);
+}
+
+
+Game.prototype.bc_tutorial4 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_number = 4;
+  this.tutorial_screen.tutorial_text.text = "HERE'S YOUR CURSOR. PRESS LEFT, RIGHT, UP AND DOWN TO MOVE IT.";
+
+  this.tutorial_cursor_arrow = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/arrow2.png"));
+  this.tutorial_cursor_arrow.anchor.set(0.5, 0.5);
+  this.tutorial_cursor_arrow.scale.set(0.6, 0.6);
+  this.tutorial_cursor_arrow.position.set(this.cursor[0].x - 32, this.cursor[0].y - 32);
+  this.tutorial_cursor_arrow.tint = 0xf3db3c;
+  this.tutorial_cursor_arrow.angle = 45;
+  this.player_area.addChild(this.tutorial_cursor_arrow);
+}
+
+
+Game.prototype.bc_tutorial5 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_cursor_arrow.visible = false;
+  this.tutorial_number = 5;
+  this.tutorial_screen.tutorial_text.text = "GOOD! KEEP MOVING.";
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "YOU CAN ALSO PRESS LEFT OR RIGHT SHIFT TO MOVE YOUR CURSOR QUICKLY.";
+  }, 4000);
+}
+
+
+Game.prototype.bc_tutorial6 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_number = 6;
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "YOU CAN USE YOUR MOUSE TO MAKE YOUR CURSOR JUMP AROUND, TOO.";
+  }, 500);
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "PLEASE CLICK ON A DIFFERENT LETTER TO MOVE YOUR CURSOR.";
+  }, 4000);
+}
+
+
+Game.prototype.bc_tutorial7 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_number = 7;
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "FIND A SPOT YOU LIKE, AND START TYPING A NEW WORD.";
+  }, 500);
+
+  delay(function() {
+    self.tutorial_number = 7.1
+    self.tutorial_screen.tutorial_text.text = "WHEN YOU LIKE YOUR WORD, \nYOU CAN HIT ENTER TO PLACE IT ON THE BOARD.";
+  }, 4500);
+}
+
+
+Game.prototype.bc_tutorial8 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_number = 8;
+  this.tutorial_screen.tutorial_text.text = "THE RULES FOR MAKING WORDS ARE THE SAME AS WORD ROCKETS.";
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "YOUR WORD MUST BE IN THE ENGLISH DICTIONARY.";
+  }, 4000);
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "IT CAN'T BE TOO SHORT, AND YOU CAN'T PLAY IT TWICE.";
+  }, 8000);
+
+  delay(function() {
+    self.bc_tutorial9();
+  }, 12000);
+}
+
+
+Game.prototype.bc_tutorial9 = function() {
+  var self = this;
+  var screen = this.screens["1p_base_capture"];
+
+  this.tutorial_number = 9;
+  this.tutorial_screen.tutorial_text.text = "OH, LOOK! YOUR OPPONENT HAS WOKEN UP.";
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "YOU AND YOUR OPPONENT COMPETE TO SEE \nWHO CAN GRAB THE MOST TERRITORY.";
+  }, 4000);
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "YOU GET A POINT FOR EACH BUILDING.";
+  }, 9000);
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "IF YOU BUILD ON TOP OF A ROCKET, IT FLIES OUT \nOF THE SCREEN AND STUNS THE OTHER PLAYER.";
+  }, 13000);  
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "THE FIRST TO 70 POINTS WINS.";
+  }, 19000);
+
+  delay(function() {
+    self.speed_play = true;
+    self.tutorial_screen.tutorial_text.text = "AFTER EITHER PLAYER GETS 50 POINTS, A TIME LIMIT IS IMPOSED.";
+  }, 23000);
+
+  delay(function() {
+    self.speed_play = true;
+    self.tutorial_screen.tutorial_text.text = "IF NOBODY PLAYS FOR 15 SECONDS, THE GAME ENDS, \nAND THE PLAYER WITH THE MOST POINTS WINS.";
+  }, 27000);
+
+  delay(function() {
+    self.speed_play = true;
+    self.tutorial_screen.tutorial_text.text = "TIME TO RESET AND PLAY FOR REAL. READY?";
+  }, 33000);
+
+  delay(function() {
+    self.tutorial = false;
+    self.initialize1pBaseCapture();
+  }, 37000); 
+}
+
+
+
+
+
+/*
+
+Base capture tutorial script.
+
+welcome to base capture.
+in this game, you will build a base out of crossword puzzle style words.
+please start typing to make your first word.
+
+okay!
+
+when you like your word, you can hit Enter to place it on the board.
+
+your word has turned into buildings. these are your territory.
+
+you can cross this word with another word.
+
+first, you'll need to find a good spot.
+you have a cursor (point to cursor) which moves around the board.
+when you type, words start or end at this cursor.
+
+press up, down, left, or right to move your cursor.
+
+you can press left or right shift to move your cursor quickly.
+please press left or right shift.
+
+you can also use your mouse to make your cursor jump around.
+please click here to move your cursor (point to new spot)
+
+
+find a spot you like, and start typing a new word that crosses the first word.
+
+when you like your word, you can hit Enter to place it on the board.
+
+the rules for making words are the same as Word Rockets:
+your word must be in the English dictionary.
+It can't be too short, and you can't play it twice.
+
+oh, look! your opponent has woken up and is making words.
+
+you and your opponent will compete to see who can grab the most territory.
+you get a point for each building.
+
+the first player to 70 points wins.
+after either player gets to 50, a time limit will be imposed.
+if nobody plays for 15 seconds, the game will end and
+the player with the most points will win.
+
+if you build a word on top of a rocket, the rocket will fly out of the screen
+and stun the keyboard of the other player.
+
+TIME TO RESET AND PLAY FOR REAL. READY?
+
+
+*/
 
 
 

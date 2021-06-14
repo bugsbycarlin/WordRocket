@@ -274,8 +274,8 @@ class Game {
 
     this.flow[2] = {};
     this.flow[2]["EASY"] = [
-      //"cut:t1", "wr:1", "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
-      "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
+      "cut:t1", "wr:1", "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
+      // "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
     ];
   }
 

@@ -72,6 +72,12 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.enemy_screen_texture_update = this.markTime();
   
   if (this.tutorial) {
+    this.paused = false;
+    this.pause_time = 0;
+    this.cursor[0].visible = true;
+    this.cursor[1].visible = true;
+    this.start_time = this.markTime();
+    this.game_phase = "active";
     this.bc_tutorial1();
   } else {
     delay(function() {
@@ -437,8 +443,12 @@ Game.prototype.baseCaptureKeyDown = function(key) {
       this.baseCaptureMoveCursor("down", player);
     }
 
-    if (key === "LShift") {
-       
+    if (key === "LShift" && (this.game_phase != "tutorial" || this.tutorial_number >= 5)) {
+      
+      if (this.tutorial == true && this.tutorial_number == 5) {
+        this.bc_tutorial6();
+      }
+
       let cursor = this.cursor[player];
       if (cursor.angle == "0" || cursor.angle == "180") {
         let x_tile = cursor.x_tile;
@@ -460,7 +470,11 @@ Game.prototype.baseCaptureKeyDown = function(key) {
 
     }
 
-    if (key === "RShift") {
+    if (key === "RShift" && (this.game_phase != "tutorial" || this.tutorial_number >= 5)) {
+
+      if (this.tutorial == true && this.tutorial_number == 5) {
+        this.bc_tutorial6();
+      }
        
       let cursor = this.cursor[player];
       if (cursor.angle == "0" || cursor.angle == "180") {
@@ -593,6 +607,10 @@ Game.prototype.baseCaptureMouseDown = function(ev) {
   let self = this;
   let mouse_data = pixi.renderer.plugins.interaction.mouse.global;
 
+  if (this.game_phase == "tutorial" && this.tutorial_number < 6) {
+    return;
+  }
+
   if (ev.button == 0) {
     // click to move the cursor.
     let x_click = mouse_data.x - this.player_area.x;
@@ -601,6 +619,11 @@ Game.prototype.baseCaptureMouseDown = function(ev) {
     let y_tile = Math.floor((13 * 32 + y_click)/32);
 
     if (this.baseCaptureInBounds(x_tile, y_tile) && this.baseCaptureBoard[x_tile][y_tile] != "") {
+      if (this.game_phase == "tutorial" && this.tutorial_number == 6 
+        && (x_tile != this.cursor[0].x_tile || y_tile != this.cursor[0].y_tile)) {
+        this.bc_tutorial7();
+      }
+
       this.baseCaptureJumpCursor(0, x_tile, y_tile, null);
     }
   }
@@ -608,7 +631,7 @@ Game.prototype.baseCaptureMouseDown = function(ev) {
 
 
 Game.prototype.baseCaptureClearWord = function(player, drop_letters = true) {
-  if (this.game_phase != "active") {
+  if (this.game_phase != "active" && this.game_phase != "tutorial") {
     return;
   }
   for (let i = 0; i < this.base_letters[player].length; i++) {
@@ -626,7 +649,7 @@ Game.prototype.baseCaptureClearWord = function(player, drop_letters = true) {
 
 
 Game.prototype.baseCaptureDeleteAction = function(player) {
-  if (this.game_phase != "active") {
+  if (this.game_phase != "active" && this.game_phase != "tutorial") {
     return;
   }
   if (this.base_letters[player].length == 0) {
@@ -674,9 +697,13 @@ Game.prototype.baseCaptureEnterAction = function(player) {
   var self = this;
   var screen = this.screens["1p_base_capture"];
 
-  if (this.game_phase != "active") {
+  if (this.game_phase != "active" && this.game_phase != "tutorial") {
     return;
   }
+  if (this.game_phase === "tutorial" && (this.tutorial_number < 2 || this.tutorial_number == 7)) {
+    return;
+  }
+
   if (this.can_play_word[player] == false) {
     return;
   }
@@ -697,6 +724,17 @@ Game.prototype.baseCaptureEnterAction = function(player) {
   this.player_area.shake = this.markTime();
   this.enemy_area.shake = this.markTime();
   this.soundEffect("build");
+
+  if (this.game_phase === "tutorial" && this.tutorial_number === 2) {
+    delay(function() {
+      self.bc_tutorial3();
+    }, 500)
+  }
+  if (this.game_phase === "tutorial" && this.tutorial_number === 7.1) {
+    delay(function() {
+      self.bc_tutorial8();
+    }, 500)
+  }
 
   let team = (player == 0) ? "american" : "soviet";
   for (let i = 0; i < this.base_letters[player].length; i++) {
@@ -772,8 +810,7 @@ Game.prototype.baseCaptureEnterAction = function(player) {
 
   this.played_words[this.word_to_play[player]] = 1;
 
-  // TO DO: maybe don't delete in this way. maybe just proper delete.
-  this.baseCaptureClearWord(player, false);
+  this.baseCaptureClearWord(player, false); // false means the tiles just disappear instead of falling away.
 }
 
 
@@ -832,15 +869,24 @@ Game.prototype.baseCaptureMakeRocket = function(player, o_x, o_y) {
 
 
 Game.prototype.baseCaptureMoveCursor = function(direction, player) {
-  if (this.game_phase != "active") {
+  let self = this;
+  let screen = this.screens["1p_base_capture"];
+
+  if (this.game_phase != "active" && this.game_phase != "tutorial") {
     return;
   }
+
+  if (this.tutorial == true && this.tutorial_number < 4) {
+    return;
+  } else if (this.tutorial == true && this.tutorial_number == 4) {
+    this.bc_tutorial5();
+  }
+
   if (this.base_letters[player].length > 0) {
     //return;
     this.baseCaptureClearWord(player);
   }
 
-  let self = this;
   let cursor = this.cursor[player];
   if (direction == "up" && cursor.y_tile > 0 && this.baseCaptureBoard[cursor.x_tile][cursor.y_tile - 1] != "") {
     cursor.y_tile -= 1;
@@ -873,7 +919,7 @@ Game.prototype.baseCaptureMoveCursor = function(direction, player) {
 
 
 Game.prototype.baseCaptureJumpCursor = function(player, x, y, direction = -1) {
-  if (this.game_phase != "active") {
+  if (this.game_phase != "active" && this.game_phase != "tutorial") {
     return;
   }
   if (this.base_letters[player].length > 0) {
@@ -909,7 +955,9 @@ Game.prototype.baseCaptureJumpCursor = function(player, x, y, direction = -1) {
 
 Game.prototype.baseCaptureAddLetter = function(letter, player) {
   if (this.game_phase != "active") {
-    return;
+    if (this.game_phase != "tutorial" || this.tutorial_number < 1.1) {
+      return;
+    }
   }
   let bpc = this.cursor[player];
   let letters = this.base_letters[player];
@@ -1003,6 +1051,10 @@ Game.prototype.baseCaptureAddLetter = function(letter, player) {
 
   // Add the tile to the list of tiles.
   letters.push(tile);
+
+  if (this.game_phase === "tutorial" && this.tutorial_number === 1.1 && letters.length >= 3) {
+    this.bc_tutorial2();
+  }
 
   // Now check the word and color it accordingly.
   this.baseCaptureCheckWord(player);
@@ -1150,10 +1202,10 @@ Game.prototype.baseCaptureUpdateDisplayInfo = function() {
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);
 
-      for (var i = 0; i < board_width; i++) {
+      //for (var i = 0; i < board_width; i++) {
         this.cursor[0].visible = true;
         this.cursor[1].visible = true;
-      }
+      //}
     }
   }
 }
@@ -1190,6 +1242,10 @@ Game.prototype.baseCaptureUpdatePlayClock = function() {
 
 Game.prototype.baseCaptureGameOver = function() {
   var self = this;
+  if (this.tutorial == true) {
+    return;
+  }
+
   this.game_phase = "gameover";
 
   this.announcement.style.fontSize = 36;
@@ -1258,7 +1314,7 @@ Game.prototype.baseCaptureEnemyAction = function() {
     return;
   }
 
-  if (this.game_phase == "tutorial" && this.tutorial_number < 8) {
+  if (this.game_phase == "tutorial" && this.tutorial_number <= 8) {
     return;
   }
 
@@ -1703,9 +1759,9 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
 
   let fractional = diff / (1000/30.0);
 
-  // if (this.game_phase == "tutorial") {
-  //   this.tutorial_screen.tutorial_text.hover();
-  // }
+  if (this.game_phase == "tutorial") {
+    this.tutorial_screen.tutorial_text.hover();
+  }
 
   this.baseCaptureUpdateDisplayInfo();
   this.shakeDamage();
@@ -1719,7 +1775,7 @@ Game.prototype.singlePlayerBaseCaptureUpdate = function(diff) {
   this.updateRockets();
 
   // Skip the rest if we aren't in active gameplay
-  if (this.game_phase != "active") {
+  if (this.game_phase != "active" && this.game_phase != "tutorial") {
     return;
   }
 

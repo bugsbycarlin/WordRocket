@@ -1253,25 +1253,17 @@ Game.prototype.baseCaptureGameOver = function() {
   let winning_player = 0;
 
   if (this.tile_score[0] < this.tile_score[1]) {
-    this.announcement.text = "GAME OVER";
+    this.announcement.text = "YOU LOSE";
     this.stopMusic();
-    //this.soundEffect("game_over");
-    delay(function() {
-      let low_high = self.local_high_scores[self.getModeName()][self.difficulty_level.toLowerCase()][9];
-      if (low_high == null || low_high.score < self.score) {
-        self.initializeHighScore(self.score);
-        self.switchScreens("1p_base_capture", "high_score");
-      } else {
-        self.initialize1pLobby();
-        self.switchScreens("1p_base_capture", "1p_lobby");
-      }
-    }, 10000);
+    this.soundEffect("game_over");
+    this.gameOverScreen(10000);
     winning_player = 1;
   } else {
-    this.announcement.text = "VICTORY!";
+    this.announcement.text = "YOU WIN!";
+    this.announcement.style.fill = 0xFFFFFF;
+    flicker(this.announcement, 500, 0xFFFFFF, 0x67d8ef);
+    this.soundEffect("victory");
     winning_player = 0;
-    // this.level += 1;
-    // delay(function() {self.initialize1pBaseCapture();}, 10000);
     delay(function() {
       self.nextFlow();
     }, 10000);

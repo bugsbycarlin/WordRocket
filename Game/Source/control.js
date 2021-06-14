@@ -280,6 +280,16 @@ Game.prototype.handleKeyDown = function(ev) {
         this.highScoreEnter();
       }
     }
+  } else if (this.current_screen === "game_over") {
+    let key = ev.key;
+
+    if (ev.key === "Escape") {
+      this.gameOverEscape();
+    }
+
+    if (ev.key === "Enter") {
+      this.gameOverEnter();
+    }
   } else if (this.current_screen === "cutscene") {
     if (ev.key === "Enter" || ev.key === " ") {
       this.gotoCutscenePage(this.cutscene_pagenum + 1);
@@ -287,7 +297,6 @@ Game.prototype.handleKeyDown = function(ev) {
 
     if (ev.key === "Escape") {
       this.endCutscene();
-      // TO DO: go to the next scene
     }
   } else if (this.current_screen === "title") {
     if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {

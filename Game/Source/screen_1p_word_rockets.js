@@ -795,23 +795,14 @@ Game.prototype.checkEndCondition = function(bypass = false) {
     if (enemy_dead === true || player_dead === true || bypass === true) {
       this.announcement.style.fontSize = 36;
       if (player_dead === true || bypass === true) { //regardless of whether enemy is dead
-        this.announcement.text = "GAME OVER";
+        this.announcement.text = "YOU LOSE";
         this.stopMusic();
         this.soundEffect("game_over");
-        delay(function() {
-          let low_high = self.local_high_scores[self.getModeName()][self.difficulty_level.toLowerCase()][9];
-          if (low_high == null || low_high.score < self.score) {
-            self.initializeHighScore(self.score);
-            self.switchScreens("1p_word_rockets", "high_score");
-          } else {
-            self.initialize1pLobby();
-            self.switchScreens("1p_word_rockets", "1p_lobby");
-          }
-        }, 4000);
+        this.gameOverScreen(4000);
       } else if (enemy_dead == true) {
-        this.announcement.text = "VICTORY!";
-        // this.level += 1;
-        // delay(function() {self.initialize1pWordRockets();}, 4000);
+        this.announcement.text = "YOU WIN!";
+        this.soundEffect("victory");
+        flicker(this.announcement, 500, 0xFFFFFF, 0x67d8ef);
         delay(function() {
           self.nextFlow();
         }, 4000);

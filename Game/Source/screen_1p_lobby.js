@@ -61,6 +61,10 @@ Game.prototype.initialize1pLobby = function() {
     this.lobby_sections.arcade_type.x = 1200;
     this.lobby_sections.difficulty.x = 0;
   }
+
+  if (use_music) {
+    this.setMusic("title_song");
+  }
 }
 
 Game.prototype.initializeSectionDifficulty = function() {
@@ -73,12 +77,11 @@ Game.prototype.initializeSectionDifficulty = function() {
 
   this.option_values = ["EASY", "MEDIUM", "HARD", "BEACON"];
 
-
   this.option_info_values = [
-    "Spelling aid on. Special levels off. 13 levels. Stunned keys don't launch rockets. For novice typists.",
-    "Spelling aid off. Special levels on. 26 levels. Stunned keys don't launch rockets. For seasoned typists.",
-    "Spelling aid off. Special levels on. 26 levels. Stunned keys don't launch rockets. Much faster enemy. For very good typists.",
-    "So fast. 26 levels. Stunned keys stop working temporarily. Whoever you are, this is more than you can handle."
+    "Spelling aid on. Special levels off. Short game. Continues. Stunned keys still work. For novice typists.",
+    "Spelling aid off. Special levels on. Long game. Continues. Stunned keys still work. For seasoned typists.",
+    "Spelling aid off. Special levels on. Long game. 1 Continue. Stunned keys still work. Much faster enemy. For very good typists.",
+    "So fast. Stunned keys don't work. Long game. No continues. Whoever you are, this is more than you can handle."
   ];
 
   let center_x = 640;
@@ -88,7 +91,7 @@ Game.prototype.initializeSectionDifficulty = function() {
   difficulty_label.position.set(center_x,125);
   section.addChild(difficulty_label);
 
-  this.option_info = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left", wordWrap: true, wordWrapWidth: 900});
+  this.option_info = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left", wordWrap: true, wordWrapWidth: 910});
   this.option_info.anchor.set(0,0);
   this.option_info.position.set(180,265);
   this.option_info.partial_value = 0;
@@ -319,6 +322,13 @@ Game.prototype.initializeSectionGameType = function() {
       flicker(self.game_type_story_text, 500, 0xFFFFFF, 0x67d8ef);
       flicker(self.game_type_story_button, 500, 0xFFFFFF, 0x67d8ef);
       // Proceed to difficulty screen
+      self.option_info_values = [
+        "Spelling aid on. Special levels off. Short game. Continues. Stunned keys still work. For novice typists.",
+        "Spelling aid off. Special levels on. Long game. Continues. Stunned keys still work. For seasoned typists.",
+        "Spelling aid off. Special levels on. Long game. 1 Continue. Stunned keys still work. Much faster enemy. For very good typists.",
+        "So fast. Stunned keys don't work. Long game. No Continues. Whoever you are, this is more than you can handle."
+      ];
+      self.option_info.setPartial(self.option_info_values[self.difficulty_choice].toUpperCase());
       self.lobby_mode = "none";
       delay(function() {
         var tween = new TWEEN.Tween(self.lobby_sections.game_type.position)
@@ -338,6 +348,13 @@ Game.prototype.initializeSectionGameType = function() {
       flicker(self.game_type_arcade_button, 500, 0xFFFFFF, 0x67d8ef);
       // Proceed to arcade type screen
       self.lobby_mode = "none";
+      self.option_info_values = [
+        "Spelling aid on. Special levels off. Stunned keys still work. For novice typists.",
+        "Spelling aid off. Special levels on. Stunned keys still work. For seasoned typists.",
+        "Spelling aid off. Special levels on. Stunned keys still work. Much faster enemy. For very good typists.",
+        "So fast. Stunned keys don't work. Whoever you are, this is more than you can handle."
+      ];
+      self.option_info.setPartial(self.option_info_values[self.difficulty_choice].toUpperCase());
       delay(function() {
         var tween = new TWEEN.Tween(self.lobby_sections.game_type.position)
           .to({x: -1200})

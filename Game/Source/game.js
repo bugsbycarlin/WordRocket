@@ -280,6 +280,22 @@ class Game {
   }
 
 
+  returnToLastCutscene() {
+    if (this.last_cutscene != null && this.last_flow_marker != null) {
+      console.log("switching to cutscene");
+      this.flow_marker = this.last_flow_marker;
+      this.stopMusic();
+      this.initializeCutscene(this.last_cutscene);
+      if (this.current_screen != "cutscene") {
+        this.switchScreens(this.current_screen, "cutscene");
+      }
+    } else {
+      this.resetGame();
+      this.nextFlow();
+    }
+  }
+
+
   nextFlow() {
     this.flow_marker += 1;
     console.log("Marker: " + this.flow_marker);
@@ -330,6 +346,8 @@ class Game {
           }
         } else if (next_type == "cut") {
           if (this.current_screen != "cutscene") {
+            this.last_flow_marker = this.flow_marker;
+            this.last_cutscene = next_value;
             console.log("switching to cutscene");
             this.stopMusic();
             this.initializeCutscene(next_value);
@@ -395,6 +413,8 @@ class Game {
       this.initialize1pLobby();
     } else if (screen_name == "high_score") {
       this.initializeHighScore();
+    } else if (screen_name == "game_over") {
+      this.initializeGameOver();
     } else if (screen_name == "credits") {
       this.initializeCredits();
     } else if (screen_name == "1p_word_rockets") {
@@ -567,6 +587,7 @@ class Game {
   resetGame() {
     this.level = 1;
     this.score = 0;
+    this.continues = 1;
 
     this.flow_marker = -1;
 

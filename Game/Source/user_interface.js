@@ -397,6 +397,7 @@ Game.prototype.initializeScreens = function() {
   this.makeScreen("1p_launch_code");
   this.makeScreen("cutscene");
   this.makeScreen("high_score");
+  this.makeScreen("game_over");
   this.makeScreen("credits");
 
   this.black = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -583,6 +584,35 @@ Game.prototype.initializeAlertBox = function() {
 
   this.alertBox.interactive = true;
   this.alertBox.buttonMode = true;
+}
+
+
+Game.prototype.gameOverScreen = function(delay_time, force_exit = false) {
+  let self = this;
+
+  delay(function() {
+    if (!force_exit && self.game_type_selection == 0 
+      && (self.difficulty_level == "EASY" || self.difficulty_level == "MEDIUM"
+          || (self.difficulty_level == "HARD" && self.continues > 0))) {
+      if (self.difficulty_level == "HARD") {
+        self.continues -= 1;
+      }
+      self.initializeGameOver();
+      self.switchScreens(self.current_screen, "game_over");
+    } else {
+      let low_high = self.local_high_scores[self.getModeName()][self.difficulty_level.toLowerCase()][9];
+      if (low_high == null || low_high.score < self.score) {
+        self.initializeHighScore(self.score);
+        self.switchScreens(self.current_screen, "high_score");
+      } else {
+        self.initialize1pLobby();
+        self.switchScreens(self.current_screen, "1p_lobby");
+      }
+    }
+
+    
+  }, delay_time);
+
 }
 
 

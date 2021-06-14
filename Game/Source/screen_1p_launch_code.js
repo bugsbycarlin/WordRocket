@@ -37,28 +37,28 @@ Game.prototype.resetRace = function() {
   var self = this;
   var screen = this.screens["1p_launch_code"];
 
-  let placeholder = new PIXI.Text("LAUNCH CODE", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
+  let placeholder = new PIXI.Text("LAUNCH CODE PLACEHOLDER", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
   placeholder.scaleMode = PIXI.SCALE_MODES.NEAREST;
   placeholder.anchor.set(0.5,0.5);
-  placeholder.position.set(this.width / 2, this.height - 320);
+  placeholder.position.set(this.width / 2, 200);
   screen.addChild(placeholder);
 
-  placeholder.interactive = true;
-  placeholder.buttonMode = true;
-  placeholder.on("pointerdown", function() {
-    self.game_phase = "gameover";
+  // placeholder.interactive = true;
+  // placeholder.buttonMode = true;
+  // placeholder.on("pointerdown", function() {
+  //   self.game_phase = "gameover";
 
-    self.announcement.text = "GAME OVER";
-    self.stopMusic();
-    //this.soundEffect("game_over");
-    // delay(function() {
-    //   self.initialize1pLobby();
-    //   self.switchScreens("1p_launch_code", "1p_lobby");
-    // }, 500);
-    delay(function() {
-      self.nextFlow();
-    }, 500);
-  });
+  //   self.announcement.text = "GAME OVER";
+  //   self.stopMusic();
+  //   //this.soundEffect("game_over");
+  //   // delay(function() {
+  //   //   self.initialize1pLobby();
+  //   //   self.switchScreens("1p_launch_code", "1p_lobby");
+  //   // }, 500);
+  //   delay(function() {
+  //     self.nextFlow();
+  //   }, 500);
+  // });
 
   this.mouse_cord = new PIXI.Container();
   screen.addChild(this.mouse_cord);
@@ -102,6 +102,19 @@ Game.prototype.resetRace = function() {
   }
 
   this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
+}
+
+
+Game.prototype.launchCodeGameOver = function(key) {
+  let self = this;
+  this.game_phase = "gameover";
+
+  this.announcement.text = "GAME OVER";
+  this.stopMusic();
+  this.soundEffect("game_over");
+  delay(function() {
+    self.nextFlow();
+  }, 500);
 }
 
 
@@ -177,11 +190,14 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
       this.game_phase = "active";
       this.last_play = this.markTime();
 
-      // TO DO: different song
-      this.setMusic("action_song_3");
+      // this.setMusic("action_song_3");
 
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);
+
+      delay(function() {
+        self.launchCodeGameOver();
+      }, 2000);
     }
   }
 }

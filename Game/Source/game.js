@@ -248,10 +248,18 @@ class Game {
     // game type is story
     this.flow[0] = {};
     this.flow[0]["EASY"] = [
-      "cut:c1", "wr:1", "wr:2", "cut:c2", "bc:3", "bc:4",
-      "cut:c3", "lc:5", "lc:6", "cut:c4", "wr:7", "wr:8",
-      "cut:c5", "bc:9", "bc:10", "cut:c6", "lc:11", "lc:12",
-      "cut:c7", "wr:13", "wr:14", "cut:c8"
+      // "cut:c1", "wr:1", "wr:2", "cut:c2", "bc:3", "bc:4",
+      // "cut:c3", "lc:5", "lc:6", "cut:c4", "wr:7", "wr:8",
+      // "cut:c5", "bc:9", "bc:10", "cut:c6", "lc:11", "lc:12",
+      // "cut:c7", "wr:13", "wr:14", "cut:c8"
+      "cut:c1", "lc:1",
+      "cut:c2", "lc:2",
+      "cut:c3", "lc:3",
+      "cut:c4", "lc:4",
+      "cut:c5", "lc:5",
+      "cut:c6", "lc:6",
+      "cut:c7", "lc:7",
+      "cut:c8",
     ];
     this.flow[0]["MEDIUM"] = [
       "cut:c1", "wr:1", "wr:2", "wr:3", "cut:c2", "bc:4", "bc:5", "bc:6",
@@ -284,7 +292,7 @@ class Game {
     if (this.last_cutscene != null && this.last_flow_marker != null) {
       console.log("switching to cutscene");
       this.flow_marker = this.last_flow_marker;
-      this.stopMusic();
+      //this.fadeMusic();
       this.initializeCutscene(this.last_cutscene);
       if (this.current_screen != "cutscene") {
         this.switchScreens(this.current_screen, "cutscene");
@@ -318,7 +326,7 @@ class Game {
           this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
           if (this.current_screen != "1p_word_rockets") {
             console.log("switching to word rockets");
-            this.stopMusic();
+            //this.fadeMusic();
             this.initializeScreen("1p_word_rockets");
             this.switchScreens(this.current_screen, "1p_word_rockets");
           } else {
@@ -328,7 +336,7 @@ class Game {
           this.level = parseInt(next_value);
           this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
           if (this.current_screen != "1p_base_capture") {
-            this.stopMusic();
+            this.fadeMusic();
             this.initializeScreen("1p_base_capture");
             this.switchScreens(this.current_screen, "1p_base_capture");
           } else {
@@ -338,7 +346,7 @@ class Game {
           this.level = parseInt(next_value);
           this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
           if (this.current_screen != "1p_launch_code") {
-            this.stopMusic();
+            this.fadeMusic();
             this.initializeScreen("1p_launch_code");
             this.switchScreens(this.current_screen, "1p_launch_code");
           } else {
@@ -349,7 +357,7 @@ class Game {
             this.last_flow_marker = this.flow_marker;
             this.last_cutscene = next_value;
             console.log("switching to cutscene");
-            this.stopMusic();
+            //this.fadeMusic();
             this.initializeCutscene(next_value);
             this.switchScreens(this.current_screen, "cutscene");
           } else {
@@ -628,7 +636,7 @@ class Game {
     if (use_music) {
       var self = this;
       if (this.music != null && this.music_name != music_name) {
-        this.stopMusic();
+        this.fadeMusic();
       }
       this.music = document.getElementById(music_name);
       this.music.loop = true;
@@ -647,12 +655,23 @@ class Game {
   }
 
 
-  fadeMusic(delay) {
+  fadeMusic(delay_time) {
     if (this.music != null) {
+      this.old_music = this.music;
+      this.music = null;
+      this.old_music.done = true;
       var self = this;
       for (let i = 0; i < 14; i++) {
-        setTimeout(function() {self.music.volume = (13 - i) / 20;}, delay + 50 * i);
+        delay(function() {
+          console.log("reducing volume");
+          self.old_music.volume = (13 - i) / 20;
+        }, delay_time + 300 * i);
       }
+      setTimeout(function() {
+        // TO DO
+        // DELETE OLD MUSIC
+        this.old_music = null;
+      }, 1000);
     }
   }
 

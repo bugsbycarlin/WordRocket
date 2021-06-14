@@ -294,13 +294,14 @@ Game.prototype.gotoCutscenePage = function(page_num) {
       self.tournament_board.usa.text.text = (self.tournament_board.above_position+1) + ".      " + "USA";
       self.tournament_board.above.text.text = (self.tournament_board.usa_position+1) + ".      " + self.tournament_board.above_country;
     }, 250);
-    // delay(function() {
-    //   self.tournament_board.parent.next.visible = true;
-    // }, 1000)
+    delay(function() {
+      self.tournament_board.parent.next.visible = true;
+    }, 1000)
 
     return;
   }
 
+  console.log("Sequence Num Before: " + this.sequence_num);
   if (this.sequence_num < this.cutscene_pages[this.cutscene_pagenum].sequence_max) {
     this.sequence_num += 1;
 
@@ -317,7 +318,7 @@ Game.prototype.gotoCutscenePage = function(page_num) {
       }
     }
 
-    if (something_appeared) this.soundEffect("punch_" + Math.ceil(Math.random() * 6));
+    if (something_appeared) this.soundEffect("slap_" + Math.ceil(Math.random() * 4));
     
     for (let j = 0; j < this.cutscene_pages[this.cutscene_pagenum].disappears.length; j++) {
       if (this.sequence_num == this.cutscene_pages[this.cutscene_pagenum].disappears[j].disappears) {
@@ -328,15 +329,16 @@ Game.prototype.gotoCutscenePage = function(page_num) {
     if (this.sequence_num >= this.cutscene_pages[this.cutscene_pagenum].sequence_max) {
       this.cutscene_pages[this.cutscene_pagenum].next.visible = true;
     }
-
+    console.log("Sequence Num After: " + this.sequence_num);
     return;
   }
 
   //this.soundEffect("swipe");
+  this.soundEffect("button_chirp");
   
   if (page_num >= this.cutscene_items.length) {
     //console.log("running over the end of the cutscene. don't do that. use the scene end button instead.");
-    this.endCutscene();
+    this.endCutscene(false);
     return;
   }
 
@@ -371,7 +373,7 @@ Game.prototype.gotoCutscenePage = function(page_num) {
         for (var p = 0; p < self.cutscene_items.length; p++) {
           if (self.cutscene_pages[p].next != null) {
             self.cutscene_pages[p].next.interactive = true;
-            if (self.cutscene_pages[p].sequence_max == 0 && self.cutscene_pages[p].has_tournament_board != true) {
+            if (self.cutscene_pages[p].sequence_max == 0) {
               self.cutscene_pages[p].next.visible = true;
             }
           }
@@ -383,9 +385,12 @@ Game.prototype.gotoCutscenePage = function(page_num) {
 }
 
 
-Game.prototype.endCutscene = function() {
+Game.prototype.endCutscene = function(play_sound = true) {
   if (this.cutscene_state != "ready") {
     return;
+  }
+  if (play_sound) {
+    this.soundEffect("button_chirp");
   }
   this.cutscene_state = "transitioning";
   for (var p = 0; p < this.cutscene_items.length; p++) {
@@ -534,12 +539,11 @@ scenes = {
       {text: "So we went up against the Russians. \nThey were bigger, they were stronger, \nthey were really good typists...", x: 430, y: 120},
       {text: "But god damnit*, we were Americans.", x: 850, y: 750, drift: "left"},
       {text: "*Sorry, Mom", x: 200, y: 900},
-      {button: "Ready?", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
+      {button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
     ],
     [
-      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
+      {button: "Go go go!", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
       {tournament_board: "okay!"}
-      
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -547,8 +551,15 @@ scenes = {
 //---------------------------------------------------------------------------------------
   c2: [
     [
-      {disappears: 1, text: "Moskva...", x: 640, y: 480},
-      {appears: 1, disappears: 8, image: "zhukov.png", x: 690, y: 420},
+      {button: "Next", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+    ],
+    [
+      {button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
+      {text: "Moskva...", x: 640, y: 480}
+    ],
+    [
+      {disappears: 8, image: "zhukov.png", x: 690, y: 420},
       {appears: 1, disappears: 4, text: "You are obsessed with this *game*, \nGeorgy. It is unhealthy.", size: 24, x: 960, y: 150},
       {appears: 2, disappears: 4, text: "It is the perfect combination of strategy and combat. \nThe Americans will use this to raise an unstoppable \ngeneral staff. I must go to the competition.", size: 24, x: 510, y: 800},
       {appears: 3, disappears: 4, text: "I must destroy them.", size: 24, x: 850, y: 880},

@@ -122,7 +122,6 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         this.tournament_board.usa_position = 9 - parseInt(name.replace("c", ""));
         let usa_position = this.tournament_board.usa_position;
         this.tournament_board.above_position = this.tournament_board.usa_position - 1;
-        console.log("usa position " + usa_position);
 
         let country_list = ["USSR", "FRA", "GBR", "POL", "JPN", "CSK", "NOR"];
         country_list.splice(usa_position, 0, "USA");
@@ -181,7 +180,10 @@ Game.prototype.initializeCutscene = function(name = "intro") {
           score_text.position.set(190, 4);
           board.addChild(score_text);
 
-          if (i == usa_position) this.tournament_board.usa = board;
+          if (i == usa_position) {
+            console.log("yes, this is the usa");
+            this.tournament_board.usa = board;
+          }
           if (i == this.tournament_board.above_position) {
             this.tournament_board.above = board;
             this.tournament_board.above_country = country_list[i];
@@ -246,58 +248,30 @@ Game.prototype.initializeCutscene = function(name = "intro") {
 
   screen.interactive = true;
   screen.buttonMode = true;
-  screen.on("pointerdown", function() {
+  screen.on("pointertap", function() {
     self.gotoCutscenePage(self.cutscene_pagenum + 1);
   });
 
-  console.log("about to set music");
   if (name != "c8") {
     this.setMusic("cutscene_song");
   } else {
     this.setMusic("final_song");
   }
+
+  if (self.checkTournamentBoard) {
+    self.cutscene_state = "transitioning";
+    self.tournament_board.parent.next.visible = false;
+    delay(function() {
+        self.setTournamentBoard();
+    }, 1500);
+  }
+
 }
 
 
 Game.prototype.gotoCutscenePage = function(page_num) {
   var self = this;
   if (this.cutscene_state != "ready") {
-    return;
-  }
-
-  if (this.cutscene_pages[this.cutscene_pagenum].has_tournament_board == true 
-    && this.tournament_board != null
-    && this.cutscene_name != "c1"
-    && this.tournament_board.visible == true
-    && this.tournament_board.complete == false) {
-    this.tournament_board.complete = true;
-    this.cutscene_state = "transitioning";
-
-    let y1 = this.tournament_board.usa.position.y;
-    let y2 = this.tournament_board.above.position.y;
-    let tween = new TWEEN.Tween(this.tournament_board.usa.position)
-      .to({y: y2})
-      .duration(500)
-      .easing(TWEEN.Easing.Cubic.InOut)
-      .onComplete(function() {
-        self.cutscene_state = "ready";
-      })
-      .start();
-    let tween2 = new TWEEN.Tween(this.tournament_board.above.position)
-      .to({y: y1})
-      .duration(500)
-      .easing(TWEEN.Easing.Cubic.InOut)
-      .onComplete(function() {
-      })
-      .start();
-    delay(function() {
-      self.tournament_board.usa.text.text = (self.tournament_board.above_position+1) + ".      " + "USA";
-      self.tournament_board.above.text.text = (self.tournament_board.usa_position+1) + ".      " + self.tournament_board.above_country;
-    }, 250);
-    delay(function() {
-      self.tournament_board.parent.next.visible = true;
-    }, 1000)
-
     return;
   }
 
@@ -378,8 +352,13 @@ Game.prototype.gotoCutscenePage = function(page_num) {
             }
           }
         }
+        console.log("end of tween");
         self.cutscene_state = "ready";
         self.cutscene_pagenum = self.cutscene_pagenum + 1;
+
+        if(self.checkTournamentBoard()) {
+          self.setTournamentBoard();
+        }
       }, 200)})
     .start();
 }
@@ -416,6 +395,53 @@ Game.prototype.endCutscene = function(play_sound = true) {
 }
 
 
+Game.prototype.checkTournamentBoard = function() {
+  let self = this;
+  console.log("in the function");
+  if (this.cutscene_pages[this.cutscene_pagenum].has_tournament_board == true 
+    && this.tournament_board != null
+    && this.cutscene_name != "c1"
+    && this.tournament_board.visible == true
+    && this.tournament_board.complete == false) {
+    return true;
+  }
+}
+
+Game.prototype.setTournamentBoard = function() {
+  let self = this;
+  this.tournament_board.complete = false;
+  this.cutscene_state = "transitioning";
+  this.tournament_board.parent.next.visible = false;
+
+  console.log("in the if block");
+  let y1 = this.tournament_board.usa.position.y;
+  let y2 = this.tournament_board.above.position.y;
+  let tween = new TWEEN.Tween(this.tournament_board.usa.position)
+    .to({y: y2})
+    .duration(500)
+    .easing(TWEEN.Easing.Cubic.InOut)
+    .onComplete(function() {
+      self.cutscene_state = "ready";
+    })
+    .start();
+  let tween2 = new TWEEN.Tween(this.tournament_board.above.position)
+    .to({y: y1})
+    .duration(500)
+    .easing(TWEEN.Easing.Cubic.InOut)
+    .onComplete(function() {
+    })
+    .start();
+  delay(function() {
+    self.tournament_board.usa.text.text = (self.tournament_board.above_position+1) + ".      " + "USA";
+    self.tournament_board.above.text.text = (self.tournament_board.usa_position+1) + ".      " + self.tournament_board.above_country;
+  }, 250);
+  delay(function() {
+    self.tournament_board.complete = true;
+    self.tournament_board.parent.next.visible = true;
+  }, 1000)
+}
+
+
 Game.prototype.cutsceneUpdate = function(diff) {
   var self = this;
   var screen = this.screens["cutscene"];
@@ -437,21 +463,7 @@ Game.prototype.cutsceneUpdate = function(diff) {
 
 
 
-// scenes = {
-//   c8: [
-//     [
-//       {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
-//       {tournament_board: "okay!"}
-      
-//     ],
-//     [
-//       {image: "1988.png", x: 600, y: 440},
-//       {text: "1988", x: 180, y: 160, drift: "right"},
-//       {text: "Crazy time to live in Berlin.", x: 890, y: 720, drift: "left"},
-//       {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1}
-//     ],
-//   ],
-// }
+
 scenes = {
   t1: [
     [
@@ -492,7 +504,7 @@ scenes = {
       {image: "1988.png", x: 600, y: 440},
       {text: "1988", x: 180, y: 160, drift: "right"},
       {text: "Crazy time to live in Berlin.", x: 890, y: 720, drift: "left"},
-      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1}
+      {button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1}
     ],
     [
       {image: "fight_image.png", x: 690, y: 480},
@@ -555,25 +567,36 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
+      {button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+      {image: "russian_andy_and_kid.png", x: 640, y: 380},
+      {text: "I lost... \nto a kid.", x: 580, y: 340}
+    ],
+    [
+      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
       {text: "Moskva...", x: 640, y: 480}
     ],
     [
-      {disappears: 8, image: "zhukov.png", x: 690, y: 420},
+      {image: "zhukov.png", x: 690, y: 420},
       {appears: 1, disappears: 4, text: "You are obsessed with this *game*, \nGeorgy. It is unhealthy.", size: 24, x: 960, y: 150},
       {appears: 2, disappears: 4, text: "It is the perfect combination of strategy and combat. \nThe Americans will use this to raise an unstoppable \ngeneral staff. I must go to the competition.", size: 24, x: 510, y: 800},
       {appears: 3, disappears: 4, text: "I must destroy them.", size: 24, x: 850, y: 880},
       // {appears: 8, button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1},
-      {appears: 5, disappears: 8, text: "But you're too old.", size: 24, x: 990, y: 180},
-      {appears: 6, disappears: 8, text: "The fuck I am.", size: 24, x: 510, y: 800},
-      {appears: 7, disappears: 8, text: "Look at my high score.", size: 24, x: 850, y: 840},
-      {appears: 8, disappears: 9, text: "Berlin...", x: 640, y: 480},
-      {appears: 9, image:"zhukov_2a.png", x: 255, y: 520},
-      {appears: 9, text: "For the Base Capture portion of the \ncompetition, the USSR selects...", size: 24, x: 320, y: 100},
-      {appears: 10, text: "Moskva High student Georgy Zhukov.", size: 24, x: 640, y: 860},
-      {appears: 10, image:"zhukov_2b.png", x: 640, y: 450},
-      {appears: 11, image:"zhukov_2c.png", x: 1000, y: 545},
-      {appears: 12, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {appears: 5, text: "But you're too old.", size: 24, x: 990, y: 180},
+      {appears: 6, text: "The hell I am.", size: 24, x: 510, y: 800},
+      {appears: 7, text: "Look at my high score.", size: 24, x: 850, y: 840},
+      {appears: 8, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},
+      {text: "Berlin...", x: 640, y: 480}
+    ],
+    [
+      {image:"official.png", x: 255, y: 520},
+      {appears: 1, text: "For the Base Capture portion of the \ncompetition, the USSR selects...", size: 36, x: 420, y: 100},
+      {appears: 2, text: "Moskva High student Georgy Zhukov.", size: 36, x: 640, y: 860},
+      {appears: 2, image:"zhukov_2b.png", x: 640, y: 450},
+      {appears: 3, image:"surprised_kid.png", x: 1000, y: 520},
+      {appears: 4, button: "Go go go!", x: 130, y: 50, swipe_x: 1, swipe_y: 0},
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -581,10 +604,20 @@ scenes = {
 //---------------------------------------------------------------------------------------  
   c3: [
     [
-      {disappears: 1, text: "More stuff...", x: 640, y: 480},
-      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
-      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
-      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {button: "Next", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+    ],
+    [
+      {disappears: 2, image:"zhukov_3a.png", x: 645, y: 545},
+      {appears: 2, square:"zhukov_3b.png", x: 640, y: 480, w: 450, h: 300},
+      {appears: 3, text: "Good job! You have my respect. \nAnd a bright future in computers.", size: 36, x: 740, y: 380},
+      {appears: 4, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {disappears: 2, square:"ivan_3a.png", x: 640, y: 480, w: 900, h: 400},
+      {appears: 2, square:"ivan_3b.png", x: 640, y: 480, w: 850, h: 420},
+      {appears: 3, text: "I must break you.", size: 36, x: 600, y: 380},
+      {appears: 4, button: "Go go go!", x: 130, y: 50, swipe_x: 0, swipe_y: 1},
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -592,10 +625,30 @@ scenes = {
 //---------------------------------------------------------------------------------------
   c4: [
     [
-      {disappears: 1, text: "More stuff...", x: 640, y: 480},
-      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
-      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
-      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {button: "Next", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+    ],
+    [
+      {square: "ivan_and_kid.png", x: 640, y: 480, w: 600, h: 400},
+      {appears: 2, text: "You broke me.", x: 540, y: 380},
+      {appears: 3, button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {square:"puzten_and_kids_1.png", x: 640, y: 480, w: 900, h: 400},
+      {appears: 2, text: "Mister Putzen, we're so tired. \nWe need a miracle.", size: 36, x: 500, y: 380},
+      {appears: 3, text: "Nobody should pin their hopes on a miracle. \nJust hang in there.", size: 36, x: 700, y: 540},
+      {appears: 4, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {image:"zhukov_2a.png", x: 255, y: 520},
+      {text: "Next up, the USSR selects Pomor Komarov", size: 36, x: 420, y: 100},
+      {disappears: 2, square:"komarov_4a.png", x: 440, y: 480, w: 300, h: 500},
+      {disappears: 5, square:"kid_4a.png", x: 640, y: 480, w: 300, h: 500},
+      {appears: 2, disappears: 3, square:"komarov_4b.png", x: 840, y: 480, w: 300, h: 500},
+      {appears: 3, disappears: 4, square:"komarov_4b.png", x: 840, y: 480, w: 300, h: 500},
+      {appears: 4, square:"komarov_4b.png", x: 840, y: 480, w: 300, h: 500},
+      {appears: 4, square:"kid_4b.png", x: 640, y: 480, w: 300, h: 500},
+      {appears: 5, button: "Go go go!", x: 130, y: 50, swipe_x: 1, swipe_y: 0},
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -603,10 +656,26 @@ scenes = {
 //---------------------------------------------------------------------------------------
   c5: [
     [
-      {disappears: 1, text: "More stuff...", x: 640, y: 480},
-      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
-      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
-      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {button: "Next", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+    ],
+    [
+      {square: "komarov_defeated_swearing.png", x: 640, y: 480, w: 900, h: 400},
+      {button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {square:"puzten_and_kids_2.png", x: 640, y: 480, w: 900, h: 400},
+      {appears: 2, text: "Urgh...", size: 36, x: 500, y: 380},
+      {appears: 3, text: "Guys, is going to be okay. \nI sent a ringer to enemy team. \nYou can't lose against him.", size: 36, x: 700, y: 540},
+      {appears: 4, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {image:"zhukov_2a.png", x: 255, y: 520},
+      {appears: 1, text: "For the second round of base capture, \nthe USSR selects...", size: 36, x: 420, y: 100},
+      {appears: 2, text: "Fyodor Fedor.", size: 36, x: 640, y: 860},
+      {appears: 2, image:"fedor_5b.png", x: 640, y: 450},
+      {appears: 3, image:"fedor_5c.png", x: 1000, y: 520},
+      {appears: 4, button: "Go go go!", x: 130, y: 50, swipe_x: 1, swipe_y: 0},
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -614,10 +683,21 @@ scenes = {
 //---------------------------------------------------------------------------------------
   c6: [
     [
-      {disappears: 1, text: "More stuff...", x: 640, y: 480},
-      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
-      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
-      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {button: "Next", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+    ],
+    [
+      {square: "fedor_iron.png", x: 440, y: 480, w: 400, h: 400},
+      {disappears: 5, square: "shadow_putzen.png", x: 740, y: 480, w: 400, h: 400},
+      {appears: 2, text: "She is not a girl.", size: 36, x: 300, y: 380},
+      {appears: 3, text: "She is like a piece of iron.", size: 36, x: 300, y: 480},
+      {appears: 4, text: "Hold out for one more round.", size: 36, x: 700, y: 280},
+      {appears: 5, square: "revealed_putzen.png", x: 740, y: 480, w: 400, h: 400},
+      {appears: 5, text: "Then I will be ready.", size: 36, x: 700, y: 280},
+      {appears: 6, text: "DUN", size: 36, x: 900, y: 700},
+      {appears: 7, text: "DUN", size: 36, x: 1000, y: 700},
+      {appears: 8, text: "DUN", size: 36, x: 1100, y: 700},
+      {appears: 9, button: "Go go go!", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -625,10 +705,20 @@ scenes = {
 //---------------------------------------------------------------------------------------
   c7: [
     [
-      {disappears: 1, text: "More stuff...", x: 640, y: 480},
-      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
-      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
-      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {button: "Next", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+    ],
+    [
+      {disappears: 2, square: "fedor_defeated.png", x: 340, y: 480, w: 400, h: 400},
+      {disappears: 2, square: "kid_facing_left.png", x: 640, y: 480, w: 400, h: 400},
+      {appears: 2, square: "kid_facing_right.png", x: 640, y: 480, w: 400, h: 400},
+      {appears: 2, square: "putzen_revealed.png", x: 940, y: 480, w: 400, h: 400},
+      {appears: 3, disappears: 6, text: "You're.", size: 36, x: 340, y: 380},
+      {appears: 4, disappears: 6, text: "Yes.", size: 36, x: 1000, y: 380},
+      {appears: 6, image:"zhukov_2a.png", x: 255, y: 520},
+      {appears: 6, text: "Final competitor for the USSR...", size: 36, x: 420, y: 100},
+      {appears: 7, text: "Wladimir Putin.", size: 36, x: 640, y: 860},
+      {appears: 8, button: "Go go go!", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -636,10 +726,25 @@ scenes = {
 //---------------------------------------------------------------------------------------
   c8: [
     [
-      {disappears: 1, text: "More stuff...", x: 640, y: 480},
-      {appears: 1, square: "yep", x: 690, y: 420, w: 800, h: 600},
-      {appears: 1, text: "This is a blank cutscene.", size: 24, x: 960, y: 150},
-      {appears: 1, button: "Ready?", x: 120, y: 50, swipe_x: 1, swipe_y: 0},
+      {button: "Next", x: 120, y: 40, swipe_x: 1, swipe_y: 0},
+      {tournament_board: "okay!"}
+    ],
+    [
+      {appears: 2, disappears: 8, square: "putin_defeated.png", x: 500, y: 480, w: 400, h: 400},
+      {disappears: 2, text: "We win!!!", size: 36, x: 900, y: 500},
+      {disappears: 4, square: "kids_celebrating.png", x: 900, y: 480, w: 600, h: 400},
+      {disappears: 4, appears: 3, text: "I... lose.", size: 36, x: 400, y: 100},
+      {disappears: 7, appears: 6, text: "I lose...", size: 36, x: 800, y: 300},
+      {appears: 8, disappears: 11, square: "putin_resolute.png", x: 500, y: 480, w: 400, h: 400},
+      {disappears: 8, appears: 7, text: "Ah well.", size: 36, x: 900, y: 400},
+      {appears: 8, disappears: 11, square: "russian_competitors.png", x: 640, y: 480, w: 900, h: 200},
+      {appears: 8, disappears: 10, text: "Sir, what does this mean for Russian dominance? \nWill it be okay? What will you do?", size: 36, x: 700, y: 100},
+      {appears: 9, disappears: 10, text: "Everything will probably never be okay. \nBut you have to try.", size: 36, x: 800, y: 500},
+      {appears: 10, disappears: 11, text: "As for me...", size: 36, x: 800, y: 500},
+      {appears: 11, text: "I'm going home.", size: 36, x: 900, y: 500},
+      {appears: 11, square: "putin_on_bear.png", x: 500, y: 480, w: 400, h: 400},
+      // HERE I WANT TO FADE TO SOME KIND OF CREDITS
+      {button: "The End.", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
     ],
   ],
 }

@@ -10,9 +10,9 @@ var log_performance = true;
 
 // var first_screen = "1p_base_capture";
 // var first_screen = "1p_launch_code";
-var first_screen = "intro";
+// var first_screen = "intro";
 // var first_screen = "1p_lobby";
-// var first_screen = "title";
+var first_screen = "title";
 // var first_screen = "cutscene";
 
 var performance_result = null;
@@ -252,13 +252,15 @@ class Game {
       // "cut:c3", "lc:5", "lc:6", "cut:c4", "wr:7", "wr:8",
       // "cut:c5", "bc:9", "bc:10", "cut:c6", "lc:11", "lc:12",
       // "cut:c7", "wr:13", "wr:14", "cut:c8"
-      "cut:c1", "lc:1",
-      "cut:c2", "lc:2",
-      "cut:c3", "lc:3",
-      "cut:c4", "lc:4",
-      "cut:c5", "lc:5",
-      "cut:c6", "lc:6",
-      "cut:c7", "lc:7",
+      
+      // Testing cutscenes
+      // "cut:c1", 
+      // "cut:c2", 
+      "cut:c3", 
+      "cut:c4", 
+      "cut:c5", 
+      "cut:c6", 
+      "cut:c7", 
       "cut:c8",
     ];
     this.flow[0]["MEDIUM"] = [
@@ -306,13 +308,9 @@ class Game {
 
   nextFlow() {
     this.flow_marker += 1;
-    console.log("Marker: " + this.flow_marker);
-    console.log("Game type: " + this.game_type_selection);
-    console.log("Difficulty: " + this.difficulty_level);
 
     if (this.game_type_selection == 0 || this.game_type_selection == 2) {
       // Story mode
-      console.log("story mode");
       if (this.flow_marker < this.flow[this.game_type_selection][this.difficulty_level].length) {
         if (this.game_type_selection == 2) {
           this.tutorial = true;
@@ -325,7 +323,6 @@ class Game {
           this.level = parseInt(next_value);
           this.opponent_name = typeof extra_value !== "undefined" ? extra_value : null;
           if (this.current_screen != "1p_word_rockets") {
-            console.log("switching to word rockets");
             //this.fadeMusic();
             this.initializeScreen("1p_word_rockets");
             this.switchScreens(this.current_screen, "1p_word_rockets");
@@ -356,7 +353,6 @@ class Game {
           if (this.current_screen != "cutscene") {
             this.last_flow_marker = this.flow_marker;
             this.last_cutscene = next_value;
-            console.log("switching to cutscene");
             //this.fadeMusic();
             this.initializeCutscene(next_value);
             this.switchScreens(this.current_screen, "cutscene");
@@ -366,12 +362,13 @@ class Game {
         }
       } else {
         // return to 1p_lobby
-        console.log("return to lobby");
-        this.initializeScreen("1p_lobby");
-        this.switchScreens(this.current_screen, "1p_lobby");
+        // this.initializeScreen("1p_lobby");
+        // this.updateHighScoreDisplay();
+        // this.switchScreens(this.current_screen, "1p_lobby");
+        this.score = 9999;
+        this.gameOverScreen(500, true);
       }
     } else if (this.game_type_selection == 1) {
-      console.log("Picked arcade mode");
       this.level = this.flow_marker + 1;
       let type = "";
       if (this.arcade_type_selection == 0) {
@@ -391,7 +388,6 @@ class Game {
       }
 
       if (this.current_screen != type) {
-        this.stopMusic();
         this.initializeScreen(type);
         this.switchScreens(this.current_screen, type);
       } else {
@@ -634,13 +630,28 @@ class Game {
 
   setMusic(music_name) {
     if (use_music) {
+      if (this.music != null && this.music.music_name == music_name) {
+        return;
+      }
       var self = this;
+      let crossfade = false;
       if (this.music != null && this.music_name != music_name) {
+        crossfade = true;
         this.fadeMusic();
       }
       this.music = document.getElementById(music_name);
       this.music.loop = true;
-      this.music.volume = 0.6;
+      this.music.pause();
+      this.music.currentTime = 0;
+      if (crossfade) {
+        for (let i = 0; i < 14; i++) {
+          delay(function() {
+            self.music.volume = i / 20;
+          }, 50 * i);
+        }
+      } else {
+        this.music.volume = 0.6;
+      }
       this.music_name = music_name;
       this.music.play();
     }
@@ -655,23 +666,22 @@ class Game {
   }
 
 
-  fadeMusic(delay_time) {
+  fadeMusic(delay_time = 0) {
     if (this.music != null) {
       this.old_music = this.music;
       this.music = null;
-      this.old_music.done = true;
+      //this.old_music.done = true;
       var self = this;
       for (let i = 0; i < 14; i++) {
         delay(function() {
-          console.log("reducing volume");
           self.old_music.volume = (13 - i) / 20;
-        }, delay_time + 300 * i);
+        }, delay_time + 50 * i);
       }
       setTimeout(function() {
         // TO DO
         // DELETE OLD MUSIC
         this.old_music = null;
-      }, 1000);
+      }, 1500);
     }
   }
 

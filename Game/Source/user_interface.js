@@ -425,7 +425,6 @@ Game.prototype.makeScreen = function(name) {
 
 
 Game.prototype.clearScreen = function(screen) {
-  console.log("here i am cleaning " + screen.name);
   while(screen.children[0]) {
     let x = screen.removeChild(screen.children[0]);
     x.destroy();
@@ -435,7 +434,6 @@ Game.prototype.clearScreen = function(screen) {
 
 Game.prototype.switchScreens = function(old_screen, new_screen) {
   var self = this;
-  console.log("fading from " + old_screen + " to " + new_screen);
 
   var direction = -1;
   if (new_screen == "title") direction = 1;

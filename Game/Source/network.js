@@ -10,7 +10,7 @@ class Network {
 
 
   anonymousSignIn(callback) {
-    console.log("Using anonymous sign in");
+    console.log("Using anonymous sign in for global high scores");
     var self = this;
     firebase.auth().signInAnonymously()
       .then(() => {

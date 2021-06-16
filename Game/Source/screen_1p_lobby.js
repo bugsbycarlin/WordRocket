@@ -110,11 +110,9 @@ Game.prototype.initializeSectionDifficulty = function() {
   }
   section.addChild(this.option_info);
 
-  console.log(this.option_values.length);
   this.option_markers = [];
   for (let i = 0; i < this.option_values.length; i++) {
     let option = this.option_values[i];
-    console.log(option);
 
     this.option_markers[i] = new PIXI.Text(option, {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
     this.option_markers[i].anchor.set(0.5,0.5);
@@ -197,7 +195,7 @@ Game.prototype.initializeSectionDifficulty = function() {
   go_button.on("pointertap", function() {
     self.soundEffect("button_accept");
     //self.fadeMusic(0);
-    self.stopMusic();
+    //self.stopMusic();
     flicker(go_button, 500, 0xFFFFFF, 0x67d8ef);
     self.difficulty_level = self.option_values[self.difficulty_choice];
     self.resetGame();
@@ -375,7 +373,7 @@ Game.prototype.initializeSectionGameType = function() {
       flicker(self.game_type_tutorial_text, 500, 0xFFFFFF, 0x67d8ef);
       flicker(self.game_type_tutorial_button, 500, 0xFFFFFF, 0x67d8ef);
       self.soundEffect("button_accept");
-      self.stopMusic();
+      //self.stopMusic();
       localStorage.setItem("cold_war_keyboards_difficulty_level", self.difficulty_level);
       self.resetGame();
       self.nextFlow();

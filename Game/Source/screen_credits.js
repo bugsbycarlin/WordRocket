@@ -26,10 +26,15 @@ Game.prototype.initializeCredits = function() {
   sound_derp.position.set(this.width / 2, 430);
   screen.addChild(sound_derp);
 
-  let open_thang = new PIXI.Text("FREESOUND.ORG", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  let open_thang = new PIXI.Text("FREESOUND.ORG", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   open_thang.anchor.set(0.5,0.5);
   open_thang.position.set(this.width / 2, 470);
   screen.addChild(open_thang);
+
+  let splice_thang = new PIXI.Text("SPLICE.COM", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  splice_thang.anchor.set(0.5,0.5);
+  splice_thang.position.set(this.width / 2, 500);
+  screen.addChild(splice_thang);
 
   let music_derp = new PIXI.Text("MUSIC", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   music_derp.anchor.set(0.5,0.5);
@@ -43,8 +48,13 @@ Game.prototype.initializeCredits = function() {
 
   let oga_thang = new PIXI.Text("OPENGAMEART.ORG \n(SPRING AND NENE)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
   oga_thang.anchor.set(0.5,0.5);
-  oga_thang.position.set(this.width / 2, 760);
+  oga_thang.position.set(this.width / 2, 750);
   screen.addChild(oga_thang);
+
+  let abstraction_thang = new PIXI.Text("ABSTRACTIONMUSIC.COM \n(ABSTRACTION - LUDUM DARE 28 TRACK 3)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+  abstraction_thang.anchor.set(0.5,0.5);
+  abstraction_thang.position.set(this.width / 2, 820);
+  screen.addChild(abstraction_thang);
 
 
   var left_shark = new PIXI.Sprite(PIXI.Texture.from("Art/rocket_american.png"));

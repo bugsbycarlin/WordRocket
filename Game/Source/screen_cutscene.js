@@ -608,10 +608,10 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {disappears: 2, image:"zhukov_3a.png", x: 645, y: 545},
-      {appears: 2, square:"zhukov_3b.png", x: 640, y: 480, w: 450, h: 300},
-      {appears: 3, text: "Good job! You have my respect. \nAnd a bright future in computers.", size: 36, x: 740, y: 380},
-      {appears: 4, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
+      {disappears: 1, image:"zhukov_3a.png", x: 645, y: 545},
+      {appears: 1, image:"zhukov_3b_0.png", x: 645, y: 545},
+      {appears: 2, text: "Good job! You have my respect, \n and a bright future in computers.", size: 36, x: 780, y: 240},
+      {appears: 3, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
     ],
     [
       {disappears: 2, square:"ivan_3a.png", x: 640, y: 480, w: 900, h: 400},

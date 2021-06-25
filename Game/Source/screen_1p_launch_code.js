@@ -10,16 +10,6 @@ Game.prototype.initialize1pLaunchCode = function() {
 
   this.game_phase = "pre_game";
 
-  // Enemy speeds
-  // 1200, 600 is pretty hard to play against.
-  // 1800, 900 is inhuman
-  // 3000, 1500 is impossible
-  // 900, 450: 3 - 6, and many of the games were *very* close.
-  // 500, 250: pretty fun
-  // 100, 100: nice and easy.
-  // this.enemy_move_speed = 900 + 100 * this.level;
-  // this.enemy_typing_speed = 400 + 50 * this.level;
-  // this.enemy_phase = "moving"; // moving, typing
 
   this.resetRace();
 
@@ -37,31 +27,79 @@ Game.prototype.resetRace = function() {
   var self = this;
   var screen = this.screens["1p_launch_code"];
 
-  let placeholder = new PIXI.Text("LAUNCH CODE PLACEHOLDER", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 2, align: "center"});
-  placeholder.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  placeholder.anchor.set(0.5,0.5);
-  placeholder.position.set(this.width / 2, 200);
-  screen.addChild(placeholder);
+  var far_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_far_background.png"));
+  far_background.anchor.set(0, 0);
+  screen.addChild(far_background);
 
-  // placeholder.interactive = true;
-  // placeholder.buttonMode = true;
-  // placeholder.on("pointerdown", function() {
-  //   self.game_phase = "gameover";
+  // the enemy board
+  this.enemy_area = new PIXI.Container();
+  screen.addChild(this.enemy_area);
+  this.enemy_area.position.set(this.width * 1/2 + 325 - 16,340);
+  this.enemy_area.scale.set(0.5,0.5);
 
-  //   self.announcement.text = "GAME OVER";
-  //   self.stopMusic();
-  //   //this.soundEffect("game_over");
-  //   // delay(function() {
-  //   //   self.initialize1pLobby();
-  //   //   self.switchScreens("1p_launch_code", "1p_lobby");
-  //   // }, 500);
-  //   delay(function() {
-  //     self.nextFlow();
-  //   }, 500);
-  // });
+  this.enemy_live_area = new PIXI.Container();
+  screen.addChild(this.enemy_live_area);
+  //this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
+  //this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
+
+  this.enemy_palette = this.makeKeyboard({
+    player: 2,
+    parent: screen, x: 1062.5, y: 472,
+    defense: this.enemy_defense, 
+    action: function(letter) {
+    }
+  });
+  this.enemy_palette.scale.set(0.3125, 0.3125);
+
+  if(this.opponent_name != null) {
+    let name = "";
+    if (this.opponent_name == "zh") {
+      name = "zhukov";
+    }
+    this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/Opponents/" + name + ".png"));
+    this.opponent_image.anchor.set(0.5, 0.5);
+    this.opponent_image.position.set(1100, 304);
+    this.opponent_image.alpha = 0.7;
+  } else {
+    this.opponent_image = new PIXI.Container();
+  }
+  screen.addChild(this.opponent_image);
+
+  var near_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_near_background.png"));
+  near_background.anchor.set(0, 0);
+  screen.addChild(near_background);
 
   this.mouse_cord = new PIXI.Container();
   screen.addChild(this.mouse_cord);
+
+  this.player_palette = this.makeKeyboard({
+    player: 1,
+    parent: screen, x: 467, y: 807,
+    defense: this.player_defense, 
+    action: function(letter) {
+
+      if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
+        self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
+        self.tutorial_1_snide_clicks += 1
+      }
+
+      self.baseCaptureKeyDown(letter);
+    }
+  });
+
+  // the player's board
+  this.player_area = new PIXI.Container();
+  screen.addChild(this.player_area);
+  this.player_area.position.set(this.width * 1/2 - 370 - 32,520);
+
+  this.player_live_area = new PIXI.Container();
+  screen.addChild(this.player_live_area);
+  this.player_live_area.position.set(this.player_area.x, this.player_area.y);
+  this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
+
+  let area = this.player_area;
+
+
 
   this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0x000000, letterSpacing: 3, align: "center"});
   this.announcement.anchor.set(0.5,0.5);
@@ -101,6 +139,8 @@ Game.prototype.resetRace = function() {
     });
   }
 
+  this.test_runner = this.makeRunner(screen, "grey", 2, this.width/2, this.height/2);
+
   this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
 }
 
@@ -118,10 +158,24 @@ Game.prototype.launchCodeGameOver = function(key) {
 }
 
 
+Game.prototype.cycleRunnerPoses = function() {
+  let items = this.test_runner.states;
+  const currentIndex = items.indexOf(this.test_runner.current_state);
+  const nextIndex = (currentIndex + 1) % items.length;
+  this.test_runner.setState(items[nextIndex]);
+}
+
+
 Game.prototype.launchCodeKeyDown = function(key) {
   let player = 0;
   if (!this.paused) {
-    this.pressKey(this.player_palette, key);
+
+    //this.pressKey(this.player_palette, key);
+
+    if (key === " ") {
+      console.log("here");
+      this.cycleRunnerPoses();
+    }
 
     // if (key === "ArrowRight") {
     //   this.baseCaptureMoveCursor("right", player);
@@ -195,9 +249,9 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);
 
-      delay(function() {
-        self.launchCodeGameOver();
-      }, 2000);
+      // delay(function() {
+      //   self.launchCodeGameOver();
+      // }, 2000);
     }
   }
 }

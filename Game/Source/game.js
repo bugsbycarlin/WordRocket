@@ -10,9 +10,9 @@ var log_performance = true;
 
 // var first_screen = "1p_base_capture";
 // var first_screen = "1p_launch_code";
-// var first_screen = "intro";
+var first_screen = "intro";
 // var first_screen = "1p_lobby";
-var first_screen = "title";
+// var first_screen = "title";
 // var first_screen = "cutscene";
 
 var performance_result = null;
@@ -438,27 +438,42 @@ class Game {
 
   initializeAnimations() {
     var self = this;
-    if (!PIXI.Loader.shared.resources["Art/intro.png"]) {
-      PIXI.Loader.shared.add("Art/intro.png").load(function() {
-        if (!PIXI.Loader.shared.resources["Art/fire.json"]) {
-          PIXI.Loader.shared.add("Art/fire.json").load(function() {
-            if (!PIXI.Loader.shared.resources["Art/explosion.json"]) {
-              PIXI.Loader.shared.add("Art/explosion.json").load(function() {
-                if (!PIXI.Loader.shared.resources["Art/electric.json"]) {
-                  PIXI.Loader.shared.add("Art/electric.json").load(function() {
-                    if (!PIXI.Loader.shared.resources["Art/smoke.json"]) {
-                      PIXI.Loader.shared.add("Art/smoke.json").load(function() {
-                        self.initializeScreen(first_screen, true);
-                      });
-                    }
-                  });
-                }
-              });
-            }  
-          });
-        }
+    PIXI.Loader.shared
+      .add("Art/intro.png")
+      .add("Art/fire.json")
+      .add("Art/explosion.json")
+      .add("Art/electric.json")
+      .add("Art/smoke.json")
+      .load(function() {
+        self.initializeScreen(first_screen, true);
+
+        PIXI.Loader.shared
+          .add("Art/Runner/grey_runner_combat_fall.json")
+          .add("Art/Runner/grey_runner_combat_punch.json")
+          .add("Art/Runner/grey_runner_combat_rise.json")
+          .add("Art/Runner/grey_runner_combat_ready.json")
+          .add("Art/Runner/grey_runner_fast_run.json")
+          .add("Art/Runner/grey_runner_slow_run.json")
+          .add("Art/Runner/grey_runner_jump.json")
+          .add("Art/Runner/grey_runner_static.json")
+          .add("Art/Runner/red_runner_combat_fall.json")
+          .add("Art/Runner/red_runner_combat_punch.json")
+          .add("Art/Runner/red_runner_combat_rise.json")
+          .add("Art/Runner/red_runner_combat_ready.json")
+          .add("Art/Runner/red_runner_fast_run.json")
+          .add("Art/Runner/red_runner_slow_run.json")
+          .add("Art/Runner/red_runner_jump.json")
+          .add("Art/Runner/red_runner_static.json")
+          .add("Art/Runner/blue_runner_combat_fall.json")
+          .add("Art/Runner/blue_runner_combat_punch.json")
+          .add("Art/Runner/blue_runner_combat_rise.json")
+          .add("Art/Runner/blue_runner_combat_ready.json")
+          .add("Art/Runner/blue_runner_fast_run.json")
+          .add("Art/Runner/blue_runner_slow_run.json")
+          .add("Art/Runner/blue_runner_jump.json")
+          .add("Art/Runner/blue_runner_static.json")
+          .load(function() {});
       });
-    }
   }
 
 

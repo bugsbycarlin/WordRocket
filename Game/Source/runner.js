@@ -25,12 +25,18 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y) {
   runner.states.forEach((state) => {
     let sheet = PIXI.Loader.shared.resources["Art/Runner/" + color + "_runner_" + state + ".json"].spritesheet;
     let sprite = new PIXI.AnimatedSprite(sheet.animations[state]);
-    sprite.anchor.set(0.5,0.5);
+    sprite.anchor.set(0.5,0.71);
     sprite.visible = false;
     sprite.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
     runner.sprites[state] = sprite;
     runner.addChild(sprite);
+
+    if (state == "fast_run") {
+      sprite.onFrameChange = function() {
+        console.log(this.currentFrame);
+      }
+    }
   });
 
   runner.sprites[runner.current_state].visible = true;

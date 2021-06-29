@@ -65,6 +65,7 @@ class Game {
 
     this.basicInit();
 
+    this.loadPrompts();
     this.loadWords();
 
     this.auth_user = null;
@@ -477,6 +478,37 @@ class Game {
   }
 
 
+  loadPrompts() {
+    var self = this;
+    let request;
+
+    this.typing_prompts = [];
+
+    request = new XMLHttpRequest();
+    request.open("GET", "Text/typing_prompts.txt", true);
+    request.responseType = "arraybuffer";
+    request.onload = function(e) {
+      console.log("Pooz")
+      console.log(this.response);
+      // let word_list = new TextDecoder("utf-8").decode(
+      //   new Zlib.Gunzip(
+      //     new Uint8Array(this.response)
+      //   ).decompress()
+      // );
+      // word_list = word_list.split(/\n/);
+
+      // for (let i = 0; i < word_list.length; i++) {
+      //   let word = word_list[i];
+
+      //   if (word != null && word.length >= 3) {
+      //     special_dict[word.toUpperCase()] = 1;
+      //   }
+      // }
+    }
+    request.send();
+  }
+
+
   loadWords() {
     var self = this;
     let request;
@@ -492,7 +524,7 @@ class Game {
     for (const [special_key, special_dict] of Object.entries(this.special_dictionaries)) {
       request = new XMLHttpRequest();
       console.log(special_key);
-      request.open("GET", "Dada/" + special_key + "_words.txt.gz", true);
+      request.open("GET", "Text/" + special_key + "_words.txt.gz", true);
       request.responseType = "arraybuffer";
       request.onload = function(e) {
         let word_list = new TextDecoder("utf-8").decode(
@@ -542,7 +574,7 @@ class Game {
     }
 
     request = new XMLHttpRequest();
-    request.open("GET", "Dada/legal_words.txt.gz", true);
+    request.open("GET", "Text/legal_words.txt.gz", true);
     request.responseType = "arraybuffer";
     request.onload = function(e) {
 

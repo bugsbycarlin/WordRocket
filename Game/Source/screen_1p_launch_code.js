@@ -90,7 +90,7 @@ Game.prototype.resetRace = function() {
   // the player's board
   this.player_area = new PIXI.Container();
   screen.addChild(this.player_area);
-  this.player_area.position.set(this.width * 1/2 - 370 - 32,520);
+  this.player_area.position.set(129, 39);
 
   this.player_live_area = new PIXI.Container();
   screen.addChild(this.player_live_area);
@@ -98,6 +98,79 @@ Game.prototype.resetRace = function() {
   this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
 
   let area = this.player_area;
+
+  let player_monitor_mask = new PIXI.Graphics();
+  player_monitor_mask.beginFill(0xFF3300);
+  player_monitor_mask.drawRect(129, 39, 669, 504);
+  player_monitor_mask.endFill();
+  this.player_area.mask = player_monitor_mask;
+
+
+  // Test bands for the level
+  let top_level_band = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  top_level_band.tint = 0x282b2f;
+  top_level_band.width = 669;
+  top_level_band.height = 200;
+  top_level_band.anchor.set(0, 0)
+  top_level_band.position.set(0, 0);
+  area.addChild(top_level_band);
+
+  let top_level = new PIXI.Sprite(PIXI.Texture.from("Art/Level/launch_code_level_sketch_2.png"));
+  top_level.anchor.set(0, 0)
+  top_level.position.set(0, 0);
+  top_level.scale.set(2,2);
+  area.addChild(top_level);  
+
+  let bottom_level_band = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  bottom_level_band.tint = 0x33373d;
+  bottom_level_band.width = 669;
+  bottom_level_band.height = 200;
+  bottom_level_band.anchor.set(0, 0)
+  bottom_level_band.position.set(0, 200);
+  area.addChild(bottom_level_band);
+
+  let bottom_level = new PIXI.Sprite(PIXI.Texture.from("Art/Level/launch_code_level_sketch_2.png"));
+  bottom_level.anchor.set(0, 0)
+  bottom_level.position.set(0, 200);
+  bottom_level.scale.set(2,2);
+  area.addChild(bottom_level);  
+
+  let writing_band = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  writing_band.tint = 0x282b2f;
+  writing_band.width = 669;
+  writing_band.height = 100;
+  writing_band.anchor.set(0, 0)
+  writing_band.position.set(0, 404);
+  area.addChild(writing_band);
+
+
+  this.run_prompt = new PIXI.Text("RUN: alphabetical order is best...", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0x000000, letterSpacing: 3, align: "left"});
+  this.run_prompt.anchor.set(0,0);
+  this.run_prompt.position.set(10, 404 + 10);
+  area.addChild(this.run_prompt);
+
+  this.jump_prompt = new PIXI.Text("JMP: seven purple towers swayed in the...", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0x000000, letterSpacing: 3, align: "left"});
+  this.jump_prompt.anchor.set(0,0);
+  this.jump_prompt.position.set(10, 404 + 40);
+  area.addChild(this.jump_prompt);
+
+  // this.hit_prompt = new PIXI.Text("HIT: never have I seen so many different...", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0x000000, letterSpacing: 3, align: "left"});
+  // this.hit_prompt.anchor.set(0,0);
+  // this.hit_prompt.position.set(10, 404 + 50);
+  // area.addChild(this.hit_prompt);
+
+  this.act_prompt = new PIXI.Text("ACT: harriman paused and thought for a moment...", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0x000000, letterSpacing: 3, align: "left"});
+  this.act_prompt.anchor.set(0,0);
+  this.act_prompt.position.set(10, 404 + 70);
+  area.addChild(this.act_prompt);
+
+  
+  let test_guard = this.makeRunner(area, "grey", 1.5, 268 + 100, 194);
+  test_guard.scale.set(-1.5, 1.5);
+  test_guard.setState("combat_fall")
+
+  this.player_runner = this.makeRunner(area, "blue", 1.5, 268, 194 + 200);
+  this.enemy_runner = this.makeRunner(area, "red", 1.5, 268, 194);
 
 
 
@@ -107,6 +180,12 @@ Game.prototype.resetRace = function() {
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.announcement.style.lineHeight = 36;
   screen.addChild(this.announcement);
+
+
+  var screen_cover_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_screen_cover_background.png"));
+  screen_cover_background.anchor.set(0, 0);
+  screen.addChild(screen_cover_background);
+
 
   this.mouse_tester = new PIXI.Container();
   this.mouse_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/mouse.png"));
@@ -139,7 +218,6 @@ Game.prototype.resetRace = function() {
     });
   }
 
-  this.test_runner = this.makeRunner(screen, "grey", 2, this.width/2, this.height/2);
 
   this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
 }
@@ -158,11 +236,11 @@ Game.prototype.launchCodeGameOver = function(key) {
 }
 
 
-Game.prototype.cycleRunnerPoses = function() {
-  let items = this.test_runner.states;
-  const currentIndex = items.indexOf(this.test_runner.current_state);
+Game.prototype.cycleRunnerPoses = function(runner) {
+  let items = runner.states;
+  const currentIndex = items.indexOf(runner.current_state);
   const nextIndex = (currentIndex + 1) % items.length;
-  this.test_runner.setState(items[nextIndex]);
+  runner.setState(items[nextIndex]);
 }
 
 
@@ -172,9 +250,13 @@ Game.prototype.launchCodeKeyDown = function(key) {
 
     //this.pressKey(this.player_palette, key);
 
-    if (key === " ") {
-      console.log("here");
-      this.cycleRunnerPoses();
+    if (key === "a") {
+      this.cycleRunnerPoses(this.player_runner);
+    }
+
+
+    if (key === "m") {
+      this.cycleRunnerPoses(this.enemy_runner);
     }
 
     // if (key === "ArrowRight") {

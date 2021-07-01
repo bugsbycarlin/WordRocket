@@ -6,7 +6,7 @@ runner_animation_speeds = {
   combat_rise: 0.35,
   fast_run: 0.4,
   slow_run: 0.4,
-  jump: 0.4,
+  jump: 0.5,
   static: 0.1,
 }
 
@@ -32,11 +32,11 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y) {
     runner.sprites[state] = sprite;
     runner.addChild(sprite);
 
-    if (state == "fast_run") {
-      sprite.onFrameChange = function() {
-        console.log(this.currentFrame);
-      }
-    }
+    // if (state == "fast_run") {
+    //   sprite.onFrameChange = function() {
+    //     console.log(this.currentFrame);
+    //   }
+    // }
   });
 
   runner.sprites[runner.current_state].visible = true;

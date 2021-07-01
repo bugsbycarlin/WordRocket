@@ -488,22 +488,10 @@ class Game {
     request.open("GET", "Text/typing_prompts.txt", true);
     request.responseType = "arraybuffer";
     request.onload = function(e) {
-      console.log("Pooz")
-      console.log(this.response);
-      // let word_list = new TextDecoder("utf-8").decode(
-      //   new Zlib.Gunzip(
-      //     new Uint8Array(this.response)
-      //   ).decompress()
-      // );
-      // word_list = word_list.split(/\n/);
-
-      // for (let i = 0; i < word_list.length; i++) {
-      //   let word = word_list[i];
-
-      //   if (word != null && word.length >= 3) {
-      //     special_dict[word.toUpperCase()] = 1;
-      //   }
-      // }
+      let raw_prompt_text = new TextDecoder("utf-8").decode(
+        this.response
+      );
+      self.typing_prompts = raw_prompt_text.split("\n\n");
     }
     request.send();
   }

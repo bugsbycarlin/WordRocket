@@ -243,11 +243,6 @@ Game.prototype.resetRace = function() {
   this.jump_prompt = this.makePrompt(area, 100, 404 + 50, this.typing_prompts[1]);
   this.act_prompt = this.makePrompt(area, 100, 404 + 80, this.typing_prompts[2]);
 
-  
-  // let test_guard = this.makeRunner(area, "grey", 1.5, 268 + 100, 194);
-  // test_guard.scale.set(-1.5, 1.5);
-  // test_guard.setState("combat_fall")
-
   this.player_runner = this.makeRunner(area, "blue", 1.5, 268, 194 + 200);
   this.enemy_runner = this.makeRunner(area, "red", 1.5, 268, 194);
 
@@ -259,9 +254,11 @@ Game.prototype.resetRace = function() {
   this.player_runner.speed = 0;
   this.enemy_runner.speed = 0;
 
+  this.player_runner.base_height = 0;
+
   this.player_runner.last_speed_change = this.markTime();
 
-  this.player_runner.state = "running";
+  // this.player_runner.setState("reverse_jump")
 
   // Add event listeners to change the run speed.
   // We do it this way so there isn't a sudden frame jump.
@@ -320,22 +317,6 @@ Game.prototype.resetRace = function() {
   this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
 }
 
-chunk_types = ["box", "door", "flat", "rise"];
-Game.prototype.launchCodeMakeLevel = function(level_parent, size) {
-  level_parent.items = [];
-  for (let i = 0; i < size; i++) {
-    // size of each chunk is 167*2 = 334.
-    shuffleArray(chunk_types);
-    let chunk_type = chunk_types[0];
-    let chunk = new PIXI.Sprite(PIXI.Texture.from("Art/Level/level_" + chunk_type + ".png"));
-    chunk.scale.set(2, 2);
-    chunk.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    chunk.position.set(334 * i, 0);
-    level_parent.addChild(chunk);
-    level_parent.items.push(chunk)
-  }
-}
-
 
 Game.prototype.launchCodeGameOver = function(key) {
   let self = this;
@@ -368,9 +349,6 @@ Game.prototype.changeRunnerSpeed = function() {
   this.player_runner.sprites[this.player_runner.current_state].animationSpeed = speed_option.animation_speed;
   this.player_level.ground_speed = speed_option.ground_speed;
 
-  console.log("Make haste");
-  console.log(this.player_level.ground_speed);
-
   //this.player_runner.last_speed_change = this.markTime();
 }
 
@@ -383,8 +361,11 @@ Game.prototype.tryJumping = function() {
     && this.player_runner.current_state != "jump") {
     this.player_runner.last_state = this.player_runner.current_state;
     this.player_runner.setState("jump");
-    this.player_runner.speed = Math.max(this.player_runner.speed, 3);
-    this.player_level.ground_speed = Math.max(this.player_level.ground_speed, run_speeds[3].ground_speed);
+    this.player_runner.old_base_height = this.player_runner.base_height;
+    //this.player_runner.speed = Math.max(this.player_runner.speed, 3);
+    //this.player_level.ground_speed = Math.max(this.player_level.ground_speed, run_speeds[3].ground_speed);
+    this.player_runner.speed = Math.max(this.player_runner.speed, 4);
+    this.player_level.ground_speed = Math.max(this.player_level.ground_speed, run_speeds[4].ground_speed);
     this.player_runner.sprites["jump"].onLoop = function() {
       self.player_runner.setState(self.player_runner.last_state);
       if (self.player_runner.last_state == "static") {
@@ -397,14 +378,52 @@ Game.prototype.tryJumping = function() {
     this.player_runner.sprites["jump"].onFrameChange = function() {
       if (this.currentFrame >= 2 && this.currentFrame <= 27) {
         let t = this.currentFrame - 2;
-        self.player_runner.ly = (t - 12.5)*(t - 12.5) - 144;
+        self.player_runner.ly = 0.8 * ((t - 12)*(t - 12) - 144) + self.player_runner.old_base_height;
+        if (self.player_runner.ly > self.player_runner.base_height) {
+          console.log(self.player_runner.ly);
+          console.log(self.player_runner.base_height);
+          self.player_runner.ly = self.player_runner.base_height;
+          self.player_runner.sprites["jump"].onLoop(); // end the jump
+        }
       } else {
-        self.player_runner.ly = 0;
+        self.player_runner.ly = self.player_runner.base_height;
+        console.log("Setting final height: " + self.player_runner.base_height);
       }
+    }
+  }
+}
+
+
+Game.prototype.tryReverseJumping = function() {
+  let self = this;
+
+
+  // let parachute_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/parachute.png"));
+  // parachute_sprite.anchor.set(0.5, 0.5);
+  // parachute_sprite.scale.set(xScale, yScale);
+  // parachute_sprite.position.set(x, y);
+  // parent.addChild(parachute_sprite);
+  // return parachute_sprite;
+
+  if (this.player_runner.current_state != "damage") {
+    this.player_runner.setState("damage");
+    this.player_runner.old_base_height = this.player_runner.base_height;
+    this.player_runner.speed = -1 * 6;
+    this.player_level.ground_speed = -1 * run_speeds[6].ground_speed;
+    this.player_runner.sprites["damage"].onLoop = function() {
+      self.player_runner.setState("static");
+      self.player_runner.speed = 0;
+      self.player_level.ground_speed = 0;
+      self.player_runner.ly = self.player_runner.old_base_height;
+    }
+    this.player_runner.sprites["damage"].onFrameChange = function() {
+      let t = this.currentFrame;
+      self.player_runner.ly = 2 * ((t - 4)*(t - 4) - 16) + self.player_runner.old_base_height;
       console.log(this.currentFrame);
     }
   }
 }
+
 
 
 Game.prototype.launchCodeSetTyping = function(new_typing) {
@@ -518,7 +537,7 @@ Game.prototype.launchCodeAdvance = function() {
 
 Game.prototype.launchCodeKeyDown = function(key) {
   let player = 0;
-  if (!this.paused) {
+  if (!this.paused && this.game_phase == "active") {
 
     this.pressKey(this.player_palette, key);
 
@@ -538,11 +557,11 @@ Game.prototype.launchCodeKeyDown = function(key) {
     //   console.log("Ground: " + this.run_ground_speed);
     // }
 
-    // if (key === "ArrowUp") {
-    //   this.player_runner.sprites[this.player_runner.current_state].animationSpeed *= 1.05;
-    //   console.log("Animation: " + this.player_runner.sprites[this.player_runner.current_state].animationSpeed);
-    //   console.log("Ground: " + this.run_ground_speed);
-    // }
+    if (key === "ArrowUp") {
+      console.log("I will try jumping");
+      this.player_runner.next_state = "jump";
+      this.tryJumping();
+    }
 
     // if (key === "ArrowDown") {
     //   this.player_runner.sprites[this.player_runner.current_state].animationSpeed /= 1.05;
@@ -560,6 +579,10 @@ Game.prototype.launchCodeKeyDown = function(key) {
       // if (key === lower_array[i] || key === letter_array[i]) {
       //   this.launchCodeSetTyping(this.launch_code_typing + letter_array[i]);
       // }
+    }
+
+    if (key === "'") {
+      this.launchCodeSetTyping(this.launch_code_typing + "'");
     }
 
     if (key === " ") {
@@ -650,6 +673,100 @@ Game.prototype.unpressButtons = function() {
 }
 
 
+// chunk_types = ["box", "door", "flat", "rise"];
+// chunk_types = ["box", "door", "flat", "rise", "flat", "guard"];
+chunk_types = ["flat", "box"];
+Game.prototype.launchCodeMakeLevel = function(level_parent, size) {
+  level_parent.items = [];
+  let height = 0;
+  for (let i = 0; i < size; i++) {
+    // size of each chunk is 167*2 = 334.
+    let chunk_type = "flat";
+    if (i < 3 || i % 2 == 1 || i > size - 5) {
+      // flat is good.
+    } else {
+      shuffleArray(chunk_types);
+      chunk_type = chunk_types[0];
+    }
+    let chunk = new PIXI.Sprite(PIXI.Texture.from("Art/Level/level_" + (chunk_type == "guard" ? "flat" : chunk_type) + ".png"));
+    chunk.scale.set(2, 2);
+    chunk.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    chunk.position.set(334 * i, height);
+    chunk.level_height = height;
+    chunk.chunk_type = chunk_type;
+    level_parent.addChild(chunk);
+    level_parent.items.push(chunk);
+
+    if (chunk_type == "guard") {
+      let guard = this.makeRunner(level_parent, "grey", 1.5, 334 * i + 167, 194);
+      guard.scale.set(-1.5, 1.5);
+      guard.setState("combat_ready")
+      chunk.guard = guard;
+    }
+
+    if (chunk_type == "rise") height -= 100;
+  }
+}
+
+
+Game.prototype.launchCodeMoveAndCheckRunner = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+
+  let last_x = this.player_runner.lx + 268;
+
+  this.player_runner.lx += this.player_level.ground_speed;
+  this.player_level.position.set(-1 * this.player_runner.lx, 200 - this.player_runner.ly);
+
+  let player_x = this.player_runner.lx + 268;
+
+
+
+  for (let i = 0; i < this.player_level.items.length; i++) {
+    let chunk = this.player_level.items[i];
+    if (player_x > chunk.position.x && player_x < chunk.position.x + 334) {
+      chunk.tint = 0x44FF44;
+      //this.player_runner.base_height = chunk.level_height;
+    } else {
+      chunk.tint = 0xFFFFFF;
+    }
+
+    if (chunk.chunk_type == "box" 
+      && last_x <= chunk.position.x + 167 && player_x >= chunk.position.x + 167
+      && (this.player_runner.current_state != "jump" || this.player_runner.ly > chunk.position.y - 70)) {
+      this.tryReverseJumping();
+    }
+
+    if (chunk.chunk_type == "rise" 
+      && last_x <= chunk.position.x + 167 && player_x >= chunk.position.x + 167) {
+      if (this.player_runner.current_state != "jump" || this.player_runner.ly > chunk.position.y - 100) {
+        this.tryReverseJumping();
+      } else if (this.player_runner.current_state == "jump") {
+        this.player_runner.base_height = chunk.level_height - 100;
+        console.log("adjusting base height: " + this.player_runner.base_height);
+      } 
+    }
+      
+  }
+}
+
+
+Game.prototype.launchCodeDecayRunnerSpeed = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+
+  if (this.timeSince(this.player_runner.last_speed_change) > 1000 && this.player_runner.speed > 0) {
+    this.player_runner.speed -= 0.5;
+    if (this.player_runner.speed <= 0) {
+      this.player_runner.speed = 0;
+      this.changeRunnerSpeed(); // immediately stop if we get to zero
+    }
+    this.player_runner.last_speed_change = this.markTime();
+    console.log(this.player_runner.speed);
+  }
+}
+
+
 Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
   var self = this;
   var screen = this.screens["1p_launch_code"];
@@ -670,18 +787,6 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
     return;
   }
 
-  this.player_runner.lx += this.player_level.ground_speed;
-  this.player_level.position.set(-1 * this.player_runner.lx, 200 - this.player_runner.ly);
-
-  if (this.timeSince(this.player_runner.last_speed_change) > 1000) {
-    this.player_runner.speed -= 0.5;
-    if (this.player_runner.speed <= 0) {
-      this.player_runner.speed = 0;
-      this.changeRunnerSpeed(); // immediately stop if we get to zero
-    }
-    this.player_runner.last_speed_change = this.markTime();
-    console.log(this.player_runner.speed);
-  }
-
-  // this.baseCaptureEnemyAction();  
+  this.launchCodeMoveAndCheckRunner();
+  this.launchCodeDecayRunnerSpeed();
 }

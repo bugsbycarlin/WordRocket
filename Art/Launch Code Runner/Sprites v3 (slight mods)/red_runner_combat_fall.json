@@ -1,6 +1,6 @@
 {"frames": {
 
-"blue_combat_ko-00147.png":
+"red_combat_ko-00001.png":
 {
 	"frame": {"x":0,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -8,7 +8,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00151.png":
+"red_combat_ko-00003.png":
 {
 	"frame": {"x":256,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -16,7 +16,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00154.png":
+"red_combat_ko-00005.png":
 {
 	"frame": {"x":512,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -24,7 +24,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00157.png":
+"red_combat_ko-00007.png":
 {
 	"frame": {"x":768,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -32,7 +32,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00160.png":
+"red_combat_ko-00009.png":
 {
 	"frame": {"x":1024,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -40,7 +40,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00163.png":
+"red_combat_ko-00011.png":
 {
 	"frame": {"x":1280,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -48,7 +48,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00166.png":
+"red_combat_ko-00013.png":
 {
 	"frame": {"x":1536,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -56,7 +56,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00169.png":
+"red_combat_ko-00015.png":
 {
 	"frame": {"x":1792,"y":0,"w":256,"h":256},
 	"rotated": false,
@@ -64,7 +64,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00172.png":
+"red_combat_ko-00017.png":
 {
 	"frame": {"x":0,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -72,7 +72,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00175.png":
+"red_combat_ko-00019.png":
 {
 	"frame": {"x":256,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -80,7 +80,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00178.png":
+"red_combat_ko-00021.png":
 {
 	"frame": {"x":512,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -88,7 +88,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00181.png":
+"red_combat_ko-00023.png":
 {
 	"frame": {"x":768,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -96,7 +96,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00184.png":
+"red_combat_ko-00025.png":
 {
 	"frame": {"x":1024,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -104,7 +104,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00187.png":
+"red_combat_ko-00027.png":
 {
 	"frame": {"x":1280,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -112,7 +112,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00190.png":
+"red_combat_ko-00029.png":
 {
 	"frame": {"x":1536,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -120,7 +120,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00193.png":
+"red_combat_ko-00031.png":
 {
 	"frame": {"x":1792,"y":256,"w":256,"h":256},
 	"rotated": false,
@@ -128,7 +128,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00196.png":
+"red_combat_ko-00033.png":
 {
 	"frame": {"x":0,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -136,7 +136,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00199.png":
+"red_combat_ko-00035.png":
 {
 	"frame": {"x":256,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -144,7 +144,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00202.png":
+"red_combat_ko-00037.png":
 {
 	"frame": {"x":512,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -152,7 +152,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00205.png":
+"red_combat_ko-00039.png":
 {
 	"frame": {"x":768,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -160,7 +160,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00208.png":
+"red_combat_ko-00041.png":
 {
 	"frame": {"x":1024,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -168,7 +168,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00211.png":
+"red_combat_ko-00043.png":
 {
 	"frame": {"x":1280,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -176,7 +176,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00214.png":
+"red_combat_ko-00045.png":
 {
 	"frame": {"x":1536,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -184,7 +184,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00217.png":
+"red_combat_ko-00047.png":
 {
 	"frame": {"x":1792,"y":512,"w":256,"h":256},
 	"rotated": false,
@@ -192,7 +192,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00220.png":
+"red_combat_ko-00053.png":
 {
 	"frame": {"x":0,"y":768,"w":256,"h":256},
 	"rotated": false,
@@ -200,7 +200,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00223.png":
+"red_combat_ko-00055.png":
 {
 	"frame": {"x":256,"y":768,"w":256,"h":256},
 	"rotated": false,
@@ -208,7 +208,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00226.png":
+"red_combat_ko-00057.png":
 {
 	"frame": {"x":512,"y":768,"w":256,"h":256},
 	"rotated": false,
@@ -216,7 +216,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00229.png":
+"red_combat_ko-00059.png":
 {
 	"frame": {"x":768,"y":768,"w":256,"h":256},
 	"rotated": false,
@@ -224,7 +224,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00232.png":
+"red_combat_ko-00061.png":
 {
 	"frame": {"x":1024,"y":768,"w":256,"h":256},
 	"rotated": false,
@@ -232,7 +232,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00235.png":
+"red_combat_ko-00063.png":
 {
 	"frame": {"x":1280,"y":768,"w":256,"h":256},
 	"rotated": false,
@@ -240,7 +240,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00238.png":
+"red_combat_ko-00065.png":
 {
 	"frame": {"x":1536,"y":768,"w":256,"h":256},
 	"rotated": false,
@@ -248,25 +248,56 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
 },
-"blue_combat_ko-00241.png":
+"red_combat_ko-00067.png":
 {
 	"frame": {"x":1792,"y":768,"w":256,"h":256},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
 	"sourceSize": {"w":256,"h":256}
+},
+"red_combat_ko-00069.png":
+{
+	"frame": {"x":0,"y":1024,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"red_combat_ko-00071.png":
+{
+	"frame": {"x":256,"y":1024,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"red_combat_ko-00073.png":
+{
+	"frame": {"x":512,"y":1024,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"red_combat_ko-00075.png":
+{
+	"frame": {"x":768,"y":1024,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
 }},
 "animations": {
-	"combat_rise": ["blue_combat_ko-00147.png","blue_combat_ko-00151.png","blue_combat_ko-00154.png","blue_combat_ko-00157.png","blue_combat_ko-00160.png","blue_combat_ko-00163.png","blue_combat_ko-00166.png","blue_combat_ko-00169.png","blue_combat_ko-00172.png","blue_combat_ko-00175.png","blue_combat_ko-00178.png","blue_combat_ko-00181.png","blue_combat_ko-00184.png","blue_combat_ko-00187.png","blue_combat_ko-00190.png","blue_combat_ko-00193.png","blue_combat_ko-00196.png","blue_combat_ko-00199.png","blue_combat_ko-00202.png","blue_combat_ko-00205.png","blue_combat_ko-00208.png","blue_combat_ko-00211.png","blue_combat_ko-00214.png","blue_combat_ko-00217.png","blue_combat_ko-00220.png","blue_combat_ko-00223.png","blue_combat_ko-00226.png","blue_combat_ko-00229.png","blue_combat_ko-00232.png","blue_combat_ko-00235.png","blue_combat_ko-00238.png","blue_combat_ko-00241.png"],
-	"damage": ["blue_combat_ko-00223.png", "blue_combat_ko-00223.png", "blue_combat_ko-00223.png", "blue_combat_ko-00223.png", "blue_combat_ko-00223.png", "blue_combat_ko-00223.png", "blue_combat_ko-00223.png", "blue_combat_ko-00223.png"]
+	"combat_fall": ["red_combat_ko-00001.png","red_combat_ko-00003.png","red_combat_ko-00005.png","red_combat_ko-00007.png","red_combat_ko-00009.png","red_combat_ko-00011.png","red_combat_ko-00013.png","red_combat_ko-00015.png","red_combat_ko-00017.png","red_combat_ko-00019.png","red_combat_ko-00021.png","red_combat_ko-00023.png","red_combat_ko-00025.png","red_combat_ko-00027.png","red_combat_ko-00029.png","red_combat_ko-00031.png","red_combat_ko-00033.png","red_combat_ko-00035.png","red_combat_ko-00037.png","red_combat_ko-00039.png","red_combat_ko-00041.png","red_combat_ko-00043.png","red_combat_ko-00045.png","red_combat_ko-00047.png","red_combat_ko-00053.png","red_combat_ko-00055.png","red_combat_ko-00057.png","red_combat_ko-00059.png","red_combat_ko-00061.png","red_combat_ko-00063.png","red_combat_ko-00065.png","red_combat_ko-00067.png","red_combat_ko-00069.png","red_combat_ko-00071.png","red_combat_ko-00073.png","red_combat_ko-00075.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
-	"image": "blue_runner_combat_rise.png",
+	"image": "red_runner_combat_fall.png",
 	"format": "RGBA8888",
-	"size": {"w":2048,"h":1024},
+	"size": {"w":2048,"h":1280},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:f1cc909fc0735d77c6867d6b068bd672:6207792bc7fc2ef1dda1cc6fa1cea8b3:59a414d09cc83391dd8b41033fbdb5a0$"
+	"smartupdate": "$TexturePacker:SmartUpdate:bf4a60592bfa355d0aeb68ce58288e60:dd9dc69c27bd8b4f62b6f7d0c3bda803:d9ef5b49e2236b728ac2fcc36ad762d7$"
 }
 }

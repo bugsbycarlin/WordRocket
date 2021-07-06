@@ -11,7 +11,7 @@ Game.prototype.makePrompt = function(parent, x, y, text) {
   //text = text.toUpperCase();
 
   prompt.permanent_text = text;
-  prompt.word_list = prompt.permanent_text.split(/([^A-Za-z]+)/);
+  prompt.word_list = prompt.permanent_text.split(/([^A-Za-z']+)/);
   console.log(prompt.word_list);
   
   prompt.word_number = 0;

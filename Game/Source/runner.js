@@ -7,6 +7,8 @@ runner_animation_speeds = {
   fast_run: 0.4,
   slow_run: 0.4,
   jump: 0.5,
+  reverse_jump: 0.6,
+  damage: 0.6,
   static: 0.1,
 }
 
@@ -39,6 +41,16 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y) {
     // }
   });
 
+  runner.states.push("damage");
+  let sheet = PIXI.Loader.shared.resources["Art/Runner/" + color + "_runner_combat_rise.json"].spritesheet;
+  let damage_sprite = new PIXI.AnimatedSprite(sheet.animations["damage"]);
+  damage_sprite.anchor.set(0.5,0.71);
+  damage_sprite.visible = false;
+  damage_sprite.scaleMode = PIXI.SCALE_MODES.NEAREST;
+
+  runner.sprites["damage"] = damage_sprite;
+  runner.addChild(damage_sprite);
+
   runner.sprites[runner.current_state].visible = true;
   runner.sprites[runner.current_state].animationSpeed = runner_animation_speeds[runner.current_state]; 
   runner.sprites[runner.current_state].play();
@@ -46,7 +58,7 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y) {
   runner.setState = function(new_state) {
     runner.states.forEach((state) => {
       if (new_state == state) {
-        runner.sprites[runner.current_state].stop();
+        runner.sprites[runner.current_state].gotoAndStop(0);
         runner.sprites[runner.current_state].visible = false;
 
         runner.current_state = new_state;

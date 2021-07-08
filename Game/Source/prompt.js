@@ -52,6 +52,7 @@ Game.prototype.makePrompt = function(parent, x, y, text) {
   prompt.prior_strikethrough.visible = false;
   prompt.addChild(prompt.prior_strikethrough);
 
+  //wordWrap: true, wordWrapWidth: 650
   prompt.remaining_text = new PIXI.Text(prompt.active_text, {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 0, align: "left"});
   prompt.remaining_text.anchor.set(0, 0.5);
   prompt.remaining_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;

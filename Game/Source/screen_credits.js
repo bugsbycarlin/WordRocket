@@ -51,7 +51,7 @@ Game.prototype.initializeCredits = function() {
   oga_thang.position.set(this.width / 2, 750);
   screen.addChild(oga_thang);
 
-  let abstraction_thang = new PIXI.Text("ABSTRACTIONMUSIC.COM \n(ABSTRACTION - LUDUM DARE 28 TRACK 3)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+  let abstraction_thang = new PIXI.Text("ABSTRACTIONMUSIC.COM \n(LUDUM DARE 28, TRACKS 3 and 8)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
   abstraction_thang.anchor.set(0.5,0.5);
   abstraction_thang.position.set(this.width / 2, 820);
   screen.addChild(abstraction_thang);

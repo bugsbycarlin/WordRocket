@@ -8,7 +8,7 @@ runner_animation_speeds = {
   slow_run: 0.4,
   jump: 0.5,
   reverse_jump: 0.6,
-  damage: 0.6,
+  damage: 0.4,
   static: 0.1,
 }
 
@@ -50,6 +50,16 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y) {
 
   runner.sprites["damage"] = damage_sprite;
   runner.addChild(damage_sprite);
+
+  for (var i = 0; i < 4; i++) {
+    let zap_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/zappy.png"));
+    zap_sprite.anchor.set(0.5, 0.5);
+    zap_sprite.scale.set(1, 1);
+    zap_sprite.angle = 90 * i - 45 + Math.floor(Math.random() * 90);
+    //zap_sprite.position.set(25 * Math.cos(zap_sprite.angle * 180 / Math.PI), -85 + 50 * Math.sin(zap_sprite.angle * 180 / Math.PI));
+    zap_sprite.position.set(15 * Math.cos(zap_sprite.angle * Math.PI / 180), -55 + 30 * Math.sin(zap_sprite.angle * Math.PI / 180));
+    damage_sprite.addChild(zap_sprite);
+  }
 
   runner.sprites[runner.current_state].visible = true;
   runner.sprites[runner.current_state].animationSpeed = runner_animation_speeds[runner.current_state]; 

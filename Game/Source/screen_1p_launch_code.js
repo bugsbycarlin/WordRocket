@@ -66,7 +66,7 @@ Game.prototype.initialize1pLaunchCode = function() {
   this.freefalling = [];
   this.shakers = [];
 
-  this.game_phase = "pre_game";
+  // this.game_phase = "pre_game";
 
   this.resetRace();
 
@@ -75,7 +75,12 @@ Game.prototype.initialize1pLaunchCode = function() {
     self.pause_time = 0;
     self.start_time = self.markTime();
     self.game_phase = "countdown";
-    self.soundEffect("countdown");
+    //self.soundEffect("countdown");
+    self.setMusic("action_song_3");
+
+    self.player_runner.speed = 6;
+    self.changeRunnerSpeed();
+    self.player_runner.last_speed_change = self.markTime();
   }, 1200);
 }
 
@@ -162,89 +167,29 @@ Game.prototype.resetRace = function() {
   player_monitor_mask.endFill();
   this.player_area.mask = player_monitor_mask;
 
-
-  // Test bands for the level
-  let top_level_band = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  top_level_band.tint = 0x282b2f;
-  top_level_band.width = 669;
-  top_level_band.height = 200;
-  top_level_band.anchor.set(0, 0)
-  top_level_band.position.set(0, 0);
-  area.addChild(top_level_band);
-
-  // let top_level = new PIXI.Sprite(PIXI.Texture.from("Art/Level/launch_code_level_sketch_2.png"));
-  // top_level.anchor.set(0, 0)
-  // top_level.position.set(0, 0);
-  // top_level.scale.set(2,2);
-  // area.addChild(top_level);  
-
   this.player_level = new PIXI.Container();
-  this.player_level.position.set(0, 200);
+  this.player_level.position.set(0, 100);
   this.player_level.ground_speed = 0;
   area.addChild(this.player_level);
 
   this.launchCodeMakeLevel(this.player_level, 75);
 
-  // let bottom_level_band = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // bottom_level_band.tint = 0x33373d;
-  // bottom_level_band.width = 669;
-  // bottom_level_band.height = 200;
-  // bottom_level_band.anchor.set(0, 0)
-  // bottom_level_band.position.set(0, 200);
-  // area.addChild(bottom_level_band);
-
-  // let top_level = new PIXI.Sprite(PIXI.Texture.from("Art/Level/launch_code_level_sketch_2.png"));
-  // top_level.anchor.set(0, 0)
-  // top_level.position.set(0, 200);
-  // top_level.scale.set(2,2);
-  // area.addChild(top_level);  
-
   let writing_band = PIXI.Sprite.from(PIXI.Texture.WHITE);
   writing_band.tint = 0x43474d;
   // writing_band.tint = 0xFFFFFF;
   writing_band.width = 669;
-  writing_band.height = 100;
+  writing_band.height = 60;
   writing_band.anchor.set(0, 0)
-  writing_band.position.set(0, 404);
+  writing_band.position.set(0, 444);
   area.addChild(writing_band);
 
-
-  for (let i = 0; i < 3; i++) {
-    let button_backing = new PIXI.Sprite(PIXI.Texture.from("Art/button_backing.png"));
-    button_backing.anchor.set(0, 0.5);
-    button_backing.position.set(10, 404 + 22 + 30 * i);
-    area.addChild(button_backing);
-  }
-
-  this.run_label = new PIXI.Sprite(PIXI.Texture.from("Art/run_button.png"));
-  this.run_label.anchor.set(0,0.5);
-  this.run_label.position.set(10, 404 + 20);
-  this.run_label.press_count = 0;
-  this.run_label.fixed_y = this.run_label.position.y;
-  area.addChild(this.run_label);
-
-
-  this.jump_label = new PIXI.Sprite(PIXI.Texture.from("Art/jump_button.png"));
-  this.jump_label.anchor.set(0,0.5);
-  this.jump_label.position.set(10, 404 + 50);
-  this.jump_label.press_count = 0;
-  this.jump_label.fixed_y = this.jump_label.position.y;
-  area.addChild(this.jump_label);
-
-  this.act_label = new PIXI.Sprite(PIXI.Texture.from("Art/act_button.png"));
-  this.act_label.anchor.set(0,0.5);
-  this.act_label.position.set(10, 404 + 80);
-  this.act_label.press_count = 0;
-  this.act_label.fixed_y = this.act_label.position.y;
-  area.addChild(this.act_label);
-
   shuffleArray(this.typing_prompts);
-  this.run_prompt = this.makePrompt(area, 100, 404 + 20, this.typing_prompts[0]);
-  this.jump_prompt = this.makePrompt(area, 100, 404 + 50, this.typing_prompts[1]);
-  this.act_prompt = this.makePrompt(area, 100, 404 + 80, this.typing_prompts[2]);
+  this.run_prompt = this.makePrompt(area, 10, 474, this.typing_prompts[0]);
+  this.run_prompt.visible = false;
 
-  this.player_runner = this.makeRunner(area, "blue", 1.5, 268, 194 + 200);
+  this.player_runner = this.makeRunner(area, "blue", 1.5, 268, 194 + 150);
   this.enemy_runner = this.makeRunner(area, "red", 1.5, 268, 194);
+  this.enemy_runner.visible = false;
 
   this.player_runner.lx = 0;
   this.player_runner.ly = 0;
@@ -256,27 +201,67 @@ Game.prototype.resetRace = function() {
 
   this.player_runner.base_height = 0;
 
+  this.player_runner.speed = 6;
+  this.changeRunnerSpeed();
   this.player_runner.last_speed_change = this.markTime();
 
-  // this.player_runner.setState("reverse_jump")
+  // this.player_runner.setState("damage");
 
   // Add event listeners to change the run speed.
   // We do it this way so there isn't a sudden frame jump.
-  this.player_runner.sprites["static"].onFrameChange = function() { self.changeRunnerSpeed(); }
+  // this.player_runner.sprites["static"].onFrameChange = function() { self.changeRunnerSpeed(); }
   this.player_runner.sprites["slow_run"].onLoop = function() { self.changeRunnerSpeed(); }
   this.player_runner.sprites["fast_run"].onLoop = function() { self.changeRunnerSpeed(); }
 
-  this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0x000000, letterSpacing: 3, align: "center"});
-  this.announcement.anchor.set(0.5,0.5);
-  this.announcement.position.set(470, 78);
-  this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  this.announcement.style.lineHeight = 36;
-  screen.addChild(this.announcement);
+  this.intro_overlay = new PIXI.Container();
+  this.intro_overlay.position.set(0, 0);
+  area.addChild(this.intro_overlay);
+  this.intro_overlay.background = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  this.intro_overlay.background.tint = 0x000000;
+  this.intro_overlay.background.width = 1280*3;
+  this.intro_overlay.background.height = 960;
+  this.intro_overlay.background.position.set(0,-100);
+  this.intro_overlay.addChild(this.intro_overlay.background);
 
+  this.intro_overlay.rope = new PIXI.Sprite(PIXI.Texture.from("Art/complete_rope_v4.png"));
+  this.intro_overlay.rope.position.set(268 + 510, 100);
+  this.intro_overlay.addChild(this.intro_overlay.rope);
+  let rope_mask = new PIXI.Graphics();
+  rope_mask.beginFill(0xFF3300);
+  rope_mask.drawRect(394, 0, 500, 800);
+  rope_mask.endFill();
+  this.intro_overlay.rope.mask = rope_mask;
 
   var screen_cover_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_screen_cover_background.png"));
   screen_cover_background.anchor.set(0, 0);
   screen.addChild(screen_cover_background);
+
+  this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.announcement.anchor.set(0.5,0.5);
+  this.announcement.position.set(470, 78);
+  this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.announcement.style.lineHeight = 36;
+
+  screen.addChild(this.announcement);
+
+  this.instructions_text = new PIXI.Text("Type to keep running! \nUp to jump! Enter to punch!", {
+    fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.instructions_text.anchor.set(0.5,0.5);
+  this.instructions_text.position.set(470, 510);
+  this.instructions_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  screen.addChild(this.instructions_text);
+
+  this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {
+    fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
+  this.escape_to_quit.anchor.set(0.5,0.5);
+  this.escape_to_quit.position.set(470, 303);
+  this.escape_to_quit.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.escape_to_quit.style.lineHeight = 36;
+  this.escape_to_quit.visible = false;
+  screen.addChild(this.escape_to_quit);
+
+
 
 
   this.mouse_tester = new PIXI.Container();
@@ -311,8 +296,6 @@ Game.prototype.resetRace = function() {
   }
 
   this.launch_code_typing = "";
-  //this.launch_code_last_prompt = this.run_prompt;
-
 
   this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
 }
@@ -328,14 +311,6 @@ Game.prototype.launchCodeGameOver = function(key) {
   delay(function() {
     self.nextFlow();
   }, 500);
-}
-
-
-Game.prototype.cycleRunnerPoses = function(runner) {
-  let items = runner.states;
-  const currentIndex = items.indexOf(runner.current_state);
-  const nextIndex = (currentIndex + 1) % items.length;
-  runner.setState(items[nextIndex]);
 }
 
 
@@ -358,7 +333,9 @@ Game.prototype.tryJumping = function() {
 
   if (this.player_runner.next_state != null
     && this.player_runner.next_state == "jump"
-    && this.player_runner.current_state != "jump") {
+    && this.player_runner.current_state != "jump"
+    && this.player_runner.current_state != "combat_punch") {
+    this.launchCodeSetTyping("");
     this.player_runner.last_state = this.player_runner.current_state;
     this.player_runner.setState("jump");
     this.player_runner.old_base_height = this.player_runner.base_height;
@@ -369,8 +346,9 @@ Game.prototype.tryJumping = function() {
     this.player_runner.sprites["jump"].onLoop = function() {
       self.player_runner.setState(self.player_runner.last_state);
       if (self.player_runner.last_state == "static") {
-        self.player_runner.speed = 0;
-        self.player_level.ground_speed = 0;
+        self.player_runner.speed = 2;
+        self.player_level.ground_speed = run_speeds[2].ground_speed;
+        self.player_runner.setState("slow_run");
       }
       self.player_runner.next_state = null;
       self.player_runner.last_state = null;
@@ -394,22 +372,41 @@ Game.prototype.tryJumping = function() {
 }
 
 
+Game.prototype.tryPunching = function() {
+  let self = this;
+
+  // the first fist extends about 95 pixels. the second fist is about 75.
+
+  if (this.player_runner.next_state != null
+    && this.player_runner.next_state == "combat_punch"
+    && this.player_runner.current_state != "combat_punch"
+    && this.player_runner.current_state != "jump") {
+    this.launchCodeSetTyping("");
+    this.player_runner.setState("combat_punch");
+    let last_speed = this.player_runner.speed;
+    this.player_runner.speed = 0;
+    this.player_level.ground_speed = run_speeds[0].ground_speed;
+    this.player_runner.sprites["combat_punch"].onLoop = function() {
+      //self.player_runner.setState(self.player_runner.last_state);
+      self.player_runner.speed = Math.min(2, last_speed);
+      self.changeRunnerSpeed();
+      self.player_runner.next_state = null;
+      self.player_runner.last_state = null;
+    }
+  }
+}
+
+
 Game.prototype.tryReverseJumping = function() {
   let self = this;
 
-
-  // let parachute_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/parachute.png"));
-  // parachute_sprite.anchor.set(0.5, 0.5);
-  // parachute_sprite.scale.set(xScale, yScale);
-  // parachute_sprite.position.set(x, y);
-  // parent.addChild(parachute_sprite);
-  // return parachute_sprite;
 
   if (this.player_runner.current_state != "damage") {
     this.player_runner.setState("damage");
     this.player_runner.old_base_height = this.player_runner.base_height;
     this.player_runner.speed = -1 * 6;
     this.player_level.ground_speed = -1 * run_speeds[6].ground_speed;
+
     this.player_runner.sprites["damage"].onLoop = function() {
       self.player_runner.setState("static");
       self.player_runner.speed = 0;
@@ -418,8 +415,8 @@ Game.prototype.tryReverseJumping = function() {
     }
     this.player_runner.sprites["damage"].onFrameChange = function() {
       let t = this.currentFrame;
-      self.player_runner.ly = 2 * ((t - 4)*(t - 4) - 16) + self.player_runner.old_base_height;
-      console.log(this.currentFrame);
+      self.player_runner.ly = 2.5 * ((t - 4)*(t - 4) - 16) + self.player_runner.old_base_height;
+      console.log(self.player_runner.ly);
     }
   }
 }
@@ -430,42 +427,8 @@ Game.prototype.launchCodeSetTyping = function(new_typing) {
   this.launch_code_typing = new_typing;
 
   this.run_prompt.typing = this.launch_code_typing;
-  this.jump_prompt.typing = this.launch_code_typing;
-  this.act_prompt.typing = this.launch_code_typing;
-
   this.run_prompt.checkCorrectness();
-  this.jump_prompt.checkCorrectness();
-  this.act_prompt.checkCorrectness();
-
-  if (this.run_prompt.correct == true || this.jump_prompt.correct == true || this.act_prompt.correct == true) {
-    if (this.run_prompt.correct == false) {
-      this.run_prompt.clearTyping();
-    }
-    if (this.jump_prompt.correct == false) {
-      this.jump_prompt.clearTyping();
-    }
-    if (this.act_prompt.correct == false) {
-      this.act_prompt.clearTyping();
-    }
-
-  } else {
-    if (this.run_prompt.prefix_correct_count < this.act_prompt.prefix_correct_count
-      || this.run_prompt.prefix_correct_count < this.jump_prompt.prefix_correct_count) {
-      this.run_prompt.clearTyping();
-    }
-    if (this.jump_prompt.prefix_correct_count < this.act_prompt.prefix_correct_count
-      || this.jump_prompt.prefix_correct_count < this.run_prompt.prefix_correct_count) {
-      this.jump_prompt.clearTyping();
-    }
-    if (this.act_prompt.prefix_correct_count < this.run_prompt.prefix_correct_count
-      || this.act_prompt.prefix_correct_count < this.jump_prompt.prefix_correct_count) {
-      this.act_prompt.clearTyping();
-    }
-  }
-
   this.run_prompt.setPosition();
-  this.jump_prompt.setPosition();
-  this.act_prompt.setPosition();
 }
 
 
@@ -473,48 +436,12 @@ Game.prototype.launchCodeAdvance = function() {
   this.launch_code_typing = "";
 
   this.run_prompt.checkCorrectness();
-  this.jump_prompt.checkCorrectness();
-  this.act_prompt.checkCorrectness();
-    
-  if (this.run_prompt.complete == true || this.jump_prompt.complete == true || this.act_prompt.complete == true) {
-    if (this.run_prompt.complete == false) {
-      this.run_prompt.clearTyping();
-    }
-    if (this.jump_prompt.complete == false) {
-      this.jump_prompt.clearTyping();
-    }
-    if (this.act_prompt.complete == false) {
-      this.act_prompt.clearTyping();
-    }
-  }
 
-
-  if (this.act_prompt.typing.length > 0) {
-    let complete = this.act_prompt.complete;
-    this.act_label.tint = complete == true ? 0x3cb0f3 : 0xdb5858;
-    this.act_label.position.y = this.act_label.fixed_y + 2;
-    this.act_label.press_count = 6;
-    this.act_prompt.advance();
-    //this.launch_code_last_prompt = this.act_prompt;
-  }
-  if (this.jump_prompt.typing.length > 0) {
-    let complete = this.jump_prompt.complete;
-    this.jump_label.tint = complete == true ? 0x3cb0f3 : 0xdb5858;
-    this.jump_label.position.y = this.jump_label.fixed_y + 2;
-    this.jump_label.press_count = 6;
-    this.jump_prompt.advance();
-    if (complete) {
-      this.player_runner.next_state = "jump";
-      this.tryJumping();
-      this.player_runner.last_speed_change = this.markTime();
-    }
-    //this.launch_code_last_prompt = this.jump_prompt;
-  }
   if (this.run_prompt.typing.length > 0) {
     let complete = this.run_prompt.complete;
-    this.run_label.tint = complete == true ? 0x3cb0f3 : 0xdb5858;
-    this.run_label.position.y = this.run_label.fixed_y + 2;
-    this.run_label.press_count = 6;
+    //this.run_label.tint = complete == true ? 0x3cb0f3 : 0xdb5858;
+    //this.run_label.position.y = this.run_label.fixed_y + 2;
+    //this.run_label.press_count = 6;
     this.run_prompt.advance();
     if (complete) {
       this.player_runner.speed += 0.5;
@@ -522,6 +449,7 @@ Game.prototype.launchCodeAdvance = function() {
         this.player_runner.speed = 7;
       }
       this.player_runner.last_speed_change = this.markTime();
+      if (this.player_runner.current_state == "static") this.changeRunnerSpeed();
     } else {
       this.player_runner.speed -= 1.5;
       if (this.player_runner.speed <= 0) {
@@ -529,9 +457,7 @@ Game.prototype.launchCodeAdvance = function() {
         this.changeRunnerSpeed(); // immediately stop if we get to zero
       }
     }
-    //this.launch_code_last_prompt = this.run_prompt;
   }
- 
 }
 
 
@@ -561,6 +487,11 @@ Game.prototype.launchCodeKeyDown = function(key) {
       console.log("I will try jumping");
       this.player_runner.next_state = "jump";
       this.tryJumping();
+    }
+
+    if (key === "Enter") {
+      this.player_runner.next_state = "combat_punch";
+      this.tryPunching();
     }
 
     // if (key === "ArrowDown") {
@@ -635,54 +566,58 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
       this.game_phase = "active";
       this.last_play = this.markTime();
 
-      // this.setMusic("action_song_3");
+      this.instructions_text.visible = false;
+      this.run_prompt.visible = true;
 
+      this.announcement.style.fill = 0xFFFFFF;
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);
 
-      // delay(function() {
-      //   self.launchCodeGameOver();
-      // }, 2000);
+      new TWEEN.Tween(this.intro_overlay.background)
+        .to({alpha: 0})
+        .duration(150)
+        // .easing(TWEEN.Easing.Quartic.Out)
+        .start();
     }
   }
 }
 
 
-Game.prototype.unpressButtons = function() {
-  if (this.run_label.press_count > 0) {
-    this.run_label.press_count -= 1;
-    if (this.run_label.press_count == 0) {
-      this.run_label.position.y = this.run_label.fixed_y;
-      this.run_label.tint = 0xFFFFFF;
-    }
-  }
-  if (this.jump_label.press_count > 0) {
-    this.jump_label.press_count -= 1;
-    if (this.jump_label.press_count == 0) {
-      this.jump_label.position.y = this.jump_label.fixed_y;
-      this.jump_label.tint = 0xFFFFFF;
-    }
-  }
-  if (this.act_label.press_count > 0) {
-    this.act_label.press_count -= 1;
-    if (this.act_label.press_count == 0) {
-      this.act_label.position.y = this.act_label.fixed_y;
-      this.act_label.tint = 0xFFFFFF;
-    }
-  }
-}
+// Game.prototype.unpressButtons = function() {
+//   if (this.run_label.press_count > 0) {
+//     this.run_label.press_count -= 1;
+//     if (this.run_label.press_count == 0) {
+//       this.run_label.position.y = this.run_label.fixed_y;
+//       this.run_label.tint = 0xFFFFFF;
+//     }
+//   }
+//   if (this.jump_label.press_count > 0) {
+//     this.jump_label.press_count -= 1;
+//     if (this.jump_label.press_count == 0) {
+//       this.jump_label.position.y = this.jump_label.fixed_y;
+//       this.jump_label.tint = 0xFFFFFF;
+//     }
+//   }
+//   if (this.act_label.press_count > 0) {
+//     this.act_label.press_count -= 1;
+//     if (this.act_label.press_count == 0) {
+//       this.act_label.position.y = this.act_label.fixed_y;
+//       this.act_label.tint = 0xFFFFFF;
+//     }
+//   }
+// }
 
 
 // chunk_types = ["box", "door", "flat", "rise"];
 // chunk_types = ["box", "door", "flat", "rise", "flat", "guard"];
-chunk_types = ["flat", "box"];
+chunk_types = ["flat", "box", "door", "guard", "rise", "flat"];
 Game.prototype.launchCodeMakeLevel = function(level_parent, size) {
   level_parent.items = [];
-  let height = 0;
+  let height = 50;
   for (let i = 0; i < size; i++) {
     // size of each chunk is 167*2 = 334.
     let chunk_type = "flat";
-    if (i < 3 || i % 2 == 1 || i > size - 5) {
+    if (i < 6 || i % 2 == 1 || i > size - 5) {
       // flat is good.
     } else {
       shuffleArray(chunk_types);
@@ -698,7 +633,7 @@ Game.prototype.launchCodeMakeLevel = function(level_parent, size) {
     level_parent.items.push(chunk);
 
     if (chunk_type == "guard") {
-      let guard = this.makeRunner(level_parent, "grey", 1.5, 334 * i + 167, 194);
+      let guard = this.makeRunner(level_parent, "grey", 1.5, 334 * i + 167, 144);
       guard.scale.set(-1.5, 1.5);
       guard.setState("combat_ready")
       chunk.guard = guard;
@@ -716,7 +651,8 @@ Game.prototype.launchCodeMoveAndCheckRunner = function() {
   let last_x = this.player_runner.lx + 268;
 
   this.player_runner.lx += this.player_level.ground_speed;
-  this.player_level.position.set(-1 * this.player_runner.lx, 200 - this.player_runner.ly);
+  this.player_level.position.set(-1 * this.player_runner.lx, 100 - this.player_runner.ly);
+  this.intro_overlay.position.set(-1 * this.player_runner.lx, 100 - this.player_runner.ly);
 
   let player_x = this.player_runner.lx + 268;
 
@@ -751,6 +687,38 @@ Game.prototype.launchCodeMoveAndCheckRunner = function() {
 }
 
 
+Game.prototype.launchCodeMakeEmbers = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+
+  if (this.timeSince(this.start_time) < 3000) {
+    console.log("here");
+    // let alternator = Math.floor(this.timeSince(this.start_time) / 107.14);
+    let quantity = 14 + Math.floor(Math.random() * 14);
+    let adjustment = this.timeSince(this.start_time) <= 20*107.14 ? 20 * Math.sin(0.5 * this.timeSince(this.start_time) * 2 * Math.PI / 107.14) : 0;
+
+    for (var i = 0; i < quantity; i++) {
+      console.log("many here");
+      let ember = PIXI.Sprite.from(PIXI.Texture.WHITE);
+        
+      if (Math.random() > 0.6) ember.tint = fire_colors[Math.floor(Math.random()*fire_colors.length)];
+      ember.width = 4;
+      ember.height = 4;
+      ember.vx = -6 + Math.random() * 12;
+      ember.vy = -9 + Math.random() * 12;
+      ember.type = "ember";
+      ember.parent = this.intro_overlay;
+      let jitter_x = -2 + Math.random() * 4;
+      let jitter_y = -2 + Math.random() * 4;
+      // ember.position.set(-this.player_runner.lx, -this.player_runner.ly);
+      ember.position.set(268 + this.player_runner.lx + jitter_x, 150 + adjustment + jitter_y);
+      this.intro_overlay.addChild(ember);
+      this.freefalling.push(ember);
+    }
+  }
+}
+
+
 Game.prototype.launchCodeDecayRunnerSpeed = function() {
   var self = this;
   var screen = this.screens["1p_launch_code"];
@@ -778,15 +746,17 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
   // }
 
   this.launchCodeUpdateDisplayInfo();
+  this.launchCodeMakeEmbers();
   this.shakeDamage();
   this.freeeeeFreeeeeFalling(fractional);
-  this.unpressButtons();
+  //this.unpressButtons();
+
+  this.launchCodeMoveAndCheckRunner();
 
   // Skip the rest if we aren't in active gameplay
   if (this.game_phase != "active") {
     return;
   }
 
-  this.launchCodeMoveAndCheckRunner();
   this.launchCodeDecayRunnerSpeed();
 }

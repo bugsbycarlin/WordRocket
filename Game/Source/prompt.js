@@ -115,11 +115,15 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
       prompt.prior_strikethrough.visible = false;
 
       if (prompt.word_number >= prompt.word_list.length) {
+        let complete = prompt.complete;
         prompt.word_number = 0;
         prompt.carat = 0;
         prompt.prior_text.text = "";
-        if (prompt.finished_callback != null) {
+        if (complete && prompt.finished_callback != null) {
           prompt.finished_callback();
+        } else if (!complete) {
+          prompt.shake = self.markTime();
+          prompt.remaining_text.style.fill = 0xdb5858;
         }
       } else {
         prompt.carat += prompt.word_list[prompt.word_number - 2].length + prompt.word_list[prompt.word_number - 1].length

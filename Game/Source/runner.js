@@ -56,6 +56,24 @@ runner_animation_speeds = {
   terminal: 0.1,
 }
 
+
+punch_positions = {
+  7: 70,
+  8: 88,
+  9: 88,
+  10: 80,
+  11: 70,
+  15: 36,
+  16: 64,
+  17: 80,
+  18: 86,
+  19: 88,
+  20: 78,
+  21: 70,
+  22: 58,
+}
+
+
 Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) {
   var self = this;
 
@@ -73,9 +91,10 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
   runner.speed = speed;
   runner.ground_speed = 0;
   runner.get_up = get_up;
-  runner.last_speed_change = this.markTime();
-  runner.changeSpeed();
+  runner.last_choice = this.markTime();
+  runner.color = color;
 
+  // Add main sprites
   runner.sprites = {};
   runner.states.forEach((state) => {
     let sheet = PIXI.Loader.shared.resources["Art/Runner/" + color + "_runner_" + state + ".json"].spritesheet;
@@ -89,16 +108,17 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
     runner.addChild(sprite);
   });
 
+  // Add damage sprite
   runner.states.push("damage");
   let sheet = PIXI.Loader.shared.resources["Art/Runner/" + color + "_runner_combat_rise.json"].spritesheet;
   let damage_sprite = new PIXI.AnimatedSprite(sheet.animations["damage"]);
   damage_sprite.anchor.set(0.5,0.71);
   damage_sprite.visible = false;
   damage_sprite.scaleMode = PIXI.SCALE_MODES.NEAREST;
-
   runner.sprites["damage"] = damage_sprite;
   runner.addChild(damage_sprite);
 
+  // Add zappy bits to damage sprite
   for (var i = 0; i < 4; i++) {
     let zap_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/zappy.png"));
     zap_sprite.anchor.set(0.5, 0.5);
@@ -108,29 +128,8 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
     damage_sprite.addChild(zap_sprite);
   }
 
-  // Add event listeners to change the run speed.
-  // We do it this way so there isn't a sudden frame jump.
-  runner.sprites["slow_run"].onLoop = function() { self.changeSpeed(); }
-  runner.sprites["fast_run"].onLoop = function() { self.changeSpeed(); }
 
-  runner.sprites[runner.current_state].visible = true;
-  runner.sprites[runner.current_state].animationSpeed = runner_animation_speeds[runner.current_state]; 
-  runner.sprites[runner.current_state].play();
-
-  runner.sprites["combat_fall"].onLoop = function() {
-    runner.sprites["combat_fall"].gotoAndStop(26);
-    if (runner.get_up) {
-      delay(function() {
-        runner.setState("combat_rise");
-        runner.sprites["combat_rise"].onLoop = function() {
-          runner.setState("static");
-        }
-      }, 500);
-      runner.next_state = null;
-      runner.last_state = null;
-    }
-  }
-
+  // Functions
   runner.setState = function(new_state) {
     runner.states.forEach((state) => {
       if (new_state == state) {
@@ -147,6 +146,91 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
     });
   }
 
+
+  runner.damage = function() {
+    if (runner.current_state != "damage") {
+      runner.setState("damage");
+      runner.old_base_height = runner.base_height;
+      runner.speed = -1 * 6;
+      runner.ground_speed = -1 * run_speeds[6].ground_speed;
+
+      runner.sprites["damage"].onLoop = function() {
+        runner.setState("static");
+        runner.speed = 0;
+        runner.ground_speed = 0;
+        runner.ly = runner.ly_floor;
+      }
+      runner.sprites["damage"].onFrameChange = function() {
+        let t = this.currentFrame;
+        runner.ly = 2.5 * ((t - 4)*(t - 4) - 16) + runner.ly_floor;
+      }
+    }
+  }
+
+
+  runner.jump = function() {
+    if (runner.current_state != "combat_punch"
+      && runner.current_state != "jump"
+      && runner.current_state != "combat_fall"
+      && runner.current_state != "combat_rise") {
+      runner.last_state = runner.current_state;
+      runner.setState("jump");
+      runner.jump_initial_floor = runner.ly_floor;
+      runner.speed = Math.max(runner.speed, 4);
+      runner.ground_speed = Math.max(runner.ground_speed, run_speeds[4].ground_speed);
+      runner.sprites["jump"].onLoop = function() {
+        runner.setState(runner.last_state);
+        if (runner.last_state == "static") {
+          runner.speed = 2;
+          runner.ground_speed = run_speeds[2].ground_speed;
+          runner.setState("slow_run");
+        }
+        runner.last_state = null;
+        runner.ly = runner.ly_floor;
+      }
+      runner.sprites["jump"].onFrameChange = function() {
+        if (this.currentFrame >= 2 && this.currentFrame <= 27) {
+          let t = this.currentFrame - 2;
+          runner.ly = 0.8 * ((t - 12)*(t - 12) - 144) + runner.jump_initial_floor;
+          if (runner.ly > runner.ly_floor) {
+            runner.ly = runner.ly_floor;
+            runner.sprites["jump"].onLoop(); // end the jump
+          }
+        } else if (this.currentFrame < 2) {
+          runner.ly = runner.jump_initial_floor;
+        } else if (this.currentFrame > 27) {
+          runner.ly = runner.ly_floor;
+        }
+      }
+    }
+  }
+
+
+  runner.knockout = function() {
+    if (runner.current_state != "combat_fall") {
+      runner.fall_vy = -24;
+      runner.setState("combat_fall");
+      runner.ground_speed = 0;
+      runner.speed = 0;
+    }
+  }
+
+
+  runner.punch = function(punch_target, dash = false) {
+    if (runner.current_state != "combat_punch"
+      && runner.current_state != "jump"
+      && runner.current_state != "combat_fall"
+      && runner.current_state != "combat_rise") {
+      runner.last_speed = runner.speed;
+      runner.punch_target = punch_target;
+      runner.dash_punch = dash;
+      runner.speed = 0;
+      runner.ground_speed = 0;
+      runner.setState("combat_punch");
+    }
+  }
+
+
   runner.changeSpeed = function() {
     let speed_marker = Math.ceil(runner.speed);
     let speed_option = run_speeds[speed_marker];
@@ -155,6 +239,82 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
     runner.sprites[runner.current_state].animationSpeed = speed_option.animation_speed;
     runner.ground_speed = speed_option.ground_speed;
   }
+
+
+  runner.sprites["combat_punch"].onFrameChange = function() {
+    let t = this.currentFrame;
+    if (runner.dash_punch == true && (t == 7 || t == 8 || t == 9)) {
+      runner.lx += 15;
+    }
+
+    // test for punching the target
+    if (runner.punch_target != null) {
+      if (t in punch_positions 
+        && Math.abs(runner.lx - runner.punch_target.lx) <= punch_positions[t] + 5
+        && (runner.lx - runner.punch_target.lx) * runner.scale.x < 0) {
+        if (runner.punch_target.current_state == "combat_punch") {
+          let t2 = runner.punch_target.sprites["combat_punch"].currentFrame;
+          if (t2 in punch_positions
+            // 40 here is for the fact that the head moves in on punch frames, so there's a more generous buffer
+            && Math.abs(runner.lx - runner.punch_target.lx) <= punch_positions[t2] + 40
+            && (runner.punch_target.lx - runner.lx) * runner.punch_target.scale.x < 0) {
+            runner.knockout();
+          }
+        }
+
+        runner.punch_target.knockout();
+      }
+    }
+  }
+
+
+  runner.sprites["combat_punch"].onLoop = function() {
+    runner.speed = Math.min(2, runner.last_speed);
+    runner.changeSpeed();
+    runner.last_state = null;
+  }
+
+
+  runner.sprites["combat_fall"].onFrameChange = function() {
+    runner.ly += runner.fall_vy;
+    runner.fall_vy += 4;
+    if (runner.ly < runner.ly_floor) {
+      runner.lx -= 5;
+    } else {
+      runner.ly = runner.ly_floor;
+      runner.fall_vy = 0;
+    }
+  }
+
+
+  runner.sprites["combat_fall"].onLoop = function() {
+    runner.sprites["combat_fall"].gotoAndStop(26);
+    if (runner.get_up) {
+      delay(function() {
+        runner.setState("combat_rise");
+        runner.sprites["combat_rise"].onLoop = function() {
+          runner.setState("static");
+        }
+      }, 500);
+      runner.next_state = null;
+      runner.last_state = null;
+    }
+  }
+
+
+  // Add event listeners to change the run speed.
+  // We do it this way so there isn't a sudden frame jump.
+  runner.sprites["slow_run"].onLoop = function() { runner.changeSpeed(); }
+  runner.sprites["fast_run"].onLoop = function() { runner.changeSpeed(); }
+
+
+  // Final setup
+  runner.sprites[runner.current_state].visible = true;
+  runner.sprites[runner.current_state].animationSpeed = runner_animation_speeds[runner.current_state]; 
+  runner.sprites[runner.current_state].play();
+
+  runner.last_speed_change = this.markTime();
+  runner.changeSpeed();
 
   return runner;
 }

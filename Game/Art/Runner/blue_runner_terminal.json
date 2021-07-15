@@ -1,0 +1,25 @@
+{"frames": {
+
+"blue_runner_terminal.png":
+{
+	"frame": {"x":0,"y":0,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+}},
+"animations": {
+	"terminal": [
+		"blue_runner_terminal.png"
+	]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "blue_runner_terminal.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":256},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:205e4f9201d1e1f8345dbdef7c162576:6ba1313bd24fc45a41aa3b5109eba2eb:5d614b153f4d386fb859c783a9469220$"
+}
+}

@@ -1,30 +1,36 @@
 
 
-Game.prototype.makePrompt = function(parent, x, y, text) {
+Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished_callback = false) {
   var self = this;
 
   let prompt = new PIXI.Container();
   prompt.position.set(x, y);
   parent.addChild(prompt);
 
-  // for uppercase version
-  //text = text.toUpperCase();
+  prompt.setText = function(text) {
+    // for uppercase version
+    //text = text.toUpperCase();
 
-  prompt.permanent_text = text;
-  prompt.word_list = prompt.permanent_text.split(/([^A-Za-z']+)/);
-  console.log(prompt.word_list);
-  
-  prompt.word_number = 0;
-  prompt.carat = 0;
-  prompt.typing = "";
-  prompt.correct = true;
-  prompt.complete = false;
-  prompt.prefix_correct_count = 0;
-  prompt.next_word = prompt.word_list[prompt.word_number];
-  prompt.active_text = text
-  if (prompt.active_text.length > 60) {
-    prompt.active_text = prompt.active_text.slice(0, 100);
+    prompt.permanent_text = text;
+    prompt.word_list = prompt.permanent_text.split(/([^A-Za-z']+)/).filter(x => x); // the filter is to remove empties
+
+    prompt.word_number = 0;
+    prompt.carat = 0;
+    prompt.typing = "";
+    prompt.correct = true;
+    prompt.complete = false;
+    prompt.prefix_correct_count = 0;
+    prompt.next_word = prompt.word_list[prompt.word_number];
+    prompt.active_text = text
+    if (prompt.active_text.length > 60) {
+      prompt.active_text = prompt.active_text.slice(0, 100);
+    }
+
+    prompt.remaining_text.text = prompt.active_text;
   }
+
+  prompt.fixed = fixed;
+  prompt.finished_callback = finished_callback;
 
   prompt.prior_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xAAAAAA, letterSpacing: 0, align: "left"});
   prompt.prior_text.anchor.set(0, 0.5);
@@ -53,14 +59,17 @@ Game.prototype.makePrompt = function(parent, x, y, text) {
   prompt.addChild(prompt.prior_strikethrough);
 
   //wordWrap: true, wordWrapWidth: 650
-  prompt.remaining_text = new PIXI.Text(prompt.active_text, {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 0, align: "left"});
+  prompt.remaining_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 0, align: "left"});
   prompt.remaining_text.anchor.set(0, 0.5);
   prompt.remaining_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   prompt.addChild(prompt.remaining_text);
+  if (prompt.fixed == true) {
+    prompt.remaining_text.style.fill = 0x71d07d;
+  }
+
+  prompt.setText(text);
 
   let space_met = new PIXI.TextMetrics.measureText(" ", prompt.typing_text.style);
-
-  console.log("okay then");
 
   prompt.checkCorrectness = function() {
     prompt.prefix_correct_count = 0;
@@ -98,33 +107,70 @@ Game.prototype.makePrompt = function(parent, x, y, text) {
     }
   }
 
-  prompt.advance = function() {
-    prompt.word_number += 2;
+  if (prompt.fixed == true) {
 
-    prompt.prior_strikethrough.visible = false;
+    prompt.advance = function() {
+      prompt.word_number += 2;
 
-    if (prompt.word_number >= prompt.word_list.length - 1) {
-      prompt.word_number = 0;
-      prompt.carat = 0;
-      prompt.prior_text.text = "";
-    } else {
-      prompt.carat += prompt.word_list[prompt.word_number - 2].length + prompt.word_list[prompt.word_number - 1].length
-      prompt.prior_text.text = prompt.word_list[prompt.word_number - 2] + prompt.word_list[prompt.word_number - 1];
-      if (!prompt.correct) {
-        prompt.prior_strikethrough.visible = true;
-        let met_1 = new PIXI.TextMetrics.measureText(prompt.word_list[prompt.word_number - 2], prompt.prior_text.style);
-        prompt.prior_strikethrough.width = met_1.width;
+      prompt.prior_strikethrough.visible = false;
+
+      if (prompt.word_number >= prompt.word_list.length) {
+        prompt.word_number = 0;
+        prompt.carat = 0;
+        prompt.prior_text.text = "";
+        if (prompt.finished_callback != null) {
+          prompt.finished_callback();
+        }
+      } else {
+        prompt.carat += prompt.word_list[prompt.word_number - 2].length + prompt.word_list[prompt.word_number - 1].length
+        prompt.prior_text.text += prompt.word_list[prompt.word_number - 2] + prompt.word_list[prompt.word_number - 1];
+        if (!prompt.complete) {
+          prompt.word_number = 0;
+          prompt.carat = 0;
+          prompt.prior_text.text = "";
+          prompt.shake = self.markTime();
+          prompt.remaining_text.style.fill = 0xdb5858;
+        }
       }
+
+      prompt.active_text = prompt.permanent_text.slice(prompt.carat, prompt.permanent_text.length)
+
+      prompt.typing = "";
+      prompt.next_word = prompt.word_list[prompt.word_number];
+      prompt.checkCorrectness();
+      prompt.setPosition();
     }
 
-    prompt.active_text = prompt.permanent_text.slice(prompt.carat, prompt.permanent_text.length) + " " + prompt.permanent_text.slice(0, prompt.carat);
-    if (prompt.active_text.length > 60) {
-      prompt.active_text = prompt.active_text.slice(0, 60);
+  } else {
+    prompt.advance = function() {
+      prompt.word_number += 2;
+
+      prompt.prior_strikethrough.visible = false;
+
+      if (prompt.word_number >= prompt.word_list.length) {
+        prompt.word_number = 0;
+        prompt.carat = 0;
+        prompt.prior_text.text = "";
+      } else {
+        prompt.carat += prompt.word_list[prompt.word_number - 2].length + prompt.word_list[prompt.word_number - 1].length
+        prompt.prior_text.text = prompt.word_list[prompt.word_number - 2] + prompt.word_list[prompt.word_number - 1];
+        if (!prompt.complete) {
+          prompt.prior_strikethrough.visible = true;
+          let met_1 = new PIXI.TextMetrics.measureText(prompt.word_list[prompt.word_number - 2], prompt.prior_text.style);
+          prompt.prior_strikethrough.width = met_1.width;
+        }
+      }
+
+      prompt.active_text = prompt.permanent_text.slice(prompt.carat, prompt.permanent_text.length) + " " + prompt.permanent_text.slice(0, prompt.carat);
+
+      if (prompt.active_text.length > 60) {
+        prompt.active_text = prompt.active_text.slice(0, 60);
+      }
+      prompt.typing = "";
+      prompt.next_word = prompt.word_list[prompt.word_number];
+      prompt.checkCorrectness();
+      prompt.setPosition();
     }
-    prompt.typing = "";
-    prompt.next_word = prompt.word_list[prompt.word_number];
-    prompt.checkCorrectness();
-    prompt.setPosition();
   }
 
   prompt.setTyping = function(typing) {

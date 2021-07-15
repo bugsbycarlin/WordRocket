@@ -449,6 +449,7 @@ class Game {
         self.initializeScreen(first_screen, true);
 
         PIXI.Loader.shared
+          .add("Art/Level/level_door_animated.json")
           .add("Art/Runner/grey_runner_combat_fall.json")
           .add("Art/Runner/grey_runner_combat_punch.json")
           .add("Art/Runner/grey_runner_combat_rise.json")
@@ -457,6 +458,7 @@ class Game {
           .add("Art/Runner/grey_runner_slow_run.json")
           .add("Art/Runner/grey_runner_jump.json")
           .add("Art/Runner/grey_runner_static.json")
+          .add("Art/Runner/grey_runner_terminal.json")
           .add("Art/Runner/red_runner_combat_fall.json")
           .add("Art/Runner/red_runner_combat_punch.json")
           .add("Art/Runner/red_runner_combat_rise.json")
@@ -465,6 +467,7 @@ class Game {
           .add("Art/Runner/red_runner_slow_run.json")
           .add("Art/Runner/red_runner_jump.json")
           .add("Art/Runner/red_runner_static.json")
+          .add("Art/Runner/red_runner_terminal.json")
           .add("Art/Runner/blue_runner_combat_fall.json")
           .add("Art/Runner/blue_runner_combat_punch.json")
           .add("Art/Runner/blue_runner_combat_rise.json")
@@ -473,6 +476,7 @@ class Game {
           .add("Art/Runner/blue_runner_slow_run.json")
           .add("Art/Runner/blue_runner_jump.json")
           .add("Art/Runner/blue_runner_static.json")
+          .add("Art/Runner/blue_runner_terminal.json")
           .load(function() {});
       });
   }

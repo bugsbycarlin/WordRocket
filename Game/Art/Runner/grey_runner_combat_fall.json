@@ -289,7 +289,7 @@
 	"sourceSize": {"w":256,"h":256}
 }},
 "animations": {
-	"combat_fall": ["combat_ko-00001.png","combat_ko-00003.png","combat_ko-00005.png","combat_ko-00007.png","combat_ko-00009.png","combat_ko-00011.png","combat_ko-00013.png","combat_ko-00015.png","combat_ko-00017.png","combat_ko-00019.png","combat_ko-00021.png","combat_ko-00023.png","combat_ko-00025.png","combat_ko-00027.png","combat_ko-00029.png","combat_ko-00031.png","combat_ko-00033.png","combat_ko-00035.png","combat_ko-00037.png","combat_ko-00039.png","combat_ko-00041.png","combat_ko-00043.png","combat_ko-00045.png","combat_ko-00047.png","combat_ko-00053.png","combat_ko-00055.png","combat_ko-00057.png","combat_ko-00059.png","combat_ko-00061.png","combat_ko-00063.png","combat_ko-00065.png","combat_ko-00067.png","combat_ko-00069.png","combat_ko-00071.png","combat_ko-00073.png","combat_ko-00075.png"]
+	"combat_fall": ["combat_ko-00019.png","combat_ko-00021.png","combat_ko-00023.png","combat_ko-00025.png","combat_ko-00027.png","combat_ko-00029.png","combat_ko-00031.png","combat_ko-00033.png","combat_ko-00035.png","combat_ko-00037.png","combat_ko-00039.png","combat_ko-00041.png","combat_ko-00043.png","combat_ko-00045.png","combat_ko-00047.png","combat_ko-00053.png","combat_ko-00055.png","combat_ko-00057.png","combat_ko-00059.png","combat_ko-00061.png","combat_ko-00063.png","combat_ko-00065.png","combat_ko-00067.png","combat_ko-00069.png","combat_ko-00071.png","combat_ko-00073.png","combat_ko-00075.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",

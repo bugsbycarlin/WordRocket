@@ -26,7 +26,6 @@ Game.prototype.initializeIntro = function() {
   // console.log(PIXI.extract.webGL.pixels(image));
   let pixels = pixi.renderer.extract.pixels(image);
   let total = 0;
-  console.log(pixels.length);
   for (var i = 0; i < pixels.length; i += 4) {
     let alpha = pixels[i + 3];
     if (alpha > 0) {
@@ -55,7 +54,6 @@ Game.prototype.initializeIntro = function() {
     }
 
   }
-  console.log(total);
 
   // use this if it's necessary to click to start the intro
   // background.interactive = true;
@@ -70,10 +68,10 @@ Game.prototype.initializeIntro = function() {
   self.soundEffect("intro");
 
   delay(function() {
-    // self.initializeTitle();
-    // self.popScreens("intro", "title");
-    self.initializeScreen("1p_launch_code", true);
-    self.switchScreens(self.current_screen, "1p_launch_code");
+    self.initializeTitle();
+    self.popScreens("intro", "title");
+    // self.initializeScreen("1p_launch_code", true);
+    // self.switchScreens(self.current_screen, "1p_launch_code");
   }, 4500);
 }
 

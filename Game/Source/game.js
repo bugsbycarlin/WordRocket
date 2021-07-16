@@ -47,11 +47,8 @@ firebase.analytics();
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
     // User is signed in.
-    console.log("I AM USARIO");
-    console.log(user);
   } else {
     // No user is signed in.
-    console.log("i am nobs");
   }
 });
 
@@ -160,8 +157,6 @@ class Game {
     pixi.renderer.backgroundColor = 0xFFFFFF;
     pixi.renderer.resize(this.width,this.height);
     pixi.renderer.backgroundColor = 0x000000;
-    console.log("Renderer: " + PIXI.RENDERER_TYPE[pixi.renderer.type]);
-
 
     // Set up rendering and tweening loop
     let ticker = PIXI.Ticker.shared;
@@ -515,7 +510,6 @@ class Game {
 
     for (const [special_key, special_dict] of Object.entries(this.special_dictionaries)) {
       request = new XMLHttpRequest();
-      console.log(special_key);
       request.open("GET", "Text/" + special_key + "_words.txt.gz", true);
       request.responseType = "arraybuffer";
       request.onload = function(e) {

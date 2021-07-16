@@ -39,7 +39,6 @@ class Network {
       ["easy", "medium", "hard", "beacon"].forEach((difficulty) => {
         self.game.global_high_scores[mode][difficulty] = [];
 
-        console.log("making a high score call");
         this.database.ref("/high_scores/" + mode + "/" + difficulty).orderByChild("score").limitToLast(10).once("value").then((result) => {
           if (result.exists()) {
             self.game.global_high_scores[mode][difficulty] = Object.values(result.val());

@@ -176,8 +176,8 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
       runner.last_state = runner.current_state;
       runner.setState("jump");
       runner.jump_initial_floor = runner.ly_floor;
-      runner.speed = Math.max(runner.speed, 4);
-      runner.ground_speed = Math.max(runner.ground_speed, run_speeds[4].ground_speed);
+      runner.speed = Math.max(runner.speed, 2);
+      runner.ground_speed = Math.max(runner.ground_speed, run_speeds[2].ground_speed);
       runner.sprites["jump"].onLoop = function() {
         runner.setState(runner.last_state);
         if (runner.last_state == "static") {
@@ -269,8 +269,10 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
 
 
   runner.sprites["combat_punch"].onLoop = function() {
-    runner.speed = Math.min(2, runner.last_speed);
-    runner.changeSpeed();
+    if (runner.scale.x > 0) { // hack to filter for rightward facing runners.
+      runner.speed = Math.max(2, runner.last_speed);
+      runner.changeSpeed();
+    }
     runner.last_state = null;
   }
 

@@ -1,6 +1,6 @@
 {"frames": {
 
-"level_door_animated_0.png":
+"door_animated_0.png":
 {
 	"frame": {"x":0,"y":0,"w":167,"h":101},
 	"rotated": false,
@@ -8,7 +8,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_1.png":
+"door_animated_1.png":
 {
 	"frame": {"x":0,"y":101,"w":167,"h":101},
 	"rotated": false,
@@ -16,7 +16,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_2.png":
+"door_animated_2.png":
 {
 	"frame": {"x":0,"y":202,"w":167,"h":101},
 	"rotated": false,
@@ -24,7 +24,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_3.png":
+"door_animated_3.png":
 {
 	"frame": {"x":0,"y":303,"w":167,"h":101},
 	"rotated": false,
@@ -32,7 +32,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_4.png":
+"door_animated_4.png":
 {
 	"frame": {"x":0,"y":404,"w":167,"h":101},
 	"rotated": false,
@@ -40,7 +40,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_5.png":
+"door_animated_5.png":
 {
 	"frame": {"x":0,"y":505,"w":167,"h":101},
 	"rotated": false,
@@ -48,7 +48,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_6.png":
+"door_animated_6.png":
 {
 	"frame": {"x":0,"y":606,"w":167,"h":101},
 	"rotated": false,
@@ -56,7 +56,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_7.png":
+"door_animated_7.png":
 {
 	"frame": {"x":0,"y":707,"w":167,"h":101},
 	"rotated": false,
@@ -64,7 +64,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_8.png":
+"door_animated_8.png":
 {
 	"frame": {"x":0,"y":808,"w":167,"h":101},
 	"rotated": false,
@@ -72,7 +72,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":167,"h":101},
 	"sourceSize": {"w":167,"h":101}
 },
-"level_door_animated_9.png":
+"door_animated_9.png":
 {
 	"frame": {"x":0,"y":909,"w":167,"h":101},
 	"rotated": false,
@@ -81,14 +81,14 @@
 	"sourceSize": {"w":167,"h":101}
 }},
 "animations": {
-	"opening": ["level_door_animated_0.png","level_door_animated_1.png","level_door_animated_2.png","level_door_animated_3.png","level_door_animated_4.png","level_door_animated_5.png","level_door_animated_6.png","level_door_animated_7.png","level_door_animated_8.png","level_door_animated_9.png"],
-	"closed": ["level_door_animated_0.png"],
-	"open": ["level_door_animated_9.png"]
+	"opening": ["door_animated_0.png","door_animated_1.png","door_animated_2.png","door_animated_3.png","door_animated_4.png","door_animated_5.png","door_animated_6.png","door_animated_7.png","door_animated_8.png","door_animated_9.png"],
+	"closed": ["door_animated_0.png"],
+	"open": ["door_animated_9.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
-	"image": "level_door_animated.png",
+	"image": "door_animated.png",
 	"format": "RGBA8888",
 	"size": {"w":167,"h":1010},
 	"scale": "1",

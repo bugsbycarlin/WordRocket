@@ -176,13 +176,14 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
       runner.last_state = runner.current_state;
       runner.setState("jump");
       runner.jump_initial_floor = runner.ly_floor;
-      runner.speed = Math.max(runner.speed, 2);
-      runner.ground_speed = Math.max(runner.ground_speed, run_speeds[2].ground_speed);
+      runner.last_speed = runner.speed;
+      runner.speed = Math.max(runner.speed, 4);
+      runner.ground_speed = Math.max(runner.ground_speed, run_speeds[4].ground_speed);
       runner.sprites["jump"].onLoop = function() {
         runner.setState(runner.last_state);
         if (runner.last_state == "static") {
-          runner.speed = 2;
-          runner.ground_speed = run_speeds[2].ground_speed;
+          runner.speed = Math.ceil(Math.max(runner.last_speed, 2));
+          runner.ground_speed = run_speeds[runner.speed].ground_speed;
           runner.setState("slow_run");
         }
         runner.last_state = null;

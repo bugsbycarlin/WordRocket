@@ -1,8 +1,8 @@
 
 
-level_origin = {};
-level_origin.x = 268;
-level_origin.y = 375;
+course_origin = {};
+course_origin.x = 268;
+course_origin.y = 375;
 
 
 
@@ -27,6 +27,9 @@ Game.prototype.initialize1pLaunchCode = function() {
   var screen = this.screens["1p_launch_code"];
   this.clearScreen(screen);
 
+  // NO NO NO NO NO NO NO
+  this.level = 20;
+
   this.freefalling = [];
   this.shakers = [];
 
@@ -34,10 +37,14 @@ Game.prototype.initialize1pLaunchCode = function() {
 
   this.launch_code_typing = "";
 
+  this.word_count = 0;
+  this.correct_word_count = 0;
+
   let difficulty_multiplier = this.difficulty_level == "EASY" ? 1 :
     this.difficulty_level == "MEDIUM" ? 2 :
     this.difficulty_level == "HARD" ? 3 : 5;
 
+  console.log(this.level);
   this.launchCodeSetDifficulty1(this.level);
 
   this.resetRace();
@@ -62,6 +69,14 @@ Game.prototype.initialize1pLaunchCode = function() {
     self.runner[1].changeSpeed();
     self.runner[1].last_speed_change = self.markTime();
   }, 1200);
+
+  setInterval(function() {
+    let minutes_elapsed = self.timeSince(self.start_time) / 60000;
+    let wpm = self.correct_word_count / minutes_elapsed;
+    let accuracy = self.correct_word_count/self.word_count;
+    console.log("WPM: " + wpm);
+    console.log("Accuracy: " + accuracy);
+  }, 3000)
 }
 
 
@@ -81,7 +96,8 @@ Game.prototype.launchCodeSetDifficulty1 = function(level) {
     this.chunk_types[4] = "box";
     this.chunk_types[5] = "rise";
   }
-  this.launch_code_level_length = Math.floor(100 * (0.75 + 0.5 * Math.random()));
+  this.launch_code_course_length = Math.floor((30 + 5 * level) * (0.75 + 0.5 * Math.random()));
+  this.code_panel_difficulty = Math.min(12, Math.floor(level / 2));
 }
 
 
@@ -90,11 +106,14 @@ Game.prototype.launchCodeSetDifficulty2 = function(level, difficulty_multiplier)
   this.runner[1].min_speed = 1 + Math.max(2, Math.floor(level / 5));
   this.runner[1].jump_probability = Math.min(1, 0.4 + level * 0.05);
   this.runner[1].punch_probability = Math.min(1, 0.4 + level * 0.05);
-  this.runner[1].terminal_delay = Math.max(4000, 7000 - 300 * level);
+  this.runner[1].terminal_delay = Math.max(3500, 6000 - 300 * level);
   this.runner[1].speed_change_time = Math.max(300, 1000 - 100 * level);
 
-  this.runner[0].decay_time = Math.max(500, 1000 - 50 * level);
-  this.runner[0].typing_boost = Math.max(0.35, 1.5 - level * 0.1);
+  this.runner[0].decay_time = Math.max(600, 1000 - 30 * level);
+  this.runner[0].typing_boost = Math.max(0.4, 1.5 - level * 0.1);
+  console.log(level);
+  console.log(Math.max(0.35, 1.5 - level * 0.1));
+  console.log(this.runner[0].typing_boost);
 }
 
 
@@ -170,19 +189,19 @@ Game.prototype.resetRace = function() {
   player_monitor_mask.endFill();
   this.player_area.mask = player_monitor_mask;
 
-  this.parallax_level_bg = new PIXI.Container();
-  this.parallax_level_bg.position.set(0, 0); // shift it so y = 0 matches the player's origin.
-  area.addChild(this.parallax_level_bg);
+  this.parallax_course_bg = new PIXI.Container();
+  this.parallax_course_bg.position.set(0, 0); // shift it so y = 0 matches the player's origin.
+  area.addChild(this.parallax_course_bg);
   for (var i = 0; i < 4; i++) {
-    let bg = new PIXI.Sprite(PIXI.Texture.from("Art/Level/parallax_background.png"));
+    let bg = new PIXI.Sprite(PIXI.Texture.from("Art/Course/parallax_background.png"));
     bg.anchor.set(0, 0);
     bg.scale.set(1.5, 1.5);
     bg.position.set(1280 * 1.5 * i, -480 * 1.5);
     bg.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    this.parallax_level_bg.addChild(bg);
+    this.parallax_course_bg.addChild(bg);
   }
 
-  this.makeLevelsAndPlayers();
+  this.makeCoursesAndPlayers();
 
   this.makeCodePanel();
 
@@ -248,22 +267,41 @@ Game.prototype.resetRace = function() {
   this.runner_text.anchor.set(0.5, 0.5);
   screen.addChild(this.runner_text);
 
-
   this.score_label = new PIXI.Text("Score", {
     fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
   this.score_label.anchor.set(0.5,0.5);
   this.score_label.position.set(204, 62);
   this.score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.score_label.visible = false;
   screen.addChild(this.score_label);
 
   this.score_text_box = new PIXI.Text(this.score, {
-    fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
   this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(204, 92);
+  this.score_text_box.position.set(204, 87);
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.score_text_box.visible = false;
   screen.addChild(this.score_text_box);
+
+  this.level_label = new PIXI.Text("Level", {
+    fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
+  this.level_label.anchor.set(0.5,0.5);
+  this.level_label.position.set(742, 62);
+  this.level_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.level_label.visible = false;
+  screen.addChild(this.level_label);
+
+  this.level_text_box = new PIXI.Text(this.level, {
+    fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
+  this.level_text_box.anchor.set(0.5,0.5);
+  this.level_text_box.position.set(742, 87);
+  this.level_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.level_text_box.visible = false;
+  screen.addChild(this.level_text_box);
 
   this.instructions_text = new PIXI.Text("Type to keep running! \nUp to jump! Enter to punch!", {
     fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
@@ -350,59 +388,20 @@ Game.prototype.makeCodePanel = function() {
 }
 
 
-Game.prototype.makeLevelsAndPlayers = function() {
+Game.prototype.makeCoursesAndPlayers = function() {
   let self = this;
   var screen = this.screens["1p_launch_code"];
 
-  let list = this.launchCodeMakeLevelList(this.launch_code_level_length);
-  this.level = [];
+  let list = this.launchCodeMakeCourseList(this.launch_code_course_length);
+  this.course = [];
   this.runner = [];
-  this.level[1] = this.launchCodeMakeLevel(1, list, level_origin.x, level_origin.y - 60, "red");
-  this.level[0] = this.launchCodeMakeLevel(0, list, level_origin.x, level_origin.y, "blue");
+  this.course[1] = this.launchCodeMakeCourse(1, list, course_origin.x, course_origin.y - 60, "red");
+  this.course[0] = this.launchCodeMakeCourse(0, list, course_origin.x, course_origin.y, "blue");
 
-  this.runner[0] = this.level[0].runner;
-  this.runner[1] = this.level[1].runner;
+  this.runner[0] = this.course[0].runner;
+  this.runner[1] = this.course[1].runner;
 
-  this.level[1].scale.set(0.6666, 0.6666);
-
-  // this.enemy_level = new PIXI.Container();
-  // this.enemy_level.position.set(0, 150); // shift it so y = 0 matches the player's origin.
-  // this.enemy_level.ground_speed = 0;
-  // this.enemy_level.scale.set(0.6666, 0.6666);
-  // area.addChild(this.enemy_level);
-
-  // this.player_level = new PIXI.Container();
-  // this.player_level.position.set(0, 150); // shift it so y = 0 matches the player's origin.
-  // this.player_level.ground_speed = 0;
-  // area.addChild(this.player_level);
-
-
-
-  // this.enemy_runner = this.makeRunner(area, "red", 1, lc_origin.x, lc_origin.y - 67);
-  // this.enemy_runner.lx = 0;
-  // this.enemy_runner.ly = 0;
-  // this.enemy_runner.ly_floor = 0;
-  // this.enemy_runner.speed = 6;
-  // this.enemy_runner.get_up = true;
-  // this.changeRunnerSpeed(this.enemy_runner, this.enemy_level);
-  // this.enemy_runner.last_speed_change = this.markTime();
-
-  // this.player_runner = this.makeRunner(area, "blue", 1.5, lc_origin.x, lc_origin.y);
-  // this.player_runner.lx = 0;
-  // this.player_runner.ly = 0;
-  // this.player_runner.ly_floor = 0;
-  // this.player_runner.speed = 6;
-  // this.player_runner.get_up = true;
-  // this.changeRunnerSpeed(this.player_runner, this.player_level);
-  // this.player_runner.last_speed_change = this.markTime();
-
-  // Add event listeners to change the run speed.
-  // We do it this way so there isn't a sudden frame jump.
-  // this.enemy_runner.sprites["slow_run"].onLoop = function() { self.changeRunnerSpeed(self.enemy_runner, self.enemy_level); }
-  // this.enemy_runner.sprites["fast_run"].onLoop = function() { self.changeRunnerSpeed(self.enemy_runner, self.enemy_level); }
-  // this.player_runner.sprites["slow_run"].onLoop = function() { self.changeRunnerSpeed(self.player_runner, self.player_level); }
-  // this.player_runner.sprites["fast_run"].onLoop = function() { self.changeRunnerSpeed(self.player_runner, self.player_level); }
-
+  this.course[1].scale.set(0.6666, 0.6666);
 }
 
 
@@ -410,14 +409,14 @@ Game.prototype.makeLevelsAndPlayers = function() {
 // chunk_types = ["box", "door", "flat", "rise", "flat", "guard"];
 // chunk_types = ["flat", "box", "door", "guard", "rise", "box", "door", "guard", "rise"];
 //chunk_types = ["guard"];
-Game.prototype.launchCodeMakeLevelList = function(size) {
+Game.prototype.launchCodeMakeCourseList = function(size) {
   
   let list = [];
   for (let i = 0; i < size; i++) {
     let chunk_type = "flat";
     if (i == size - 1) {
       chunk_type = "end";
-    } else if (i < 7 || i % 2 == 1 || i % 2 == 2 || i > size - 5) {
+    } else if (i < 8 || i % 3 != 0 || i > size - 5) {
       // flat is good.
     } else {
       shuffleArray(this.chunk_types);
@@ -429,25 +428,25 @@ Game.prototype.launchCodeMakeLevelList = function(size) {
 }
 
 
-Game.prototype.launchCodeMakeLevel = function(player_number, list, origin_x, origin_y, player_color) {
-  let level = new PIXI.Container();
-  level.player_number = player_number;
-  level.ox = origin_x;
-  level.oy = origin_y;
-  level.position.set(level.ox, level.oy); // shift it so y = 0 matches the player's origin.
-  this.player_area.addChild(level);
+Game.prototype.launchCodeMakeCourse = function(player_number, list, origin_x, origin_y, player_color) {
+  let course = new PIXI.Container();
+  course.player_number = player_number;
+  course.ox = origin_x;
+  course.oy = origin_y;
+  course.position.set(course.ox, course.oy); // shift it so y = 0 matches the player's origin.
+  this.player_area.addChild(course);
 
-  level.items = [];
+  course.items = [];
   let height = 0;
   for (let i = 0; i < list.length; i++) {
     // size of each chunk is 167*2 = 334.
     let chunk_type = list[i];
     let chunk = null;
     if (chunk_type != "door") {
-      chunk = new PIXI.Sprite(PIXI.Texture.from("Art/Level/level_" + (chunk_type == "guard" ? "flat" : chunk_type) + ".png"));
+      chunk = new PIXI.Sprite(PIXI.Texture.from("Art/Course/" + (chunk_type == "guard" ? "flat" : chunk_type) + ".png"));
       chunk.anchor.set(0, 1);
     } else if (chunk_type == "door") {
-      let sheet = PIXI.Loader.shared.resources["Art/Level/level_door_animated.json"].spritesheet;
+      let sheet = PIXI.Loader.shared.resources["Art/Course/door_animated.json"].spritesheet;
       chunk = new PIXI.Container();
       chunk.door_closed = new PIXI.AnimatedSprite(sheet.animations["closed"]);
       chunk.door_open = new PIXI.AnimatedSprite(sheet.animations["open"]);
@@ -495,13 +494,12 @@ Game.prototype.launchCodeMakeLevel = function(player_number, list, origin_x, ori
     chunk.position.set(334 * i, height + 8);
     chunk.lx = 334 * i;
     chunk.ly = height;
-    // chunk.level_height = height;
     chunk.chunk_type = chunk_type;
-    level.addChild(chunk);
-    level.items.push(chunk);
+    course.addChild(chunk);
+    course.items.push(chunk);
 
     if (chunk_type == "guard") {
-      let guard = this.makeRunner(level, "grey", 1.5, 334 * i + 167, 0, 0, false);
+      let guard = this.makeRunner(course, "grey", 1.5, 334 * i + 167, 0, 0, false);
       guard.lx = 334 * i + 167;
       guard.scale.set(-1.5, 1.5);
       guard.setState("static")
@@ -511,20 +509,24 @@ Game.prototype.launchCodeMakeLevel = function(player_number, list, origin_x, ori
     if (chunk_type == "rise") height -= 100;
   }
 
-  level.runner = this.makeRunner(level, player_color, 1.5, 0, 0, 0, true);
+  course.runner = this.makeRunner(course, player_color, 1.5, 0, 0, 0, true);
 
-  return level;
+  return course;
 }
 
 
-Game.prototype.chooseLaunchCode = function(length = 5) {
+Game.prototype.chooseLaunchCode = function(length = 5, difficulty = 0) {
   let code = "";
   let letter = letter_array[Math.floor(Math.random() * 26)];
   let dict_1 = this.short_starting_dictionaries[letter];
   let dict_2 = this.starting_dictionaries[letter];
+  // let word_list = this.enemy_words[word_size];
   for (let i = 0; i < length; i++) {
     let dict = i % 2 == 0 ? dict_1 : dict_2;
     let word = dict[Math.floor(Math.random() * dict.length)].toLowerCase();
+    for (let j = 0; j < 10; j++) {
+      if (word.length > 3 + difficulty / 2) word = dict[Math.floor(Math.random() * dict.length)].toLowerCase();
+    }
     word = word[0].toUpperCase() + word.substring(1);
     code += " " + word;
   }
@@ -537,7 +539,6 @@ Game.prototype.launchCodeGameOver = function(win = false) {
   let self = this;
   
   this.game_phase = "gameover";
-  this.stopMusic();
 
   this.score = Math.floor(this.score);
 
@@ -559,56 +560,6 @@ Game.prototype.launchCodeGameOver = function(win = false) {
 }
 
 
-// Game.prototype.runnerPunch = function() {
-//   let self = this;
-
-//   // the first fist extends about 95 pixels. the second fist is about 75.
-
-//   if (this.player_runner.current_state != "combat_punch"
-//     && this.player_runner.current_state != "jump") {
-//     this.launchCodeSetTyping("");
-//     this.player_runner.setState("combat_punch");
-//     let last_speed = this.player_runner.speed;
-//     this.player_runner.speed = 0;
-//     this.player_level.ground_speed = run_speeds[0].ground_speed;
-//     this.player_runner.sprites["combat_punch"].onFrameChange = function() {
-//       let t = this.currentFrame;
-//       if (t == 9) {
-//         self.player_runner.lx += 30;
-//       }
-
-//       // test for punching guards
-//       let x = self.player_runner.lx + lc_origin.x;
-//       for (let i = 0; i < self.player_level.items.length; i++) {
-//         let chunk = self.player_level.items[i];
-//         if (chunk.chunk_type == "guard" && x >= chunk.position.x && x <= chunk.position.x + 334) {
-//           console.log("testing the guard");
-//           console.log(t);
-//           console.log(t in punch_positions);
-//           if (t in punch_positions) console.log(punch_positions[t]);
-//           console.log(chunk.position.x - x);
-//           if (t in punch_positions && x >= chunk.position.x - punch_positions[t] - 5 && x <= chunk.position.x) {
-//               if (chunk.guard.current_state == "combat_punch") {
-//                 let t2 = chunk.guard.sprites["combat_punch"].currentFrame;
-//                 if (t2 in punch_positions && x >= chunk.position.x - punch_positions[t2] - 25 && x <= chunk.position.x) { // 25 here is for the fact that the head moves in on punch frames, so there's a more generous buffer
-//                   self.runnerKnockout(self.player_runner, true);
-//                 }
-//               }
-//               self.runnerKnockout(chunk.guard, false);
-//           }
-//         }
-//       }
-//     }
-//     this.player_runner.sprites["combat_punch"].onLoop = function() {
-//       //self.player_runner.setState(self.player_runner.last_state);
-//       self.player_runner.speed = Math.min(2, last_speed);
-//       self.changeRunnerSpeed(self.player_runner, self.player_level);
-//       self.player_runner.last_state = null;
-//     }
-//   }
-// }
-
-
 Game.prototype.launchCodeTerminal = function(chunk, runner, player_number) {
   runner.setState("terminal");
   runner.last_speed = 0;
@@ -620,7 +571,7 @@ Game.prototype.launchCodeTerminal = function(chunk, runner, player_number) {
     this.launchCodeSetTyping("");
     this.code_panel.visible = true;
     this.code_panel.alpha = 1;
-    this.code_prompt.setText(this.chooseLaunchCode());
+    this.code_prompt.setText(this.chooseLaunchCode(5, this.code_panel_difficulty));
     let measure = new PIXI.TextMetrics.measureText(this.code_prompt.remaining_text.text, this.code_prompt.remaining_text.style);
     this.code_prompt.position.set(-1 * measure.width / 2, 0);
     this.code_panel.backing.width = measure.width + 40;
@@ -628,11 +579,10 @@ Game.prototype.launchCodeTerminal = function(chunk, runner, player_number) {
 
     this.game_phase = "terminal";
   } else {
-    delay(function() {
-      chunk.setState("opening");
-      runner.speed = 2;
-      runner.changeSpeed();
-    }, runner.terminal_delay * (0.8 + 0.4 * Math.random()));
+    runner.terminal_chunk = chunk;
+    runner.terminal_time = this.markTime();
+    runner.current_terminal_delay = runner.terminal_delay * (0.8 + 0.4 * Math.random());
+    runner.final_terminal = false;
   }
 }
 
@@ -647,12 +597,13 @@ Game.prototype.launchCodeFinalTerminal = function(chunk, runner, player_number) 
 
   if (player_number == 0) {
     this.launchCodeSetTyping("");
-    this.code_prompt.prior_text.style.fontSize = 12;
-    this.code_prompt.typing_text.style.fontSize = 12;
-    this.code_prompt.remaining_text.style.fontSize = 12;
+    // this.code_prompt.prior_text.style.fontSize = 12;
+    // this.code_prompt.typing_text.style.fontSize = 12;
+    // this.code_prompt.remaining_text.style.fontSize = 12;
+    this.code_panel.position.x -= 50;
     this.code_panel.visible = true;
     this.code_panel.alpha = 1;
-    this.code_prompt.setText(this.chooseLaunchCode(8));
+    this.code_prompt.setText(this.chooseLaunchCode(7, this.code_panel_difficulty));
     let measure = new PIXI.TextMetrics.measureText(this.code_prompt.remaining_text.text, this.code_prompt.remaining_text.style);
     this.code_prompt.position.set(-1 * measure.width / 2, 0);
     this.code_panel.backing.width = measure.width + 40;
@@ -668,43 +619,14 @@ Game.prototype.launchCodeFinalTerminal = function(chunk, runner, player_number) 
 
     this.game_phase = "terminal";
   } else {
-    delay(function() {
-      self.launchCodeGameOver(false);
-    }, runner.terminal_delay * 1.5 * (0.8 + 0.4 * Math.random()));
+    runner.terminal_chunk = chunk;
+    runner.terminal_time = this.markTime();
+    runner.current_terminal_delay = runner.terminal_delay * 1.5 * (0.8 + 0.4 * Math.random());
+    runner.final_terminal = true;
   }
 
   
 }
-
-
-// Game.prototype.runnerKnockout = function(player, extra) {
-//   let self = this;
-
-//   // the first fist extends about 95 pixels. the second fist is about 75.
-
-//   if (player.current_state != "combat_fall") {
-//     if (extra) {
-//       this.launchCodeSetTyping("");
-//       this.player_level.ground_speed = run_speeds[0].ground_speed;
-//     }
-//     player.setState("combat_fall");
-//     player.speed = 0;
-    
-
-//     let vy = -24;
-//     player.sprites["combat_fall"].onFrameChange = function() {
-//       player.ly += vy;
-//       vy += 4;
-//       if (player.ly < player.ly_floor) {
-//         player.lx -= 5;
-//       } else {
-//         player.ly = player.ly_floor;
-//         vy = 0;
-//       }
-//     }
-//     // remember to drop the player towards the ground if jumping
-//   }
-// }
 
 
 Game.prototype.launchCodeSetTyping = function(new_typing) {
@@ -742,7 +664,9 @@ Game.prototype.launchCodeAdvance = function() {
     //this.run_label.press_count = 6;
     prompt.advance();
     if (this.game_phase == "active") {
+      this.word_count += 1;
       if (complete) {
+        this.correct_word_count += 1;
         this.runner[0].speed += this.runner[0].typing_boost;
         if (this.runner[0].speed >= 7) {
           this.runner[0].speed = 7;
@@ -772,14 +696,14 @@ Game.prototype.launchCodeKeyDown = function(key) {
     this.pressKey(this.player_palette, key);
 
     if (key === "ArrowUp") {
-      this.launchCodeSetTyping("");
+      //this.launchCodeSetTyping("");
       this.runner[0].jump();
     }
 
     if (key === "Enter") {
       let target = null;
-      for (let i = 0; i < this.level[0].items.length; i++) {
-        let chunk = this.level[0].items[i];
+      for (let i = 0; i < this.course[0].items.length; i++) {
+        let chunk = this.course[0].items[i];
         if (chunk.chunk_type == "guard" 
           && this.runner[0].lx >= chunk.position.x && this.runner[0].lx <= chunk.position.x + 334) {
           target = chunk.guard;
@@ -887,6 +811,11 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
 
       this.announcement.style.fill = 0xFFFFFF;
       this.announcement.text = "GO";
+
+      this.score_label.visible = true;
+      this.score_text_box.visible = true;
+      this.level_label.visible = true;
+      this.level_text_box.visible = true;
       delay(function() {self.announcement.text = "";}, 1600);
 
       new TWEEN.Tween(this.intro_overlay.background)
@@ -897,16 +826,18 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
     }
   }
 
-  // Add to the score
-  if (this.runner[0].lx > this.runner[0].last_x) {
-    this.score += 0.1;
-    if (this.runner[0].lx > this.runner[1].lx) {
+  if (this.game_phase == "active") {
+    // Add to the score
+    if (this.runner[0].lx > this.runner[0].last_x) {
       this.score += 0.1;
+      if (this.runner[0].lx > this.runner[1].lx) {
+        this.score += 0.1;
+      }
+      if (this.runner[0].speed >= 6) {
+        this.score += 0.1;
+      }
+      this.score_text_box.text = Math.floor(this.score);
     }
-    if (this.runner[0].speed >= 6) {
-      this.score += 0.1;
-    }
-    this.score_text_box.text = Math.floor(this.score);
   }
 
   if (this.runner[0].lx > this.runner[1].lx + 400) {
@@ -940,6 +871,7 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
   if (this.game_phase != "active" && this.game_phase != "terminal") {
     this.runner_arrow.visible = false;
     this.runner_text.visible = false;
+    this.mini_runner.visible = false;
   }
 }
 
@@ -993,7 +925,7 @@ Game.prototype.launchCodeEnemyAction = function() {
   var self = this;
   var screen = this.screens["1p_launch_code"];
 
-  let runner = this.level[1].runner;
+  let runner = this.course[1].runner;
   let last_x = runner.last_x;
   let x = runner.lx;
 
@@ -1001,15 +933,29 @@ Game.prototype.launchCodeEnemyAction = function() {
     || runner.current_state == "combat_fall"
     || runner.current_state == "combat_rise"
     || runner.current_state == "jump"
-    || runner.current_state == "terminal"
     || runner.current_state == "damage") {
+    return;
+  }
+
+  if (runner.current_state == "terminal") {
+    if (runner.terminal_time != null && this.timeSince(runner.terminal_time) > runner.current_terminal_delay) {
+      if (runner.final_terminal == false) {
+        runner.terminal_chunk.setState("opening");
+        runner.speed = 2;
+        runner.changeSpeed();
+        runner.terminal_time = null;
+      } else {
+        self.launchCodeGameOver(false);
+        runner.terminal_time = null;
+      }
+    }
     return;
   }
 
   // Jump over boxes and rises.
   //////
-  for (let i = 0; i < this.level[1].items.length; i++) {
-    let chunk = this.level[1].items[i];
+  for (let i = 0; i < this.course[1].items.length; i++) {
+    let chunk = this.course[1].items[i];
 
     if ((chunk.chunk_type == "rise" || chunk.chunk_type == "box")
       && x >= chunk.position.x && x <= chunk.position.x + 167 && runner.current_state != "jump"
@@ -1026,8 +972,8 @@ Game.prototype.launchCodeEnemyAction = function() {
 
   // Punch out that guard!
   //////
-  for (let i = 0; i < this.level[1].items.length; i++) {
-    let chunk = this.level[1].items[i];
+  for (let i = 0; i < this.course[1].items.length; i++) {
+    let chunk = this.course[1].items[i];
 
     if (chunk.chunk_type == "guard"
       && runner.current_state != "combat_punch"
@@ -1071,22 +1017,22 @@ Game.prototype.launchCodeEnemyAction = function() {
 }
 
 
-Game.prototype.launchCodeUpdateLevel = function(level) {
+Game.prototype.launchCodeUpdateCourse = function(course) {
   var self = this;
   var screen = this.screens["1p_launch_code"];
 
-  let runner = level.runner;
+  let runner = course.runner;
 
   runner.last_x = runner.lx;
   runner.lx += runner.ground_speed;
   runner.position.set(runner.lx, runner.ly);
-  level.position.set(level.ox - level.scale.x * runner.lx, level.oy - level.scale.y * runner.ly);
+  course.position.set(course.ox - course.scale.x * runner.lx, course.oy - course.scale.y * runner.ly);
 
   let last_x = runner.last_x;
   let x = runner.lx;
 
-  for (let i = 0; i < level.items.length; i++) {
-    let chunk = level.items[i];
+  for (let i = 0; i < course.items.length; i++) {
+    let chunk = course.items[i];
 
     if (x > chunk.position.x && x < chunk.position.x + 334) {
       chunk.tint = 0x44FF44;
@@ -1113,14 +1059,14 @@ Game.prototype.launchCodeUpdateLevel = function(level) {
       && runner.current_state != "terminal"
       && last_x <= chunk.position.x + 167 - 50 && x >= chunk.position.x + 167 - 50) {
       runner.lx = chunk.position.x + 167 - 50;
-      this.launchCodeTerminal(chunk, runner, level.player_number);
+      this.launchCodeTerminal(chunk, runner, course.player_number);
     }
 
     if (chunk.chunk_type == "end"
       && runner.current_state != "terminal"
       && last_x <= chunk.position.x + 167 - 75 && x >= chunk.position.x + 167 - 75) {
       runner.lx = chunk.position.x + 167 - 75;
-      this.launchCodeFinalTerminal(chunk, runner, level.player_number);
+      this.launchCodeFinalTerminal(chunk, runner, course.player_number);
     }
 
     if (chunk.chunk_type == "guard" 
@@ -1168,12 +1114,12 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
     this.launchCodeSetTyping("");
   }
 
-  this.launchCodeUpdateLevel(this.level[0]);
-  this.launchCodeUpdateLevel(this.level[1]);
-  this.level[1].position.y = this.level[1].oy - this.level[1].scale.y * this.level[0].runner.ly //this.level[0].position.y - 80;
-  this.level[1].position.x -= 0.6666 * (this.level[0].runner.lx - this.level[1].runner.lx)
+  this.launchCodeUpdateCourse(this.course[0]);
+  this.launchCodeUpdateCourse(this.course[1]);
+  this.course[1].position.y = this.course[1].oy - this.course[1].scale.y * this.course[0].runner.ly //this.course[0].position.y - 80;
+  this.course[1].position.x -= 0.6666 * (this.course[0].runner.lx - this.course[1].runner.lx)
   this.intro_overlay.position.set(-1 * this.runner[0].lx, 0);
-  this.parallax_level_bg.position.set(-0.25 * this.runner[0].lx, -0.25 * this.runner[0].ly)
+  this.parallax_course_bg.position.set(-0.25 * this.runner[0].lx, -0.25 * this.runner[0].ly)
 
   // Skip the rest if we aren't in active gameplay
   if (this.game_phase != "active" && this.game_phase != "terminal") {

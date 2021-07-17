@@ -444,7 +444,7 @@ class Game {
         self.initializeScreen(first_screen, true);
 
         PIXI.Loader.shared
-          .add("Art/Level/level_door_animated.json")
+          .add("Art/Course/door_animated.json")
           .add("Art/Runner/grey_runner_combat_fall.json")
           .add("Art/Runner/grey_runner_combat_punch.json")
           .add("Art/Runner/grey_runner_combat_rise.json")

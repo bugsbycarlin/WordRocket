@@ -444,7 +444,6 @@ class Game {
         self.initializeScreen(first_screen, true);
 
         PIXI.Loader.shared
-          .add("Art/Course/door_animated.json")
           .add("Art/Runner/grey_runner_combat_fall.json")
           .add("Art/Runner/grey_runner_combat_punch.json")
           .add("Art/Runner/grey_runner_combat_rise.json")
@@ -663,7 +662,7 @@ class Game {
 
   setMusic(music_name) {
     if (use_music) {
-      if (this.music != null && this.music.music_name == music_name) {
+      if (this.music_name == music_name) {
         return;
       }
       var self = this;

@@ -94,6 +94,8 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
   runner.last_choice = this.markTime();
   runner.color = color;
 
+  runner.sound = false;
+
   // Add main sprites
   runner.sprites = {};
   runner.states.forEach((state) => {
@@ -259,10 +261,13 @@ Game.prototype.makeRunner = function(parent, color, scale, x, y, speed, get_up) 
             // 40 here is for the fact that the head moves in on punch frames, so there's a more generous buffer
             && Math.abs(runner.lx - runner.punch_target.lx) <= punch_positions[t2] + 40
             && (runner.punch_target.lx - runner.lx) * runner.punch_target.scale.x < 0) {
+            if (runner.color == "blue") game.player_area.shake = game.markTime();
             runner.knockout();
           }
         }
 
+        if (runner.sound) game.soundEffect("slap_" + Math.ceil(Math.random() * 4));
+        if (runner.punch_target.color == "blue") game.player_area.shake = game.markTime();
         runner.punch_target.knockout();
       }
     }

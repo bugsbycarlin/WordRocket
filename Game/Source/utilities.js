@@ -4,6 +4,7 @@
 // Yellow: 0xf3db3c
 // Red: 0xdb5858
 // Green: 0x71d07d
+// Retro green: 0x3ff74f
 
 const board_width = 12;
 

@@ -32,7 +32,7 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
   prompt.fixed = fixed;
   prompt.finished_callback = finished_callback;
 
-  prompt.prior_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xAAAAAA, letterSpacing: 0, align: "left"});
+  prompt.prior_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0x058025, letterSpacing: 0, align: "left"});
   prompt.prior_text.anchor.set(0, 0.5);
   prompt.prior_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   prompt.addChild(prompt.prior_text);
@@ -51,7 +51,7 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
   prompt.addChild(prompt.strikethrough);
 
   prompt.prior_strikethrough = new PIXI.Sprite.from(PIXI.Texture.WHITE);
-  prompt.prior_strikethrough.tint = 0xAAAAAA;
+  prompt.prior_strikethrough.tint = 0x058025;
   prompt.prior_strikethrough.width = 100;
   prompt.prior_strikethrough.height = 2;
   prompt.prior_strikethrough.anchor.set(0, 0.5)
@@ -59,12 +59,12 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
   prompt.addChild(prompt.prior_strikethrough);
 
   //wordWrap: true, wordWrapWidth: 650
-  prompt.remaining_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 0, align: "left"});
+  prompt.remaining_text = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0x3ff74f, letterSpacing: 0, align: "left"});
   prompt.remaining_text.anchor.set(0, 0.5);
   prompt.remaining_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   prompt.addChild(prompt.remaining_text);
   if (prompt.fixed == true) {
-    prompt.remaining_text.style.fill = 0x71d07d;
+    prompt.remaining_text.style.fill = 0x3ff74f;
   }
 
   prompt.setText(text);
@@ -121,9 +121,16 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
         prompt.prior_text.text = "";
         if (complete && prompt.finished_callback != null) {
           prompt.finished_callback();
+          game.soundEffect("accept");
         } else if (!complete) {
+          // I think these
+          prompt.word_number = 0;
+          prompt.carat = 0;
+          prompt.prior_text.text = "";
+          //////
           prompt.shake = self.markTime();
           prompt.remaining_text.style.fill = 0xdb5858;
+          game.soundEffect("negative");
         }
       } else {
         prompt.carat += prompt.word_list[prompt.word_number - 2].length + prompt.word_list[prompt.word_number - 1].length
@@ -134,6 +141,9 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
           prompt.prior_text.text = "";
           prompt.shake = self.markTime();
           prompt.remaining_text.style.fill = 0xdb5858;
+          game.soundEffect("negative");
+        } else {
+          game.soundEffect("accept");
         }
       }
 
@@ -152,6 +162,9 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
       prompt.prior_strikethrough.visible = false;
 
       if (prompt.word_number >= prompt.word_list.length) {
+        if (!prompt.complete) {
+          game.soundEffect("negative");
+        }
         prompt.word_number = 0;
         prompt.carat = 0;
         prompt.prior_text.text = "";
@@ -159,6 +172,7 @@ Game.prototype.makePrompt = function(parent, x, y, text, fixed = false, finished
         prompt.carat += prompt.word_list[prompt.word_number - 2].length + prompt.word_list[prompt.word_number - 1].length
         prompt.prior_text.text = prompt.word_list[prompt.word_number - 2] + prompt.word_list[prompt.word_number - 1];
         if (!prompt.complete) {
+          game.soundEffect("negative");
           prompt.prior_strikethrough.visible = true;
           let met_1 = new PIXI.TextMetrics.measureText(prompt.word_list[prompt.word_number - 2], prompt.prior_text.style);
           prompt.prior_strikethrough.width = met_1.width;

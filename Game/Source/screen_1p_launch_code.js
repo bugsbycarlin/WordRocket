@@ -27,11 +27,12 @@ Game.prototype.initialize1pLaunchCode = function() {
   var screen = this.screens["1p_launch_code"];
   this.clearScreen(screen);
 
-  // NO NO NO NO NO NO NO
-  this.level = 20;
-
   this.freefalling = [];
   this.shakers = [];
+
+  // NO NO NO
+  this.difficulty_level = "MEDIUM";
+  this.level = 1;
 
   this.game_phase = "pre_game";
 
@@ -40,12 +41,12 @@ Game.prototype.initialize1pLaunchCode = function() {
   this.word_count = 0;
   this.correct_word_count = 0;
 
-  let difficulty_multiplier = this.difficulty_level == "EASY" ? 1 :
-    this.difficulty_level == "MEDIUM" ? 2 :
-    this.difficulty_level == "HARD" ? 3 : 5;
+  let difficulty_multiplier = this.difficulty_level == "EASY" ? 0.5 :
+    this.difficulty_level == "MEDIUM" ? 0.75 :
+    this.difficulty_level == "HARD" ? 1 : 1.25;
 
   console.log(this.level);
-  this.launchCodeSetDifficulty1(this.level);
+  this.launchCodeSetDifficulty1(this.level, difficulty_multiplier);
 
   this.resetRace();
   this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
@@ -80,7 +81,7 @@ Game.prototype.initialize1pLaunchCode = function() {
 }
 
 
-Game.prototype.launchCodeSetDifficulty1 = function(level) {
+Game.prototype.launchCodeSetDifficulty1 = function(level, difficulty_multiplier) {
   this.chunk_types = ["flat", "flat", "flat", "flat", "flat", "flat", "flat", "flat", "rise", "box"];
   if (level > 1) {
     this.chunk_types[0] = "guard";
@@ -96,24 +97,29 @@ Game.prototype.launchCodeSetDifficulty1 = function(level) {
     this.chunk_types[4] = "box";
     this.chunk_types[5] = "rise";
   }
-  this.launch_code_course_length = Math.floor((30 + 5 * level) * (0.75 + 0.5 * Math.random()));
+
+  this.chunk_types = ["door"];
+
+  let gain = difficulty_multiplier < 1 ? 2 : (difficulty_multiplier == 1 ? 3 : 5);
+  console.log("Gain is " + gain);
+  this.launch_code_course_length = Math.floor((30 + 3 * level) * (0.75 + 0.5 * Math.random()));
   this.code_panel_difficulty = Math.min(12, Math.floor(level / 2));
 }
 
 
 Game.prototype.launchCodeSetDifficulty2 = function(level, difficulty_multiplier) {
-  this.runner[1].max_speed = 3 + Math.max(3, Math.floor(level / 5));
-  this.runner[1].min_speed = 1 + Math.max(2, Math.floor(level / 5));
-  this.runner[1].jump_probability = Math.min(1, 0.4 + level * 0.05);
-  this.runner[1].punch_probability = Math.min(1, 0.4 + level * 0.05);
-  this.runner[1].terminal_delay = Math.max(3500, 6000 - 300 * level);
+  console.log("Difficulty multiplier is " + difficulty_multiplier);
+  let gain = difficulty_multiplier < 1 ? 0 : (difficulty_multiplier == 1 ? 1 : 3);
+  this.runner[1].max_speed = 3 + gain + Math.max(3, Math.floor(level / 5));
+  this.runner[1].min_speed = 1 + gain + Math.max(2, Math.floor(level / 5));
+  this.runner[1].jump_probability = Math.min(1, difficulty_multiplier * (0.4 + level * 0.05));
+  this.runner[1].punch_probability = Math.min(1, difficulty_multiplier * (0.3 + level * 0.04));
+  this.runner[1].terminal_delay = Math.max(3500 / difficulty_multiplier, (6000 - 300 * level) / difficulty_multiplier);
   this.runner[1].speed_change_time = Math.max(300, 1000 - 100 * level);
+  this.runner[1].last_choice = this.markTime();
 
   this.runner[0].decay_time = Math.max(600, 1000 - 30 * level);
-  this.runner[0].typing_boost = Math.max(0.4, 1.5 - level * 0.1);
-  console.log(level);
-  console.log(Math.max(0.35, 1.5 - level * 0.1));
-  console.log(this.runner[0].typing_boost);
+  this.runner[0].typing_boost = Math.max(0.4, (1.5 - level * 0.1) / difficulty_multiplier);
 }
 
 
@@ -172,7 +178,7 @@ Game.prototype.resetRace = function() {
         self.tutorial_1_snide_clicks += 1
       }
 
-      self.baseCaptureKeyDown(letter);
+      self.launchCodeKeyDown(letter);
     }
   });
 
@@ -180,6 +186,8 @@ Game.prototype.resetRace = function() {
   this.player_area = new PIXI.Container();
   screen.addChild(this.player_area);
   this.player_area.position.set(129, 39);
+  this.player_area.ox = this.player_area.position.x;
+  this.player_area.oy = this.player_area.position.y;
 
   let area = this.player_area;
 
@@ -192,31 +200,59 @@ Game.prototype.resetRace = function() {
   this.parallax_course_bg = new PIXI.Container();
   this.parallax_course_bg.position.set(0, 0); // shift it so y = 0 matches the player's origin.
   area.addChild(this.parallax_course_bg);
-  for (var i = 0; i < 4; i++) {
-    let bg = new PIXI.Sprite(PIXI.Texture.from("Art/Course/parallax_background.png"));
-    bg.anchor.set(0, 0);
-    bg.scale.set(1.5, 1.5);
-    bg.position.set(1280 * 1.5 * i, -480 * 1.5);
-    bg.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    this.parallax_course_bg.addChild(bg);
+  for (var i = 0; i < this.launch_code_course_length * 3.85; i++) {
+    let bg_1 = new PIXI.Sprite(PIXI.Texture.from("Art/Course/parallax_upper_shade.png"));
+    bg_1.anchor.set(0, 1);
+    bg_1.scale.set(1,1);
+    bg_1.position.set(1280 * 1 * i, -480);
+    bg_1.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    this.parallax_course_bg.addChild(bg_1);
+
+    let bg_2 = new PIXI.Sprite(PIXI.Texture.from("Art/Course/parallax_lower_shade.png"));
+    bg_2.anchor.set(0, 1);
+    bg_2.scale.set(1,1);
+    bg_2.position.set(1280 * 1 * i, 480);
+    bg_2.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    this.parallax_course_bg.addChild(bg_2);
+
+    let bg_3 = new PIXI.Sprite(PIXI.Texture.from("Art/Course/parallax_upper_girders.png"));
+    bg_3.anchor.set(0, 1);
+    bg_3.scale.set(1,1);
+    bg_3.position.set(1280 * 1 * i, -480);
+    bg_3.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    this.parallax_course_bg.addChild(bg_3);
+
+    let bg_4 = new PIXI.Sprite(PIXI.Texture.from("Art/Course/parallax_lower_girders.png"));
+    bg_4.anchor.set(0, 1);
+    bg_4.scale.set(1,1);
+    bg_4.position.set(1280 * 1 * i, 480);
+    bg_4.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    this.parallax_course_bg.addChild(bg_4);
   }
 
   this.makeCoursesAndPlayers();
 
   this.makeCodePanel();
 
-  let writing_band = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  writing_band.tint = 0x43474d;
-  // writing_band.tint = 0xFFFFFF;
-  writing_band.width = 669;
-  writing_band.height = 60;
-  writing_band.anchor.set(0, 0)
-  writing_band.position.set(0, 444);
-  area.addChild(writing_band);
+  let run_prompt_backing = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  run_prompt_backing.tint = 0x000000;
+  run_prompt_backing.width = 669;
+  run_prompt_backing.height = 60;
+  run_prompt_backing.anchor.set(0, 0)
+  run_prompt_backing.position.set(0, 444);
+  area.addChild(run_prompt_backing);
 
   shuffleArray(this.typing_prompts);
   this.run_prompt = this.makePrompt(area, 10, 474, this.typing_prompts[0]);
   this.run_prompt.visible = false;
+
+  // this.run_prompt_scanlines = new PIXI.Sprite(PIXI.Texture.from("Art/prompt_scanlines.png"));
+  // this.run_prompt_scanlines.tint = 0x000000;
+  // this.run_prompt_scanlines.anchor.set(0, 0)
+  // this.run_prompt_scanlines.position.set(0, 444);
+  // this.run_prompt_scanlines.alpha = 0.5;
+  // area.addChild(this.run_prompt_scanlines);
+
 
   this.intro_overlay = new PIXI.Container();
   this.intro_overlay.position.set(0, 0);
@@ -249,6 +285,13 @@ Game.prototype.resetRace = function() {
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.announcement.style.lineHeight = 36;
   screen.addChild(this.announcement);
+
+  this.launch_code_countdown = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xdb5858, letterSpacing: 3, align: "center"});
+  this.launch_code_countdown.anchor.set(0.5,0.5);
+  this.launch_code_countdown.position.set(470, 118);
+  this.launch_code_countdown.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  this.launch_code_countdown.style.lineHeight = 18;
+  screen.addChild(this.launch_code_countdown);
 
   this.runner_arrow = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/arrow_pixelated.png"));
   this.runner_arrow.visible = false;
@@ -373,7 +416,8 @@ Game.prototype.makeCodePanel = function() {
   screen.addChild(this.code_panel);
   this.code_prompt = this.makePrompt(this.code_panel, -200, 0, this.chooseLaunchCode(), true,
     function() {
-      self.code_prompt.parent_chunk.setState("opening");
+      self.code_prompt.parent_chunk.setState("open");
+      self.soundEffect("door");
       self.runner[0].setState("static");
       self.game_phase = "active";
       new TWEEN.Tween(self.code_panel)
@@ -405,10 +449,6 @@ Game.prototype.makeCoursesAndPlayers = function() {
 }
 
 
-// chunk_types = ["box", "door", "flat", "rise"];
-// chunk_types = ["box", "door", "flat", "rise", "flat", "guard"];
-// chunk_types = ["flat", "box", "door", "guard", "rise", "box", "door", "guard", "rise"];
-//chunk_types = ["guard"];
 Game.prototype.launchCodeMakeCourseList = function(size) {
   
   let list = [];
@@ -424,6 +464,9 @@ Game.prototype.launchCodeMakeCourseList = function(size) {
     }
     list.push(chunk_type);
   }
+  list.push("flat");
+  list.push("flat");
+  list.push("flat");
   return list;
 }
 
@@ -436,6 +479,8 @@ Game.prototype.launchCodeMakeCourse = function(player_number, list, origin_x, or
   course.position.set(course.ox, course.oy); // shift it so y = 0 matches the player's origin.
   this.player_area.addChild(course);
 
+  let poles = [];
+
   course.items = [];
   let height = 0;
   for (let i = 0; i < list.length; i++) {
@@ -446,61 +491,70 @@ Game.prototype.launchCodeMakeCourse = function(player_number, list, origin_x, or
       chunk = new PIXI.Sprite(PIXI.Texture.from("Art/Course/" + (chunk_type == "guard" ? "flat" : chunk_type) + ".png"));
       chunk.anchor.set(0, 1);
     } else if (chunk_type == "door") {
-      let sheet = PIXI.Loader.shared.resources["Art/Course/door_animated.json"].spritesheet;
+      //let sheet = PIXI.Loader.shared.resources["Art/Course/door_animated.json"].spritesheet;
+      
       chunk = new PIXI.Container();
-      chunk.door_closed = new PIXI.AnimatedSprite(sheet.animations["closed"]);
-      chunk.door_open = new PIXI.AnimatedSprite(sheet.animations["open"]);
-      chunk.door_opening = new PIXI.AnimatedSprite(sheet.animations["opening"]);
-      chunk.door_closed.anchor.set(0, 1);
-      chunk.door_open.anchor.set(0, 1);
-      chunk.door_opening.anchor.set(0, 1);
-      chunk.door_closed.alpha = 0.5;
-      chunk.door_open.alpha = 0.5;
-      chunk.door_opening.alpha = 0.5;
-      chunk.door_opening.animationSpeed = 0.8;
-      chunk.door_opening.loop = false;
-      chunk.addChild(chunk.door_closed);
-      chunk.addChild(chunk.door_open);
-      chunk.addChild(chunk.door_opening);
+
+      chunk.door = new PIXI.Sprite(PIXI.Texture.from("Art/Course/door.png"));
+      chunk.door.anchor.set(0, 1);
+      chunk.addChild(chunk.door);
+
+      if (player_number == 1) {
+        chunk.door.tint = 0xBBBBBB;
+      }
+
+      let door = chunk.door;
+
+      poles.push([334 * i + 164, height + 2])
+
+      door.electricity = {};
+      for (let m = 1; m <= 4; m++) {
+        door.electricity[m] = new PIXI.Sprite(PIXI.Texture.from("Art/Course/door_elec_" + m + ".png"));
+        door.electricity[m].anchor.set(0, 0.5);
+        door.electricity[m].position.set(76, -276 - 22 * (m-1));
+        door.addChild(door.electricity[m]);
+      }
+
       chunk.setState = function(state) {
-        if (state == "opening") {
-          chunk.door_state = "opening";
-          chunk.door_closed.visible = false;
-          chunk.door_open.visible = false;
-          chunk.door_opening.visible = true;
-          chunk.door_opening.play();
-          chunk.door_opening.onComplete = function() {
-            chunk.setState("open");
-          }
-        } else if (state == "open") {
+        if (state == "open") {
           chunk.door_state = "open";
-          chunk.door_closed.visible = false;
-          chunk.door_open.visible = true;
-          chunk.door_opening.visible = false;
+          for (let m = 1; m <= 4; m++) {
+            chunk.door.electricity[m].visible = false;
+          }
         } else if (state == "closed") {
           chunk.door_state = "closed";
-          chunk.door_closed.visible = true;
-          chunk.door_open.visible = false;
-          chunk.door_opening.visible = false;
         }
       }
+
       chunk.setState("closed");
     }
 
-    if (chunk.chunk_type == "end") chunk.alpha = 0.5;
-
     chunk.scale.set(2, 2);
     chunk.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    chunk.position.set(334 * i, height + 8);
+    // old position
+    // chunk.position.set(334 * i, height + 8);
+    chunk.position.set(334 * i, height + 508);
     chunk.lx = 334 * i;
     chunk.ly = height;
+    if (player_number == 1) {
+      chunk.tint = 0xBBBBBB;
+    }
     chunk.chunk_type = chunk_type;
     course.addChild(chunk);
     course.items.push(chunk);
 
+    if (chunk.chunk_type == "end") {
+      chunk.alpha = 0.5;
+      this.final_lx = 334 * i + 167 - 75;
+      this.final_ly = height;
+    }
+
     if (chunk_type == "guard") {
-      let guard = this.makeRunner(course, "grey", 1.5, 334 * i + 167, 0, 0, false);
+      let guard = this.makeRunner(course, "grey", 1.5, 334 * i + 167, height, 0, false);
+      if (player_number == 0) guard.sound = true;
       guard.lx = 334 * i + 167;
+      guard.ly = height;
+      guard.ly_floor = height;
       guard.scale.set(-1.5, 1.5);
       guard.setState("static")
       chunk.guard = guard;
@@ -510,6 +564,20 @@ Game.prototype.launchCodeMakeCourse = function(player_number, list, origin_x, or
   }
 
   course.runner = this.makeRunner(course, player_color, 1.5, 0, 0, 0, true);
+  if (player_number == 0) course.runner.sound = true;
+
+  // add the foreground poles
+  for (let i = 0; i < poles.length; i++) {
+    console.log(poles[i]);
+    let pole = new PIXI.Sprite(PIXI.Texture.from("Art/Course/pole.png"));
+    pole.scale.set(2,2);
+    pole.anchor.set(0,1);
+    pole.position.set(poles[i][0], poles[i][1]);
+    if (player_number == 1) {
+      pole.tint = 0xBBBBBB;
+    }
+    course.addChild(pole);
+  }
 
   return course;
 }
@@ -522,7 +590,7 @@ Game.prototype.chooseLaunchCode = function(length = 5, difficulty = 0) {
   let dict_2 = this.starting_dictionaries[letter];
   // let word_list = this.enemy_words[word_size];
   for (let i = 0; i < length; i++) {
-    let dict = i % 2 == 0 ? dict_1 : dict_2;
+    let dict = (this.difficulty_level == "EASY" || i % 2 == 0) ? dict_1 : dict_2;
     let word = dict[Math.floor(Math.random() * dict.length)].toLowerCase();
     for (let j = 0; j < 10; j++) {
       if (word.length > 3 + difficulty / 2) word = dict[Math.floor(Math.random() * dict.length)].toLowerCase();
@@ -537,6 +605,10 @@ Game.prototype.chooseLaunchCode = function(length = 5, difficulty = 0) {
 
 Game.prototype.launchCodeGameOver = function(win = false) {
   let self = this;
+
+  if (this.game_phase == "gameover") {
+    return;
+  }
   
   this.game_phase = "gameover";
 
@@ -555,7 +627,11 @@ Game.prototype.launchCodeGameOver = function(win = false) {
     this.announcement.text = "YOU LOSE";
     this.stopMusic();
     this.soundEffect("game_over");
-    this.gameOverScreen(4000);
+
+    this.final_pan_x = 0.6666 * (this.runner[0].lx - this.final_lx) + this.player_area.ox;
+    this.final_pan_y = 0.6666 * (this.runner[0].ly - this.final_ly) + this.player_area.oy;
+
+    this.gameOverScreen(10000);
   }
 }
 
@@ -696,7 +772,7 @@ Game.prototype.launchCodeKeyDown = function(key) {
     this.pressKey(this.player_palette, key);
 
     if (key === "ArrowUp") {
-      //this.launchCodeSetTyping("");
+      this.soundEffect("grunt");
       this.runner[0].jump();
     }
 
@@ -709,6 +785,7 @@ Game.prototype.launchCodeKeyDown = function(key) {
           target = chunk.guard;
         }
       }
+      this.soundEffect("grunt");
       this.runner[0].punch(target, true);
     }
 
@@ -826,6 +903,19 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
     }
   }
 
+  if (this.timeSince(this.start_time) > 4000 && (this.game_phase == "active" || this.game_phase == "terminal")) {
+    let percent = Math.floor(100 * this.runner[0].lx / this.final_lx);
+    this.announcement.text = percent + "%";
+
+    if (this.runner[1].final_terminal == true) {
+
+      let remaining = (this.runner[1].current_terminal_delay - this.timeSince(this.runner[1].terminal_time)) / 1000;
+      if (remaining < 0) remaining = 0;
+      
+      this.launch_code_countdown.text = remaining.toFixed(2);
+    }
+  }
+
   if (this.game_phase == "active") {
     // Add to the score
     if (this.runner[0].lx > this.runner[0].last_x) {
@@ -940,7 +1030,7 @@ Game.prototype.launchCodeEnemyAction = function() {
   if (runner.current_state == "terminal") {
     if (runner.terminal_time != null && this.timeSince(runner.terminal_time) > runner.current_terminal_delay) {
       if (runner.final_terminal == false) {
-        runner.terminal_chunk.setState("opening");
+        runner.terminal_chunk.setState("open");
         runner.speed = 2;
         runner.changeSpeed();
         runner.terminal_time = null;
@@ -978,8 +1068,8 @@ Game.prototype.launchCodeEnemyAction = function() {
     if (chunk.chunk_type == "guard"
       && runner.current_state != "combat_punch"
       && chunk.guard.current_state != "combat_fall"
-      && x >= chunk.position.x && x <= chunk.position.x + 167
-      && this.timeSince(runner.last_choice) > 400) {
+      && x >= chunk.position.x + 70 && x <= chunk.position.x + 167
+      && this.timeSince(runner.last_choice) > 200) {
       runner.last_choice = this.markTime();
       let dice = Math.random();
       if (dice <= runner.punch_probability) {
@@ -1035,14 +1125,15 @@ Game.prototype.launchCodeUpdateCourse = function(course) {
     let chunk = course.items[i];
 
     if (x > chunk.position.x && x < chunk.position.x + 334) {
-      chunk.tint = 0x44FF44;
+      //chunk.tint = 0x44FF44;
     } else {
-      chunk.tint = 0xFFFFFF;
+      //chunk.tint = 0xFFFFFF;
     }
 
     if (chunk.chunk_type == "box" 
       && last_x <= chunk.position.x + 167 && x >= chunk.position.x + 167
       && (runner.current_state != "jump" || runner.ly > chunk.position.y - 70)) {
+      if (course.player_number == 0) this.player_area.shake = this.markTime();
       runner.damage();
     }
 
@@ -1052,6 +1143,15 @@ Game.prototype.launchCodeUpdateCourse = function(course) {
         runner.damage();
       } else if (runner.current_state == "jump") {
         runner.ly_floor = chunk.ly - 100;
+      }
+    }
+
+    if (chunk.chunk_type == "door" && chunk.door_state == "closed" && Math.random() < 0.25) {
+      let vals = [0, 22, 44, 66];
+      let door = chunk.door;
+      shuffleArray(vals);
+      for (let m = 1; m <= 4; m++) {
+        door.electricity[m].position.set(76, -276 - vals[m-1]);
       }
     }
 
@@ -1091,15 +1191,37 @@ Game.prototype.launchCodeUpdateCourse = function(course) {
 }
 
 
+Game.prototype.launchCodeGameOverPan = function() {
+  let self = this;
+      
+  console.log("in game over pan");
+  this.runner[1].sprites[this.runner[1].current_state].stop();
+  this.runner[0].sprites[this.runner[0].current_state].stop();
+
+  if (Math.abs(this.final_pan_x - this.player_area.position.x) > 5) {
+    this.player_area.position.x = 0.94 * this.player_area.position.x + 0.06 * this.final_pan_x;
+  }
+  if (Math.abs(this.final_pan_y - this.player_area.position.y) > 5) {
+    this.player_area.position.y = 0.94 * this.player_area.position.y + 0.06 * this.final_pan_y;
+  }
+}
+
+
+//let tickover = 0;
+
 Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
   var self = this;
   var screen = this.screens["1p_launch_code"];
 
   let fractional = diff / (1000/30.0);
 
+  //tickover += 1;
+
   // if (this.game_phase == "tutorial") {
   //   this.tutorial_screen.tutorial_text.hover();
   // }
+
+  //this.run_prompt_scanlines.position.set(0, 444 + (tickover % 2));
 
   this.launchCodeUpdateDisplayInfo();
   this.launchCodeMakeEmbers();
@@ -1107,11 +1229,17 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
   this.freeeeeFreeeeeFalling(fractional);
 
   if (this.code_prompt.shake == null) {
-    this.code_prompt.remaining_text.style.fill = 0xFFFFFF;
+    this.code_prompt.remaining_text.style.fill = 0x3ff74f;
   }
 
   if (this.runner[0].current_state == "combat_fall") {
     this.launchCodeSetTyping("");
+  }
+
+  if (this.game_phase == "gameover") {
+    // move the camera towards the other player, and pause the animations
+    this.launchCodeGameOverPan();
+    return;
   }
 
   this.launchCodeUpdateCourse(this.course[0]);

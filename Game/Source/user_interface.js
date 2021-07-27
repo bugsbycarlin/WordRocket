@@ -342,6 +342,8 @@ Game.prototype.swearing = function() {
   var self = this;
   var screen = this.screens[this.current_screen];
 
+  if (this.opponent_image == null) return;
+
   let word = "";
   for (let i = 0; i < 5; i++) {
     let num = Math.floor(Math.random() * 5);
@@ -354,7 +356,7 @@ Game.prototype.swearing = function() {
   }, 500 + Math.random(500));
   if (this.shakers != null) this.shakers.push(bub);
   bub.shake = this.markTime();
-  if (this.opponent_image != null) this.opponent_image.shake = this.markTime();
+  this.opponent_image.shake = this.markTime();
 }
 
 

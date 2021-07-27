@@ -236,7 +236,6 @@ class Game {
     }
   }
 
-
   initializeFlows() {
     this.flow = {};
     this.flow_marker = -1;
@@ -365,8 +364,11 @@ class Game {
         this.gameOverScreen(500, true);
       }
     } else if (this.game_type_selection == 1) {
+      // Arcade mode
       this.level = this.flow_marker + 1;
       let type = "";
+      shuffleArray(opponents)
+      this.opponent_name = opponents[0];
       if (this.arcade_type_selection == 0) {
         if (this.level % 9 == 1 || this.level % 9 == 2 || this.level % 9 == 3) {
           type = "1p_word_rockets";

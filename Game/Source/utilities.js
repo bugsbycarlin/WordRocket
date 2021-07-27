@@ -19,7 +19,6 @@ const letter_values = {
   "V": 3, "W": 2, "X": 3, "Y": 2, "Z": 4,
 }
 
-
 var character_names = [
   "ALFIE", "BERT", "CALLIE", "DENZEL", "EMMA", "FATIMA",
   "GRETA", "HAKEEM", "INEZ", "JIN", "KRISHNA", "LIAN",
@@ -27,6 +26,8 @@ var character_names = [
   "SOPHIE", "TANIEL", "UBA", "VIJAY", "WINTER", "XAVIER",
   "YAIR", "ZHANG",
 ];
+
+var opponents = ["zh"];
 
 var fire_colors = [0xda5533, 0xf66931, 0xef912d, 0xfaae4b];
 

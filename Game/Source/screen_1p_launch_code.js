@@ -31,8 +31,9 @@ Game.prototype.initialize1pLaunchCode = function() {
   this.shakers = [];
 
   // NO NO NO
+  this.opponent_image = "zh"
   this.difficulty_level = "MEDIUM";
-  this.level = 1;
+  this.level = 15;
 
   this.game_phase = "pre_game";
 
@@ -54,6 +55,9 @@ Game.prototype.initialize1pLaunchCode = function() {
   this.launchCodeSetDifficulty2(this.level, difficulty_multiplier); // must come after level creation so it can set player attributes
 
   this.shakers = [screen, this.player_area, this.enemy_area, this.opponent_image, this.code_prompt];
+
+  this.updateEnemyScreenTexture();
+  this.enemy_screen_texture_update = this.markTime();
 
   delay(function() {
     self.paused = false;
@@ -97,8 +101,6 @@ Game.prototype.launchCodeSetDifficulty1 = function(level, difficulty_multiplier)
     this.chunk_types[4] = "box";
     this.chunk_types[5] = "rise";
   }
-
-  this.chunk_types = ["door"];
 
   let gain = difficulty_multiplier < 1 ? 2 : (difficulty_multiplier == 1 ? 3 : 5);
   console.log("Gain is " + gain);
@@ -228,9 +230,41 @@ Game.prototype.resetRace = function() {
     bg_4.position.set(1280 * 1 * i, 480);
     bg_4.scaleMode = PIXI.SCALE_MODES.NEAREST;
     this.parallax_course_bg.addChild(bg_4);
+
+    let missile = new PIXI.Sprite(PIXI.Texture.from("Art/Course/missile.png"));
+    missile.anchor.set(0, 1);
+    missile.scale.set(1,1);
+    missile.position.set(1280 * 1 * i + 535, 880);
+    missile.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    this.parallax_course_bg.addChild(missile);
   }
 
+  this.parallax_course_foreground = new PIXI.Container();
+  this.parallax_course_foreground.position.set(0, 0);
+
   this.makeCoursesAndPlayers();
+
+
+  // this comes later so it's in front of the other level stuff.
+  // the definition comes earlier so we can add things to it during level construction.
+  area.addChild(this.parallax_course_foreground);
+
+  this.red_light = new PIXI.Sprite(PIXI.Texture.from("Art/red_light.png"));
+  this.red_light.anchor.set(0.5, 0.5);
+  this.red_light.scale.set(4, 4);
+  this.red_light.position.set(672, 0);
+  this.red_light.rotation = 0;
+  this.red_light.alpha = 0.5;
+  area.addChild(this.red_light);
+
+  this.white_flash = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  this.white_flash.anchor.set(0, 0);
+  this.white_flash.position.set(0, 0);
+  this.white_flash.width = 1280;
+  this.white_flash.height = 960;
+  this.white_flash.alpha = 0.0;
+  area.addChild(this.white_flash);
+
 
   this.makeCodePanel();
 
@@ -252,6 +286,7 @@ Game.prototype.resetRace = function() {
   // this.run_prompt_scanlines.position.set(0, 444);
   // this.run_prompt_scanlines.alpha = 0.5;
   // area.addChild(this.run_prompt_scanlines);
+
 
 
   this.intro_overlay = new PIXI.Container();
@@ -402,19 +437,78 @@ Game.prototype.makeCodePanel = function() {
 
   this.code_panel = new PIXI.Container();
   this.code_panel.position.set(129 + 356, 39 + 237 - 100);
-  this.code_panel.backing = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  this.code_panel.backing.tint = 0x222222;
-  this.code_panel.backing.width = 469;
-  this.code_panel.backing.height = 40;
-  this.code_panel.backing.anchor.set(0.5, 0.5);
+  this.code_panel.backing = new PIXI.Container();
   this.code_panel.addChild(this.code_panel.backing);
+  this.code_panel.backing.setWidth = function(width) {
+    self.clearScreen(self.code_panel.backing);
+
+    for (let i = 1; i <= 4; i++) {
+      let backing = PIXI.Sprite.from(PIXI.Texture.WHITE);
+      backing.tint = 0x000000;
+      backing.width = width;
+      backing.height = 56;
+      backing.anchor.set(0.5, 0.5);
+      backing.position.set(i == 1 ? -2 : (i == 2 ? 2 : 0), -10 + (i == 3 ? -2 : (i == 4 ? 2 : 0)));
+      self.code_panel.backing.addChild(backing);
+    }
+
+    for (let i = 1; i <= 4; i++) {
+      let dot = PIXI.Sprite.from(PIXI.Texture.WHITE);
+      dot.tint = 0xFFFFFF;
+      dot.width = 4;
+      dot.height = 4;
+      dot.anchor.set(0.5, 0.5);
+      if (i == 1) {
+        dot.position.set(4 - width/2, -34);
+      } else if (i == 2) {
+        dot.position.set(4 - width/2, 14);
+      } else if (i == 3) {
+        dot.position.set(width/2 - 4, -34);
+      } else if (i == 4) {
+        dot.position.set(width/2 - 4, 14);
+      } 
+      self.code_panel.backing.addChild(dot);
+    }
+
+    let top_line = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    top_line.tint = 0xFFFFFF; top_line.width = width - 16; top_line.height = 2;
+    top_line.anchor.set(0.5, 0.5);
+    top_line.position.set(0, -34);
+    self.code_panel.backing.addChild(top_line);
+
+    let bottom_line = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    bottom_line.tint = 0xFFFFFF; bottom_line.width = width - 16; bottom_line.height = 2;
+    bottom_line.anchor.set(0.5, 0.5);
+    bottom_line.position.set(0, 14);
+    self.code_panel.backing.addChild(bottom_line);
+
+    let left_line = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    left_line.tint = 0xFFFFFF; left_line.width = 2; left_line.height = 40;
+    left_line.anchor.set(0.5, 0.5);
+    left_line.position.set(4 - width/2, -10);
+    self.code_panel.backing.addChild(left_line);
+
+    let right_line = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    right_line.tint = 0xFFFFFF; right_line.width = 2; right_line.height = 40;
+    right_line.anchor.set(0.5, 0.5);
+    right_line.position.set(width/2 - 4, -10);
+    self.code_panel.backing.addChild(right_line);
+
+    let enter_measure = new PIXI.TextMetrics.measureText("Enter Code", self.code_prompt.remaining_text.style);
+    let black_gap = PIXI.Sprite.from(PIXI.Texture.WHITE);
+    black_gap.tint = 0x000000; black_gap.width = 180; black_gap.height = 6;
+    black_gap.anchor.set(0.5, 0.5);
+    black_gap.position.set(0, -34);
+    self.code_panel.backing.addChild(black_gap); 
+  }
+  
   code_panel_label = new PIXI.Text("Enter Code", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
   code_panel_label.anchor.set(0.5,0.5);
-  code_panel_label.position.set(0, -20);
+  code_panel_label.position.set(0, -30);
   code_panel_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.code_panel.addChild(code_panel_label);
   screen.addChild(this.code_panel);
-  this.code_prompt = this.makePrompt(this.code_panel, -200, 0, this.chooseLaunchCode(), true,
+  this.code_prompt = this.makePrompt(this.code_panel, -200, -6, this.chooseLaunchCode(), true,
     function() {
       self.code_prompt.parent_chunk.setState("open");
       self.soundEffect("door");
@@ -426,8 +520,8 @@ Game.prototype.makeCodePanel = function() {
         .start();
     });
   let measure = new PIXI.TextMetrics.measureText(this.code_prompt.remaining_text.text, this.code_prompt.remaining_text.style);
-  this.code_prompt.position.set(-1 * measure.width / 2, 0);
-  this.code_panel.backing.width = measure.width + 40;
+  this.code_prompt.position.set(-1 * measure.width / 2, -6);
+  this.code_panel.backing.setWidth(measure.width + 40);
   this.code_panel.visible = false;
 }
 
@@ -544,7 +638,7 @@ Game.prototype.launchCodeMakeCourse = function(player_number, list, origin_x, or
     course.items.push(chunk);
 
     if (chunk.chunk_type == "end") {
-      chunk.alpha = 0.5;
+      // chunk.alpha = 0.5;
       this.final_lx = 334 * i + 167 - 75;
       this.final_ly = height;
     }
@@ -561,6 +655,15 @@ Game.prototype.launchCodeMakeCourse = function(player_number, list, origin_x, or
     }
 
     if (chunk_type == "rise") height -= 100;
+
+    if (Math.random() < 0.1) {
+      number = Math.floor(Math.random() * 3) + 1;
+      let doodad = new PIXI.Sprite(PIXI.Texture.from("Art/Course/doodad_" + number + ".png"));
+      doodad.anchor.set(0, 1);
+      doodad.position.set(668 * i + Math.random(668), 150 + height);
+      console.log(doodad.position.x);
+      this.parallax_course_foreground.addChild(doodad);
+    }
   }
 
   course.runner = this.makeRunner(course, player_color, 1.5, 0, 0, 0, true);
@@ -649,8 +752,8 @@ Game.prototype.launchCodeTerminal = function(chunk, runner, player_number) {
     this.code_panel.alpha = 1;
     this.code_prompt.setText(this.chooseLaunchCode(5, this.code_panel_difficulty));
     let measure = new PIXI.TextMetrics.measureText(this.code_prompt.remaining_text.text, this.code_prompt.remaining_text.style);
-    this.code_prompt.position.set(-1 * measure.width / 2, 0);
-    this.code_panel.backing.width = measure.width + 40;
+    this.code_prompt.position.set(-1 * measure.width / 2, -6);
+    this.code_panel.backing.setWidth(measure.width + 40);
     this.code_prompt.parent_chunk = chunk;
 
     this.game_phase = "terminal";
@@ -681,8 +784,8 @@ Game.prototype.launchCodeFinalTerminal = function(chunk, runner, player_number) 
     this.code_panel.alpha = 1;
     this.code_prompt.setText(this.chooseLaunchCode(7, this.code_panel_difficulty));
     let measure = new PIXI.TextMetrics.measureText(this.code_prompt.remaining_text.text, this.code_prompt.remaining_text.style);
-    this.code_prompt.position.set(-1 * measure.width / 2, 0);
-    this.code_panel.backing.width = measure.width + 40;
+    this.code_prompt.position.set(-1 * measure.width / 2, -6);
+    this.code_panel.backing.setWidth(measure.width + 40);
     this.code_prompt.parent_chunk = chunk;
 
     this.code_prompt.finished_callback = function() {
@@ -1121,6 +1224,17 @@ Game.prototype.launchCodeUpdateCourse = function(course) {
   let last_x = runner.last_x;
   let x = runner.lx;
 
+  if (this.timeSince(this.start_time) > 5000 && this.game_phase == "active" && Math.random() < 0.0045) {
+    console.log("I am making an explosion");
+    if (course.player_number == 0) {
+      this.soundEffect("explosion_3");
+      this.player_area.shake = this.markTime();
+    }
+    let new_explosion = this.makeExplosion(course, runner.lx + 50 + 100 * Math.random(), runner.ly - 200 + 100 * Math.random(), 2, 2, function() {
+      course.removeChild(new_explosion)
+    });
+  }
+
   for (let i = 0; i < course.items.length; i++) {
     let chunk = course.items[i];
 
@@ -1133,13 +1247,24 @@ Game.prototype.launchCodeUpdateCourse = function(course) {
     if (chunk.chunk_type == "box" 
       && last_x <= chunk.position.x + 167 && x >= chunk.position.x + 167
       && (runner.current_state != "jump" || runner.ly > chunk.position.y - 70)) {
-      if (course.player_number == 0) this.player_area.shake = this.markTime();
+      if (course.player_number == 0) {
+        this.player_area.shake = this.markTime();
+        this.soundEffect("hurt");
+      } else {
+        this.swearing();
+      }
       runner.damage();
     }
 
     if (chunk.chunk_type == "rise" 
       && last_x <= chunk.position.x + 167 && x >= chunk.position.x + 167) {
       if (runner.current_state != "jump" || runner.ly > chunk.position.y - 85) {
+        if (course.player_number == 0) {
+          this.player_area.shake = this.markTime();
+          this.soundEffect("hurt");
+        } else {
+          this.swearing();
+        }
         runner.damage();
       } else if (runner.current_state == "jump") {
         runner.ly_floor = chunk.ly - 100;
@@ -1194,9 +1319,11 @@ Game.prototype.launchCodeUpdateCourse = function(course) {
 Game.prototype.launchCodeGameOverPan = function() {
   let self = this;
       
-  console.log("in game over pan");
   this.runner[1].sprites[this.runner[1].current_state].stop();
   this.runner[0].sprites[this.runner[0].current_state].stop();
+
+  this.red_light.rotation = Math.PI / 2;
+  this.white_flash.alpha = 0;
 
   if (Math.abs(this.final_pan_x - this.player_area.position.x) > 5) {
     this.player_area.position.x = 0.94 * this.player_area.position.x + 0.06 * this.final_pan_x;
@@ -1228,6 +1355,11 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
   this.shakeDamage();
   this.freeeeeFreeeeeFalling(fractional);
 
+  //if (this.timeSince(this.enemy_screen_texture_update) > 1000) {
+    this.updateEnemyScreenTexture();
+    this.enemy_screen_texture_update = this.markTime();
+  //}
+
   if (this.code_prompt.shake == null) {
     this.code_prompt.remaining_text.style.fill = 0x3ff74f;
   }
@@ -1244,10 +1376,23 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
 
   this.launchCodeUpdateCourse(this.course[0]);
   this.launchCodeUpdateCourse(this.course[1]);
-  this.course[1].position.y = this.course[1].oy - this.course[1].scale.y * this.course[0].runner.ly //this.course[0].position.y - 80;
-  this.course[1].position.x -= 0.6666 * (this.course[0].runner.lx - this.course[1].runner.lx)
+  this.course[1].position.y = this.course[1].oy - this.course[1].scale.y * this.runner[0].ly //this.course[0].position.y - 80;
+  this.course[1].position.x -= 0.6666 * (this.runner[0].lx - this.runner[1].lx)
   this.intro_overlay.position.set(-1 * this.runner[0].lx, 0);
   this.parallax_course_bg.position.set(-0.25 * this.runner[0].lx, -0.25 * this.runner[0].ly)
+  this.parallax_course_foreground.position.set(-2 * this.runner[0].lx, -1 * this.runner[0].ly);
+
+  this.red_light.rotation = -2 * Math.PI * 1.5 * this.timeSince(this.start_time) / 1000;
+  let rotation = (-1 * this.red_light.rotation * 180.0 / Math.PI) % 1080;
+  if (rotation > 360) this.red_light.rotation = 0;
+  // Flashes of white light. Haven't quite got this worked out.
+  // if (rotation < 45) {
+  //   this.white_flash.alpha = (rotation) / 10.0;
+  // } else if (rotation < 90) {
+  //   this.white_flash.alpha = (45 - rotation) / 10.0;
+  // } else {
+  //   this.white_flash.alpha = 0;
+  // }
 
   // Skip the rest if we aren't in active gameplay
   if (this.game_phase != "active" && this.game_phase != "terminal") {

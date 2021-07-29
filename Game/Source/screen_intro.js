@@ -68,10 +68,10 @@ Game.prototype.initializeIntro = function() {
   self.soundEffect("intro");
 
   delay(function() {
-    // self.initializeTitle();
-    // self.popScreens("intro", "title");
-    self.initializeScreen("1p_launch_code", true);
-    self.switchScreens(self.current_screen, "1p_launch_code");
+    self.initializeTitle();
+    self.popScreens("intro", "title");
+    // self.initializeScreen("1p_launch_code", true);
+    // self.switchScreens(self.current_screen, "1p_launch_code");
   }, 4500);
 }
 

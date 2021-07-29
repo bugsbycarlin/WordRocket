@@ -32,8 +32,8 @@ Game.prototype.initialize1pLaunchCode = function() {
 
   // NO NO NO
   this.opponent_image = "zh"
-  this.difficulty_level = "MEDIUM";
-  this.level = 15;
+  this.difficulty_level = "HARD";
+  this.level = 10;
 
   this.game_phase = "pre_game";
 
@@ -41,6 +41,13 @@ Game.prototype.initialize1pLaunchCode = function() {
 
   this.word_count = 0;
   this.correct_word_count = 0;
+
+  this.final_missile_pan = false;
+  this.final_missile == null;
+  this.final_missile_result = "explode";
+
+  this.last_key_pressed = "A";
+  this.last_key_pressed_time = this.markTime();
 
   let difficulty_multiplier = this.difficulty_level == "EASY" ? 0.5 :
     this.difficulty_level == "MEDIUM" ? 0.75 :
@@ -75,13 +82,13 @@ Game.prototype.initialize1pLaunchCode = function() {
     self.runner[1].last_speed_change = self.markTime();
   }, 1200);
 
-  setInterval(function() {
-    let minutes_elapsed = self.timeSince(self.start_time) / 60000;
-    let wpm = self.correct_word_count / minutes_elapsed;
-    let accuracy = self.correct_word_count/self.word_count;
-    console.log("WPM: " + wpm);
-    console.log("Accuracy: " + accuracy);
-  }, 3000)
+  // setInterval(function() {
+  //   let minutes_elapsed = self.timeSince(self.start_time) / 60000;
+  //   let wpm = self.correct_word_count / minutes_elapsed;
+  //   let accuracy = self.correct_word_count/self.word_count;
+  //   console.log("WPM: " + wpm);
+  //   console.log("Accuracy: " + accuracy);
+  // }, 3000)
 }
 
 
@@ -102,8 +109,6 @@ Game.prototype.launchCodeSetDifficulty1 = function(level, difficulty_multiplier)
     this.chunk_types[5] = "rise";
   }
 
-  let gain = difficulty_multiplier < 1 ? 2 : (difficulty_multiplier == 1 ? 3 : 5);
-  console.log("Gain is " + gain);
   this.launch_code_course_length = Math.floor((30 + 3 * level) * (0.75 + 0.5 * Math.random()));
   this.code_panel_difficulty = Math.min(12, Math.floor(level / 2));
 }
@@ -121,7 +126,7 @@ Game.prototype.launchCodeSetDifficulty2 = function(level, difficulty_multiplier)
   this.runner[1].last_choice = this.markTime();
 
   this.runner[0].decay_time = Math.max(600, 1000 - 30 * level);
-  this.runner[0].typing_boost = Math.max(0.4, (1.5 - level * 0.1) / difficulty_multiplier);
+  this.runner[0].typing_boost = Math.max(0.4, (1.5 - level * 0.05) / difficulty_multiplier);
 }
 
 
@@ -148,19 +153,7 @@ Game.prototype.resetRace = function() {
   });
   this.enemy_palette.scale.set(0.3125, 0.3125);
 
-  if(this.opponent_name != null) {
-    let name = "";
-    if (this.opponent_name == "zh") {
-      name = "zhukov";
-    }
-    this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/Opponents/" + name + ".png"));
-    this.opponent_image.anchor.set(0.5, 0.5);
-    this.opponent_image.position.set(1100, 304);
-    this.opponent_image.alpha = 0.7;
-  } else {
-    this.opponent_image = new PIXI.Container();
-  }
-  screen.addChild(this.opponent_image);
+  this.addOpponentPicture(screen);
 
   var near_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_near_background.png"));
   near_background.anchor.set(0, 0);
@@ -199,10 +192,12 @@ Game.prototype.resetRace = function() {
   player_monitor_mask.endFill();
   this.player_area.mask = player_monitor_mask;
 
+  this.launch_code_missiles = [];
+
   this.parallax_course_bg = new PIXI.Container();
   this.parallax_course_bg.position.set(0, 0); // shift it so y = 0 matches the player's origin.
   area.addChild(this.parallax_course_bg);
-  for (var i = 0; i < this.launch_code_course_length * 3.85; i++) {
+  for (var i = 0; i < this.launch_code_course_length / 3; i++) {
     let bg_1 = new PIXI.Sprite(PIXI.Texture.from("Art/Course/parallax_upper_shade.png"));
     bg_1.anchor.set(0, 1);
     bg_1.scale.set(1,1);
@@ -233,10 +228,11 @@ Game.prototype.resetRace = function() {
 
     let missile = new PIXI.Sprite(PIXI.Texture.from("Art/Course/missile.png"));
     missile.anchor.set(0, 1);
-    missile.scale.set(1,1);
+    missile.scale.set(0.75,0.75);
     missile.position.set(1280 * 1 * i + 535, 880);
     missile.scaleMode = PIXI.SCALE_MODES.NEAREST;
     this.parallax_course_bg.addChild(missile);
+    this.launch_code_missiles.push(missile);
   }
 
   this.parallax_course_foreground = new PIXI.Container();
@@ -381,12 +377,24 @@ Game.prototype.resetRace = function() {
   this.level_text_box.visible = false;
   screen.addChild(this.level_text_box);
 
-  this.instructions_text = new PIXI.Text("Type to keep running! \nUp to jump! Enter to punch!", {
-    fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
-  this.instructions_text.anchor.set(0.5,0.5);
-  this.instructions_text.position.set(470, 510);
-  this.instructions_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.instructions_text);
+  // this.instructions_text = new PIXI.Text("Type to keep running! \nUp to jump! Enter to punch!", {
+  //   fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  // this.instructions_text.anchor.set(0.5,0.5);
+  // this.instructions_text.position.set(470, 510);
+  // this.instructions_text.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  // screen.addChild(this.instructions_text);
+
+  this.type_to_run = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/type_to_run_v3.png"));
+  this.type_to_run.anchor.set(0,0.5);
+  this.type_to_run.position.set(170 - 129, 150 - 39);
+  this.type_to_run.visible = false;
+  area.addChild(this.type_to_run);
+
+  this.double_tap_to_act = new PIXI.Sprite(PIXI.Texture.from("Art/Nav/double_tap_action_v4.png"));
+  this.double_tap_to_act.anchor.set(0,0.5);
+  this.double_tap_to_act.position.set(320 - 129, 200 - 39);
+  this.double_tap_to_act.visible = false;
+  area.addChild(this.double_tap_to_act);
 
   this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {
     fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
@@ -558,9 +566,10 @@ Game.prototype.launchCodeMakeCourseList = function(size) {
     }
     list.push(chunk_type);
   }
-  list.push("flat");
-  list.push("flat");
-  list.push("flat");
+  for (let i = 0; i < 8; i++) {
+    list.push("flat");
+  }
+
   return list;
 }
 
@@ -661,7 +670,6 @@ Game.prototype.launchCodeMakeCourse = function(player_number, list, origin_x, or
       let doodad = new PIXI.Sprite(PIXI.Texture.from("Art/Course/doodad_" + number + ".png"));
       doodad.anchor.set(0, 1);
       doodad.position.set(668 * i + Math.random(668), 150 + height);
-      console.log(doodad.position.x);
       this.parallax_course_foreground.addChild(doodad);
     }
   }
@@ -717,7 +725,11 @@ Game.prototype.launchCodeGameOver = function(win = false) {
 
   this.score = Math.floor(this.score);
 
+  this.final_pan_x = 0.6666 * (this.runner[0].lx - this.final_lx) + this.player_area.ox;
+  this.final_pan_y = 0.6666 * (this.runner[0].ly - this.final_ly) + this.player_area.oy;
+
   if (win == true) {
+    this.final_missile_result = "explode";
     this.announcement.text = "YOU WIN!";
     this.soundEffect("victory");
     this.score += 500;
@@ -725,14 +737,12 @@ Game.prototype.launchCodeGameOver = function(win = false) {
     flicker(this.announcement, 500, 0xFFFFFF, 0x67d8ef);
     delay(function() {
       self.nextFlow();
-    }, 4000);
+    }, 10000);
   } else {
+    this.final_missile_result = "launch";
     this.announcement.text = "YOU LOSE";
     this.stopMusic();
     this.soundEffect("game_over");
-
-    this.final_pan_x = 0.6666 * (this.runner[0].lx - this.final_lx) + this.player_area.ox;
-    this.final_pan_y = 0.6666 * (this.runner[0].ly - this.final_ly) + this.player_area.oy;
 
     this.gameOverScreen(10000);
   }
@@ -852,6 +862,12 @@ Game.prototype.launchCodeAdvance = function() {
         }
         this.runner[0].last_speed_change = this.markTime();
         if (this.runner[0].current_state == "static") this.runner[0].changeSpeed();
+        if (this.type_to_run.status != "falling") {
+          this.type_to_run.status = "falling";
+          this.type_to_run.vx = -10 + 20 * Math.random();
+          this.type_to_run.vy = -5 - 10 * Math.random();
+          this.freefalling.push(this.type_to_run);
+        }
       } else {
         this.runner[0].speed -= 1.5;
         if (this.runner[0].speed <= 0) {
@@ -866,6 +882,33 @@ Game.prototype.launchCodeAdvance = function() {
 }
 
 
+Game.prototype.launchCodeAct = function() {
+  let target = null;
+  for (let i = 0; i < this.course[0].items.length; i++) {
+    let chunk = this.course[0].items[i];
+    if (chunk.chunk_type == "guard" 
+      && this.runner[0].lx >= chunk.position.x && this.runner[0].lx <= chunk.position.x + 334) {
+      target = chunk.guard;
+    }
+  }
+
+  if (target == null) {
+    this.soundEffect("grunt");
+    this.runner[0].jump();
+  } else {
+    this.soundEffect("grunt");
+    this.runner[0].punch(target, true);
+  }
+
+  if (this.double_tap_to_act.status != "falling") {
+    this.double_tap_to_act.status = "falling";
+    this.double_tap_to_act.vx = -10 + 20 * Math.random();
+    this.double_tap_to_act.vy = -5 - 10 * Math.random();
+    this.freefalling.push(this.double_tap_to_act);
+  }
+}
+
+
 Game.prototype.launchCodeKeyDown = function(key) {
   let player = 0;
   if (!this.paused && this.game_phase == "active"
@@ -874,22 +917,26 @@ Game.prototype.launchCodeKeyDown = function(key) {
 
     this.pressKey(this.player_palette, key);
 
-    if (key === "ArrowUp") {
-      this.soundEffect("grunt");
-      this.runner[0].jump();
-    }
+    // if (key === "ArrowUp") {
+    //   this.soundEffect("grunt");
+    //   this.runner[0].jump();
+    // }
+
+    // if (key === "Enter") {
+    //   let target = null;
+    //   for (let i = 0; i < this.course[0].items.length; i++) {
+    //     let chunk = this.course[0].items[i];
+    //     if (chunk.chunk_type == "guard" 
+    //       && this.runner[0].lx >= chunk.position.x && this.runner[0].lx <= chunk.position.x + 334) {
+    //       target = chunk.guard;
+    //     }
+    //   }
+    //   this.soundEffect("grunt");
+    //   this.runner[0].punch(target, true);
+    // }
 
     if (key === "Enter") {
-      let target = null;
-      for (let i = 0; i < this.course[0].items.length; i++) {
-        let chunk = this.course[0].items[i];
-        if (chunk.chunk_type == "guard" 
-          && this.runner[0].lx >= chunk.position.x && this.runner[0].lx <= chunk.position.x + 334) {
-          target = chunk.guard;
-        }
-      }
-      this.soundEffect("grunt");
-      this.runner[0].punch(target, true);
+      this.launchCodeAct();
     }
 
     for (i in lower_array) {
@@ -909,7 +956,11 @@ Game.prototype.launchCodeKeyDown = function(key) {
     }
 
     if (key === " ") {
-      this.launchCodeAdvance();
+      if (this.last_key_pressed != " " || this.timeSince(this.last_key_pressed_time) > 400) {
+        this.launchCodeAdvance();
+      } else {
+        this.launchCodeAct();
+      }
     }
 
     if (key === "Backspace" || key === "Delete") {
@@ -922,6 +973,9 @@ Game.prototype.launchCodeKeyDown = function(key) {
     if (key === "Escape") {
       this.launchCodeSetTyping("");
     }
+
+    this.last_key_pressed = key;
+    this.last_key_pressed_time = this.markTime();
   }
 
   if (!this.paused && this.game_phase == "terminal") {
@@ -980,14 +1034,13 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
 
   if (this.game_phase == "countdown" && !this.paused) {
     let time_remaining = (2400 - (this.timeSince(this.start_time))) / 800;
-    this.announcement.text = Math.ceil(time_remaining).toString();
+    // this.announcement.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
       
       this.game_phase = "active";
       this.last_play = this.markTime();
 
-      this.instructions_text.visible = false;
-      this.run_prompt.visible = true;
+     
 
       this.announcement.style.fill = 0xFFFFFF;
       this.announcement.text = "GO";
@@ -996,6 +1049,9 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
       this.score_text_box.visible = true;
       this.level_label.visible = true;
       this.level_text_box.visible = true;
+      this.type_to_run.visible = true;
+      this.double_tap_to_act.visible = true;
+      this.run_prompt.visible = true;
       delay(function() {self.announcement.text = "";}, 1600);
 
       new TWEEN.Tween(this.intro_overlay.background)
@@ -1315,7 +1371,6 @@ Game.prototype.launchCodeUpdateCourse = function(course) {
   }
 }
 
-
 Game.prototype.launchCodeGameOverPan = function() {
   let self = this;
       
@@ -1325,11 +1380,51 @@ Game.prototype.launchCodeGameOverPan = function() {
   this.red_light.rotation = Math.PI / 2;
   this.white_flash.alpha = 0;
 
-  if (Math.abs(this.final_pan_x - this.player_area.position.x) > 5) {
-    this.player_area.position.x = 0.94 * this.player_area.position.x + 0.06 * this.final_pan_x;
-  }
   if (Math.abs(this.final_pan_y - this.player_area.position.y) > 5) {
     this.player_area.position.y = 0.94 * this.player_area.position.y + 0.06 * this.final_pan_y;
+  }
+
+  if (Math.abs(this.final_pan_x - this.player_area.position.x) > 5) {
+    this.player_area.position.x = 0.94 * this.player_area.position.x + 0.06 * this.final_pan_x;
+  } else if (this.final_missile_pan == false) {
+    this.final_missile_pan = true;
+    for (let c = 0; c < this.launch_code_missiles.length; c++) {
+      let missile = this.launch_code_missiles[c];
+      let x = missile.position.x + this.parallax_course_bg.position.x + this.player_area.position.x;
+      if (x >= 0 && x <= 1280 && x >= 400) {
+        let diff = 400 - x;
+        this.final_pan_x += diff;
+        this.final_missile = missile;
+        this.final_missile.vy = 0;
+        this.soundEffect("big_rocket");
+      }
+    }
+  }
+
+  if (this.final_missile != null) {
+    if (this.final_missile_result == "launch") {
+      this.final_missile.y += this.final_missile.vy;
+      this.final_missile.vy -= 0.02;
+
+      let dice = Math.ceil(Math.random() * 3);
+      for (let d = 0; d < dice; d++) {
+        let new_explosion = this.makeExplosion(this.parallax_course_bg, 
+          this.final_missile.x + 130 - 75 + 150 * Math.random(),
+          this.final_missile.y - 25 + 50 * Math.random(), 2, 2, function() {
+          self.parallax_course_bg.removeChild(new_explosion)
+        });
+      }
+    } else if (this.final_missile_result == "explode") {
+      let dice = Math.ceil(Math.random() * 3);
+      this.final_missile.alpha *= 0.993;
+      for (let d = 0; d < dice; d++) {
+        let new_explosion = this.makeExplosion(this.parallax_course_bg, 
+          this.final_missile.x + 130 - 75 + 150 * Math.random(),
+          this.final_missile.y - 1600 * Math.random(), 2, 2, function() {
+          self.parallax_course_bg.removeChild(new_explosion)
+        });
+      }
+    }
   }
 }
 
@@ -1355,10 +1450,10 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
   this.shakeDamage();
   this.freeeeeFreeeeeFalling(fractional);
 
-  //if (this.timeSince(this.enemy_screen_texture_update) > 1000) {
+  if (this.timeSince(this.enemy_screen_texture_update) > 3000) {
     this.updateEnemyScreenTexture();
     this.enemy_screen_texture_update = this.markTime();
-  //}
+  }
 
   if (this.code_prompt.shake == null) {
     this.code_prompt.remaining_text.style.fill = 0x3ff74f;

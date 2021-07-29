@@ -85,20 +85,7 @@ Game.prototype.resetBoard = function() {
   enemy_pad_mat.tint = 0x000000; //0x2c3130;
   this.enemy_area.addChild(enemy_pad_mat);
 
-
-  if(this.opponent_name != null) {
-    let name = "";
-    if (this.opponent_name == "zh") {
-      name = "zhukov";
-    }
-    this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/Opponents/" + name + ".png"));
-    this.opponent_image.anchor.set(0.5, 0.5);
-    this.opponent_image.position.set(1100, 304);
-    this.opponent_image.alpha = 0.7;
-  } else {
-    this.opponent_image = new PIXI.Container();
-  }
-  screen.addChild(this.opponent_image);
+  this.addOpponentPicture(screen);
 
   var near_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_near_background.png"));
   near_background.anchor.set(0, 0);

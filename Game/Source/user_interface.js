@@ -110,6 +110,25 @@ Game.prototype.makeExplosion = function(parent, x, y, xScale, yScale, action) {
 }
 
 
+Game.prototype.addOpponentPicture = function(screen) {
+  if(this.opponent_name != null) {
+    let name = "";
+    if (this.opponent_name == "zh") {
+      name = "zhukov";
+    } else if (this.opponent_name == "an") {
+      name = "andy";
+    }
+    this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/Opponents/" + name + ".png"));
+    this.opponent_image.anchor.set(0.5, 0.5);
+    this.opponent_image.position.set(1100, 304);
+    this.opponent_image.alpha = 0.7;
+  } else {
+    this.opponent_image = new PIXI.Container();
+  }
+  screen.addChild(this.opponent_image);
+}
+
+
 Game.prototype.makeElectric = function(parent, x, y, xScale, yScale) {
   let sheet = PIXI.Loader.shared.resources["Art/electric.json"].spritesheet;
   let electric_sprite = new PIXI.AnimatedSprite(sheet.animations["electric"]);

@@ -250,7 +250,7 @@ class Game {
       
       // Testing cutscenes
       // "cut:c1", 
-      // "cut:c2", 
+      "cut:c2", 
       "cut:c3", 
       "cut:c4", 
       "cut:c5", 
@@ -369,6 +369,7 @@ class Game {
       let type = "";
       shuffleArray(opponents)
       this.opponent_name = opponents[0];
+      console.log(opponents);
       if (this.arcade_type_selection == 0) {
         if (this.level % 9 == 1 || this.level % 9 == 2 || this.level % 9 == 3) {
           type = "1p_word_rockets";

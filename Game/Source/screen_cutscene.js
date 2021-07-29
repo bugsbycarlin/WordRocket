@@ -258,7 +258,7 @@ Game.prototype.initializeCutscene = function(name = "intro") {
     this.setMusic("final_song");
   }
 
-  if (self.checkTournamentBoard) {
+  if (self.checkTournamentBoard()) {
     self.cutscene_state = "transitioning";
     self.tournament_board.parent.next.visible = false;
     delay(function() {
@@ -567,9 +567,9 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
-      {image: "russian_andy_and_kid.png", x: 640, y: 380},
-      {text: "I lost... \nto a kid.", x: 580, y: 340}
+      {image: "russian_andy_and_kid_v3b.png", x: 640, y: 480},
+      {text: "I lost... \nto a kid.", x: 580, y: 420},
+      {button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
     ],
     [
       {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0},

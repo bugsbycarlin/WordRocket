@@ -541,7 +541,7 @@ scenes = {
       {button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: 0}
     ],
     [
-      {image: "putzen_class_image.png", x: 660, y: 450},
+      {image: "putzen_class_image_v4.png", x: 660, y: 450},
       {text: "Our teacher, Mr Putzen, brought our entire \nclass to the training facility...", x: 480, y: 120, drift: "down"},
       {text: "and offered us as last minute replacements.", x: 800, y: 800, drift: "up"},
       {button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1}

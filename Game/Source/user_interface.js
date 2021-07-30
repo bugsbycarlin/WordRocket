@@ -117,6 +117,8 @@ Game.prototype.addOpponentPicture = function(screen) {
       name = "zhukov";
     } else if (this.opponent_name == "an") {
       name = "andy";
+    } else if (this.opponent_name == "iv") {
+      name = "ivan";
     }
     this.opponent_image = new PIXI.Sprite(PIXI.Texture.from("Art/Opponents/" + name + ".png"));
     this.opponent_image.anchor.set(0.5, 0.5);

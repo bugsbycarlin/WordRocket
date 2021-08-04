@@ -250,8 +250,8 @@ class Game {
       
       // Testing cutscenes
       // "cut:c1", 
-      "cut:c2", 
-      "cut:c3", 
+      // "cut:c2", 
+      // "cut:c3", 
       "cut:c4", 
       "cut:c5", 
       "cut:c6", 

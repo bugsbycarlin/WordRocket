@@ -614,10 +614,10 @@ scenes = {
       {appears: 3, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
     ],
     [
-      {disappears: 2, square:"ivan_3a.png", x: 640, y: 480, w: 900, h: 400},
-      {appears: 2, square:"ivan_3b.png", x: 640, y: 480, w: 850, h: 420},
-      {appears: 3, text: "I must break you.", size: 36, x: 600, y: 380},
-      {appears: 4, button: "Go go go!", x: 130, y: 50, swipe_x: 0, swipe_y: 1},
+      {disappears: 1, image:"ivan_breaks_keyboard_1_v2.png", x: 640, y: 480},
+      {appears: 1, image:"ivan_breaks_keyboard_2_v2.png", x: 640, y: 480},
+      {appears: 1, text: "I must break you!", size: 36, x: 700, y: 280},
+      {appears: 2, button: "Go go go!", x: 130, y: 50, swipe_x: 0, swipe_y: 1},
     ],
   ],
 //---------------------------------------------------------------------------------------
@@ -629,9 +629,10 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {square: "ivan_and_kid.png", x: 640, y: 480, w: 600, h: 400},
-      {appears: 2, text: "You broke me.", x: 540, y: 380},
-      {appears: 3, button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+      {image: "ivan_loses_v1.png", x: 640, y: 480},
+      {appears: 2, text: "You broke me.", x: 540, y: 320},
+      {appears: 3, text: "Well... both teams \nplayed hard, man.", x: 940, y: 240},
+      {appears: 4, button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
     ],
     [
       {square:"puzten_and_kids_1.png", x: 640, y: 480, w: 900, h: 400},

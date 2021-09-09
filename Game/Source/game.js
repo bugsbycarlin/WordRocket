@@ -252,7 +252,7 @@ class Game {
       // "cut:c1", 
       // "cut:c2", 
       // "cut:c3", 
-      "cut:c4", 
+      // "cut:c4", 
       "cut:c5", 
       "cut:c6", 
       "cut:c7", 
@@ -438,7 +438,7 @@ class Game {
   initializeAnimations() {
     var self = this;
     PIXI.Loader.shared
-      .add("Art/intro.png")
+      .add("Art/alpha_zoo_intro.png")
       .add("Art/fire.json")
       .add("Art/explosion.json")
       .add("Art/electric.json")

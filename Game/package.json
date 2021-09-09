@@ -1,0 +1,13 @@
+{
+  "name": "Cold War Keyboards",
+  "version": "1.0.0",
+  "main": "index.html",
+  "window" : {
+    "width" : 1280,
+    "height" : 960,
+    "max_width": 1280,
+    "min_width": 960,
+    "max_height": 1280,
+    "min_height": 960
+  }
+}

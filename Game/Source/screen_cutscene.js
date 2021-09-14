@@ -567,7 +567,8 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {image: "russian_andy_and_kid_v3b.png", x: 640, y: 480},
+      {image:"lighted_stage.png", x: 640, y: 480},
+      {image: "andy_loses.png", x: 640, y: 480},
       {text: "I lost... \nto a kid.", x: 580, y: 420},
       {button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1}
     ],
@@ -577,13 +578,13 @@ scenes = {
     ],
     [
       {image: "zhukov.png", x: 690, y: 420},
-      {appears: 1, disappears: 4, text: "You are obsessed with this *game*, \nGeorgy. It is unhealthy.", size: 24, x: 960, y: 150},
-      {appears: 2, disappears: 4, text: "It is the perfect combination of strategy and combat. \nThe Americans will use this to raise an unstoppable \ngeneral staff. I must go to the competition.", size: 24, x: 510, y: 800},
-      {appears: 3, disappears: 4, text: "I must destroy them.", size: 24, x: 850, y: 880},
+      {appears: 1, disappears: 4, text: "You are obsessed with this *game*, \nGeorgy. It is unhealthy.", size: 36, x: 860, y: 150},
+      {appears: 2, disappears: 4, text: "It is the perfect combination of strategy and combat. \nThe Americans will use this to raise an unstoppable \ngeneral staff. I must go to the competition.", size: 36, x: 580, y: 800},
+      {appears: 3, disappears: 4, text: "I must destroy them.", size: 36, x: 870, y: 900},
       // {appears: 8, button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1},
-      {appears: 5, text: "But you're too old.", size: 24, x: 990, y: 180},
-      {appears: 6, text: "The hell I am.", size: 24, x: 510, y: 800},
-      {appears: 7, text: "Look at my high score.", size: 24, x: 850, y: 840},
+      {appears: 5, text: "But you're too old.", size: 36, x: 990, y: 180},
+      {appears: 6, text: "The hell I am.", size: 36, x: 510, y: 800},
+      {appears: 7, text: "Look at my high score.", size: 36, x: 850, y: 840},
       {appears: 8, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
     ],
     [
@@ -608,14 +609,15 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
+      {image:"lighted_stage.png", x: 640, y: 480},
       {disappears: 1, image:"zhukov_loses_1.png", x: 640, y: 480},
       {appears: 1, image:"zhukov_loses_2.png", x: 640, y: 480},
       {appears: 2, text: "Good job! You have my respect, \n and a bright future in computers.", size: 36, x: 780, y: 240},
       {appears: 3, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
     ],
     [
-      {disappears: 1, image:"ivan_breaks_keyboard_1_v2.png", x: 640, y: 480},
-      {appears: 1, image:"ivan_breaks_keyboard_2_v2.png", x: 640, y: 480},
+      {disappears: 1, image:"ivan_breaks_keyboard_1.png", x: 640, y: 480},
+      {appears: 1, image:"ivan_breaks_keyboard_2.png", x: 640, y: 480},
       {appears: 1, text: "I must break you!", size: 36, x: 700, y: 280},
       {appears: 2, button: "Go go go!", x: 130, y: 50, swipe_x: 0, swipe_y: 1},
     ],
@@ -629,7 +631,8 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {image: "ivan_loses_v1.png", x: 640, y: 480},
+      {image:"lighted_stage.png", x: 640, y: 480},
+      {image: "ivan_loses.png", x: 640, y: 480},
       {appears: 2, disappears: 3, text: "You broke me.", x: 540, y: 320},
       {appears: 3, disappears: 4, text: "Well... both teams \nplayed hard, man.", x: 940, y: 240},
       {appears: 4, button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
@@ -665,6 +668,7 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
+      {image:"lighted_stage.png", x: 640, y: 480},
       {image: "rogov_loses.png", x: 640, y: 480},
       {appears: 2, disappears: 3, text: "Who would have thought a six \nfingered hand could cramp this badly?", x: 500, y: 320},
       {appears: 3, disappears: 4, text: "What's your secret? \nWhere do you get your speed?", x: 500, y: 320},
@@ -726,16 +730,21 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {disappears: 2, square: "fedor_defeated.png", x: 340, y: 480, w: 400, h: 400},
-      {disappears: 2, square: "kid_facing_left.png", x: 640, y: 480, w: 400, h: 400},
-      {appears: 2, square: "kid_facing_right.png", x: 640, y: 480, w: 400, h: 400},
-      {appears: 2, square: "putzen_revealed.png", x: 940, y: 480, w: 400, h: 400},
-      {appears: 3, disappears: 6, text: "You're.", size: 36, x: 340, y: 380},
-      {appears: 4, disappears: 6, text: "Yes.", size: 36, x: 1000, y: 380},
-      {appears: 6, image:"zhukov_2a.png", x: 255, y: 520},
-      {appears: 6, text: "Final competitor for the USSR...", size: 36, x: 420, y: 100},
-      {appears: 7, text: "Wladimir Putin.", size: 36, x: 640, y: 860},
-      {appears: 8, button: "Go go go!", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+      {image:"lighted_stage.png", x: 640, y: 480},
+      {image: "fedor_defeated.png", x: 640, y: 480},
+      {appears: 1, disappears: 8, image: "girl_victorious.png", x: 640, y: 480},
+      {appears: 1, disappears: 2, text: "I did it!", size: 36, x: 400, y: 160},
+      {appears: 2, disappears: 3, image: "boy_victorious.png", x: 640, y: 480},
+      {appears: 3, image: "official_reveals_putin.png", x: 640, y: 480},
+      {appears: 3, disappears: 8, image: "putin_revealed.png", x: 640, y: 480},
+      {appears: 3, disappears: 8, image: "boy_surprised.png", x: 640, y: 480},
+      {appears: 4, disappears: 5, text: "You're", size: 36, x: 740, y: 160},
+      {appears: 5, disappears: 6, text: "Yes.", size: 36, x: 940, y: 180},
+      {appears: 6, text: "Final competitor for the USSR...", size: 36, x: 900, y: 100},
+      {appears: 7, text: "Wladimir Putin.", size: 36, x: 1060, y: 160},
+      {appears: 8, image: "boy_intimidated.png", x: 640, y: 480},
+      {appears: 8, image: "putin_smiles.png", x: 640, y: 480},
+      {appears: 9, button: "Go go go!", x: 140, y: 50, swipe_x: 0, swipe_y: 1},
     ],
   ],
 //---------------------------------------------------------------------------------------

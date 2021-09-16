@@ -766,11 +766,13 @@ scenes = {
       {appears: 8, disappears: 11, square: "russian_competitors.png", x: 640, y: 480, w: 900, h: 200},
       {appears: 8, disappears: 10, text: "Sir, what does this mean for Russian dominance? \nWill it be okay? What will you do?", size: 36, x: 700, y: 100},
       {appears: 9, disappears: 10, text: "Everything will probably never be okay. \nBut you have to try.", size: 36, x: 800, y: 500},
-      {appears: 10, disappears: 11, text: "As for me...", size: 36, x: 800, y: 500},
-      {appears: 11, text: "I'm going home.", size: 36, x: 900, y: 500},
-      {appears: 11, square: "putin_on_bear.png", x: 500, y: 480, w: 400, h: 400},
+      
+      
+      {appears: 10, image: "putin_rides.png", x: 640, y: 480},
+      {appears: 10, text: "As for me...", size: 36, x: 1060, y: 80},
+      {appears: 11, text: "I'm going \nhome.", size: 36, x: 1140, y: 160},
       // HERE I WANT TO FADE TO SOME KIND OF CREDITS
-      {button: "The End.", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+      {appears: 12, button: "The End.", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
     ],
   ],
 }

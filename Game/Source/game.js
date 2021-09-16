@@ -255,7 +255,7 @@ class Game {
       // "cut:c4", 
       // "cut:c5", 
       // "cut:c6", 
-      "cut:c7", 
+      // "cut:c7", 
       "cut:c8",
     ];
     this.flow[0]["MEDIUM"] = [

@@ -243,10 +243,10 @@ class Game {
     // game type is story
     this.flow[0] = {};
     this.flow[0]["EASY"] = [
-      // "cut:c1", "wr:1", "wr:2", "cut:c2", "bc:3", "bc:4",
-      // "cut:c3", "lc:5", "lc:6", "cut:c4", "wr:7", "wr:8",
-      // "cut:c5", "bc:9", "bc:10", "cut:c6", "lc:11", "lc:12",
-      // "cut:c7", "wr:13", "wr:14", "cut:c8"
+      // "cut:c1", "wr:1:an", "wr:2:an", "cut:c2", "bc:3:zh", "bc:4:zh",
+      // "cut:c3", "lc:5:iv", "lc:6:iv", "cut:c4", "wr:7:ro", "wr:8:ro",
+      // "cut:c5", "bc:9:fe", "bc:10:fe", "cut:c6", "lc:11:fe", "lc:12:fe",
+      "cut:c7", "wr:13:pu", "wr:14:pu", "cut:c8"
       
       // Testing cutscenes
       // "cut:c1", 
@@ -256,30 +256,30 @@ class Game {
       // "cut:c5", 
       // "cut:c6", 
       // "cut:c7", 
-      "cut:c8",
+      // "cut:c8",
     ];
     this.flow[0]["MEDIUM"] = [
-      "cut:c1", "wr:1", "wr:2", "wr:3", "cut:c2", "bc:4", "bc:5", "bc:6",
-      "cut:c3", "lc:7", "lc:8", "lc:9", "cut:c4", "wr:10", "wr:11", "wr:12",
-      "cut:c5", "bc:13", "bc:14", "bc:15", "cut:c6", "lc:16", "lc:17", "lc:18",
-      "cut:c7", "wr:19", "wr:20", "wr:21", "cut:c8"
+      "cut:c1", "wr:1:an", "wr:2:an", "wr:3:an", "cut:c2", "bc:4:zh", "bc:5:zh", "bc:6:zh",
+      "cut:c3", "lc:7:iv", "lc:8:iv", "lc:9:iv", "cut:c4", "wr:10:ro", "wr:11:ro", "wr:12:ro",
+      "cut:c5", "bc:13:fe", "bc:14:fe", "bc:15:fe", "cut:c6", "lc:16:fe", "lc:17:fe", "lc:18:fe",
+      "cut:c7", "wr:19:pu", "wr:20:pu", "wr:21:pu", "cut:c8"
     ];
     this.flow[0]["HARD"] = [
-      "cut:c1", "wr:1", "wr:2", "wr:3", "cut:c2", "bc:4", "bc:5", "bc:6",
-      "cut:c3", "lc:7", "lc:8", "lc:9", "cut:c4", "wr:10", "wr:11", "wr:12",
-      "cut:c5", "bc:13", "bc:14", "bc:15", "cut:c6", "lc:16", "lc:17", "lc:18",
-      "cut:c7", "wr:19", "wr:20", "wr:21", "cut:c8"
+      "cut:c1", "wr:1:an", "wr:2:an", "wr:3:an", "cut:c2", "bc:4:zh", "bc:5:zh", "bc:6:zh",
+      "cut:c3", "lc:7:iv", "lc:8:iv", "lc:9:iv", "cut:c4", "wr:10:ro", "wr:11:ro", "wr:12:ro",
+      "cut:c5", "bc:13:fe", "bc:14:fe", "bc:15:fe", "cut:c6", "lc:16:fe", "lc:17:fe", "lc:18:fe",
+      "cut:c7", "wr:19:pu", "wr:20:pu", "wr:21:pu", "cut:c8"
     ];
     this.flow[0]["BEACON"] = [
-      "cut:c1", "wr:1", "wr:2", "wr:3", "cut:c2", "bc:4", "bc:5", "bc:6",
-      "cut:c3", "lc:7", "lc:8", "lc:9", "cut:c4", "wr:10", "wr:11", "wr:12",
-      "cut:c5", "bc:13", "bc:14", "bc:15", "cut:c6", "lc:16", "lc:17", "lc:18",
-      "cut:c7", "wr:19", "wr:20", "wr:21", "cut:c8"
+      "cut:c1", "wr:1:an", "wr:2:an", "wr:3:an", "cut:c2", "bc:4:zh", "bc:5:zh", "bc:6:zh",
+      "cut:c3", "lc:7:iv", "lc:8:iv", "lc:9:iv", "cut:c4", "wr:10:ro", "wr:11:ro", "wr:12:ro",
+      "cut:c5", "bc:13:fe", "bc:14:fe", "bc:15:fe", "cut:c6", "lc:16:fe", "lc:17:fe", "lc:18:fe",
+      "cut:c7", "wr:19:pu", "wr:20:pu", "wr:21:pu", "cut:c8"
     ];
 
     this.flow[2] = {};
     this.flow[2]["EASY"] = [
-      "cut:t1", "wr:1", "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
+      "cut:t1", "wr:1", "cut:t2", "bc:1:an", "cut:t3", "lc:1:an", "cut:t4"
       // "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
     ];
   }

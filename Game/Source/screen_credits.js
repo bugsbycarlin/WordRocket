@@ -16,7 +16,7 @@ Game.prototype.initializeCredits = function() {
   derp.position.set(this.width / 2, 230);
   screen.addChild(derp);
 
-  let me_thang = new PIXI.Text("MATTSBY CARLIN", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
+  let me_thang = new PIXI.Text("MATT CARLIN", {fontFamily: "Press Start 2P", fontSize: 24, fill: 0xFFFFFF, letterSpacing: 6, align: "left"});
   me_thang.anchor.set(0.5,0.5);
   me_thang.position.set(this.width / 2, 270);
   screen.addChild(me_thang);

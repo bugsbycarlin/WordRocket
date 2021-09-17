@@ -27,7 +27,7 @@ var character_names = [
   "YAIR", "ZHANG",
 ];
 
-var opponents = ["zh", "an", "iv"];
+var opponents = [ "an", "zh", "iv", "ro", "fe"];
 
 var fire_colors = [0xda5533, 0xf66931, 0xef912d, 0xfaae4b];
 

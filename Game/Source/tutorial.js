@@ -186,7 +186,7 @@ Game.prototype.tutorial4 = function() {
 
   delay(function() {
     self.tutorial_number = 4.2;
-    self.tutorial_screen.tutorial_text.text = "IF YOUR WORD IS VALID, YOU CAN LAUNCH IT AT THE SOVIET COMPUTER.";
+    self.tutorial_screen.tutorial_text.text = "IF YOUR WORD IS VALID, YOU CAN LAUNCH IT AT THE SOVIET PLAYER.";
   }, 12000);
 
   delay(function() {

@@ -48,6 +48,9 @@ Game.prototype.initializeCutscene = function(name = "intro") {
     page.position.set(x, y);
     page.appears = [];
     page.disappears = [];
+    page.fade_out = [];
+    page.fade_in = [];
+    page.slide_right = [];
     page.sequence_max = 0;
     page.next = null;
     page.has_tournament_board = false;
@@ -84,6 +87,8 @@ Game.prototype.initializeCutscene = function(name = "intro") {
             self.gotoCutscenePage(i+1);
           });
         }
+      } else if ("slideshow" in item) {
+        
       } else if ("square" in item) {
         let square = PIXI.Sprite.from(PIXI.Texture.WHITE);
         square.anchor.set(0.5, 0.5);
@@ -239,6 +244,25 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         page.disappears.push(artifact);
         page.sequence_max = Math.max(page.sequence_max, item.disappears)
       }
+
+      if ("fade_out" in item) {
+        artifact.fade_out = item.fade_out;
+        page.fade_out.push(artifact);
+        page.sequence_max = Math.max(page.sequence_max, item.fade_out)
+      }
+
+      if ("fade_in" in item) {
+        artifact.fade_in = item.fade_in;
+        artifact.visible = false;
+        page.fade_in.push(artifact);
+        page.sequence_max = Math.max(page.sequence_max, item.fade_in)
+      }
+
+      if ("slide_right" in item) {
+        artifact.slide_right = item.slide_right;
+        page.slide_right.push(artifact);
+        page.sequence_max = Math.max(page.sequence_max, item.slide_right)
+      }
     }
 
     if (page.sequence_max > 0 && page.next != null) page.next.visible = false;
@@ -297,6 +321,44 @@ Game.prototype.gotoCutscenePage = function(page_num) {
     for (let j = 0; j < this.cutscene_pages[this.cutscene_pagenum].disappears.length; j++) {
       if (this.sequence_num == this.cutscene_pages[this.cutscene_pagenum].disappears[j].disappears) {
         this.cutscene_pages[this.cutscene_pagenum].disappears[j].visible = false;
+      }
+    }
+
+    for (let j = 0; j < this.cutscene_pages[this.cutscene_pagenum].fade_out.length; j++) {
+      if (this.sequence_num == this.cutscene_pages[this.cutscene_pagenum].fade_out[j].fade_out) {
+        let artifact = this.cutscene_pages[this.cutscene_pagenum].fade_out[j];
+        let fade_tween = new TWEEN.Tween(artifact)
+          .to({alpha: 0})
+          .duration(2000)
+          .onComplete(function() {
+            artifact = false;
+          })
+          .start();
+      }
+    }
+
+    for (let j = 0; j < this.cutscene_pages[this.cutscene_pagenum].fade_in.length; j++) {
+      if (this.sequence_num == this.cutscene_pages[this.cutscene_pagenum].fade_in[j].fade_in) {
+        let artifact = this.cutscene_pages[this.cutscene_pagenum].fade_in[j];
+        artifact.visible = true;
+        artifact.alpha = 0.01;
+        let fade_tween = new TWEEN.Tween(artifact)
+          .to({alpha: 1})
+          .duration(2000)
+          .start();
+      }
+    }
+
+    for (let j = 0; j < this.cutscene_pages[this.cutscene_pagenum].slide_right.length; j++) {
+      if (this.sequence_num == this.cutscene_pages[this.cutscene_pagenum].slide_right[j].slide_right) {
+        let artifact = this.cutscene_pages[this.cutscene_pagenum].slide_right[j];
+        let x = artifact.x;
+        let fade_tween = new TWEEN.Tween(artifact)
+          .to({x: x + 266})
+          .duration(2000)
+          .onComplete(function() {
+          })
+          .start();
       }
     }
 
@@ -756,23 +818,23 @@ scenes = {
       {tournament_board: "okay!"}
     ],
     [
-      {appears: 2, disappears: 8, square: "putin_defeated.png", x: 500, y: 480, w: 400, h: 400},
-      {disappears: 2, text: "We win!!!", size: 36, x: 900, y: 500},
-      {disappears: 4, square: "kids_celebrating.png", x: 900, y: 480, w: 600, h: 400},
-      {disappears: 4, appears: 3, text: "I... lose.", size: 36, x: 400, y: 100},
-      {disappears: 7, appears: 6, text: "I lose...", size: 36, x: 800, y: 300},
-      {appears: 8, disappears: 11, square: "putin_resolute.png", x: 500, y: 480, w: 400, h: 400},
-      {disappears: 8, appears: 7, text: "Ah well.", size: 36, x: 900, y: 400},
-      {appears: 8, disappears: 11, square: "russian_competitors.png", x: 640, y: 480, w: 900, h: 200},
-      {appears: 8, disappears: 10, text: "Sir, what does this mean for Russian dominance? \nWill it be okay? What will you do?", size: 36, x: 700, y: 100},
-      {appears: 9, disappears: 10, text: "Everything will probably never be okay. \nBut you have to try.", size: 36, x: 800, y: 500},
-      
-      
-      {appears: 10, image: "putin_rides.png", x: 640, y: 480},
-      {appears: 10, text: "As for me...", size: 36, x: 1060, y: 80},
-      {appears: 11, text: "I'm going \nhome.", size: 36, x: 1140, y: 160},
+      {image:"lighted_stage.png", x: 640, y: 480},
+      {disappears: 3, slide_right: 2, image: "putin_loses.png", x: 640, y: 480},
+      {fade_out: 2, image: "kids_victorious.png", x: 640, y: 480},
+      {disappears: 1, text: "We win!!! We win!!!", size: 36, x: 900, y: 160},
+      {appears: 1, disappears: 2, text: "I lose...", size: 36, x: 450, y: 300},
+      {appears: 3, disappears: 8, image: "putin_accepts.png", x: 640, y: 480},
+      {appears: 3, disappears: 4, text: "Ah well.", size: 36, x: 700, y: 280},
+      {fade_in: 4, disappears: 8, image: "russians_gathered.png", x: 640, y: 480},
+      {appears: 5, disappears: 6, text: "Sir, what does this mean for Soviet dominance? \nWill we be okay? What will you do?", size: 36, x: 700, y: 100},
+      {appears: 6, disappears: 7, text: "Everything will probably never be okay. \nBut you have to try.", size: 36, x: 800, y: 140},
+      {appears: 7, disappears: 8, text: "As for me...", size: 36, x: 1000, y: 180},
+      {appears: 8, image: "putin_rides.png", x: 640, y: 480},
+      {appears: 9, disappers: 10, text: "I'm going \nhome.", size: 36, x: 1100, y: 160},
+      {fade_in: 10, image: "black_bars.png", x: 640, y: 480},
       // HERE I WANT TO FADE TO SOME KIND OF CREDITS
-      {appears: 12, button: "The End.", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+      {slide_show: 10},
+      //
     ],
   ],
 }

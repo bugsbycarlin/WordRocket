@@ -40,6 +40,10 @@ Game.prototype.initializeCutscene = function(name = "intro") {
 
   this.sequence_num = 0;
 
+  this.slideshow_number = -1;
+  this.slideshow_timer = null;
+  this.cutscene_mode = "interactive";
+
   let x = 0;
   let y = 0;
   let last_page = null;
@@ -80,15 +84,27 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         //   self.gotoCutscenePage(i+1);
         // });
         artifact = page.next;
-        if ("next_screen" in item) {
-          this.cutscene_next_screen = item.next_screen; // last one is default
-          page.next.on("pointerdown", function() {
-            self.cutscene_next_screen = item.next_screen; // but you could have two and click one
-            self.gotoCutscenePage(i+1);
-          });
-        }
-      } else if ("slideshow" in item) {
+        // if ("next_screen" in item) {
+        //   this.cutscene_next_screen = item.next_screen; // last one is default
+        //   page.next.on("pointerdown", function() {
+        //     self.cutscene_next_screen = item.next_screen; // but you could have two and click one
+        //     self.gotoCutscenePage(i+1);
+        //   });
+        // }
+      } if ("no_button" in item) {
+        // {button: "Next", x: this.width - 90, y: this.height - 50, swipe_x: 1, swipe_y: -1}
         
+        page.transition_x = -x;
+        page.transition_y = -y;
+        
+        x += item.swipe_x * offscreen_width;
+        y += item.swipe_y * offscreen_height;
+      } else if ("slideshow" in item) {
+        this.slideshow_number = item.slideshow;
+        page.transition_x = -x;
+        page.transition_y = -y;
+        x += offscreen_width;
+        y += 0;
       } else if ("square" in item) {
         let square = PIXI.Sprite.from(PIXI.Texture.WHITE);
         square.anchor.set(0.5, 0.5);
@@ -103,6 +119,18 @@ Game.prototype.initializeCutscene = function(name = "intro") {
         let font_family = "Bangers";
         if ("font_family" in item) font_family = item.font_family;
         artifact = this.comicBubble(page, item.text, item.x, item.y, size, font_family);
+      } else if ("credits" in item) {
+        let words = item.credits;
+        for (let l = 0; l < words.length; l++) {
+          let letter = words[l];
+          let tile = this.makePixelatedLetterTile(page, letter.toUpperCase(), "black");
+          tile.x = item.x - 32 * words.length / 2 + 32 * l;
+          tile.y = item.y;
+          let tile2 = this.makePixelatedLetterTile(page, letter.toUpperCase(), "white");
+          tile2.x = item.x - 32 * words.length / 2 + 32 * l - 2;
+          tile2.y = item.y - 2;
+        }
+
       } else if ("image" in item) {
         let image = new PIXI.Sprite(PIXI.Texture.from("Art/Cutscenes/" + item.image));
         image.anchor.set(0.5, 0.5);
@@ -273,7 +301,9 @@ Game.prototype.initializeCutscene = function(name = "intro") {
   screen.interactive = true;
   screen.buttonMode = true;
   screen.on("pointertap", function() {
-    self.gotoCutscenePage(self.cutscene_pagenum + 1);
+    if (self.cutscene_mode == "interactive") {
+      self.gotoCutscenePage(self.cutscene_pagenum + 1);
+    }
   });
 
   if (name != "c8") {
@@ -329,7 +359,7 @@ Game.prototype.gotoCutscenePage = function(page_num) {
         let artifact = this.cutscene_pages[this.cutscene_pagenum].fade_out[j];
         let fade_tween = new TWEEN.Tween(artifact)
           .to({alpha: 0})
-          .duration(2000)
+          .duration(1000)
           .onComplete(function() {
             artifact = false;
           })
@@ -355,25 +385,32 @@ Game.prototype.gotoCutscenePage = function(page_num) {
         let x = artifact.x;
         let fade_tween = new TWEEN.Tween(artifact)
           .to({x: x + 266})
-          .duration(2000)
+          .duration(1500)
           .onComplete(function() {
           })
           .start();
       }
     }
 
-    if (this.sequence_num >= this.cutscene_pages[this.cutscene_pagenum].sequence_max) {
-      this.cutscene_pages[this.cutscene_pagenum].next.visible = true;
+    console.log("Angel checks");
+    console.log(this.slideshow_number);
+    console.log(this.sequence_num);
+    if (this.slideshow_number > 0 
+      && this.sequence_num == this.slideshow_number) {
+      console.log("it is now a slideshow");
+      this.cutscene_mode = "slideshow";
+      this.slideshow_timer = this.markTime();
     }
+
     console.log("Sequence Num After: " + this.sequence_num);
     return;
   }
 
-  //this.soundEffect("swipe");
-  this.soundEffect("button_chirp");
+  if (this.cutscene_mode == "interactive") {
+    this.soundEffect("button_chirp");
+  }
   
   if (page_num >= this.cutscene_items.length) {
-    //console.log("running over the end of the cutscene. don't do that. use the scene end button instead.");
     this.endCutscene(false);
     return;
   }
@@ -438,9 +475,13 @@ Game.prototype.endCutscene = function(play_sound = true) {
     if (p != this.cutscene_pagenum) {
       this.cutscene_pages[p].visible = false;
     }
-    this.cutscene_pages[p].next.interactive = false;
-    this.cutscene_pages[p].next.visible = false;
+    if (this.cutscene_pages[p].next != null) {
+      this.cutscene_pages[p].next.interactive = false;
+      this.cutscene_pages[p].next.visible = false;
+    }
   }
+
+  this.slideshow_timer = null;
   
   this.nextFlow();
 
@@ -520,6 +561,11 @@ Game.prototype.cutsceneUpdate = function(diff) {
         artifact.position.set(artifact.permanent_x, artifact.permanent_y);
       }
     }
+  }
+
+  if (this.slideshow_timer != null && this.timeSince(this.slideshow_timer) > 6000) {
+    this.slideshow_timer = this.markTime();
+    this.gotoCutscenePage(this.cutscene_pagenum + 1);
   }
 }
 
@@ -826,15 +872,66 @@ scenes = {
       {appears: 3, disappears: 8, image: "putin_accepts.png", x: 640, y: 480},
       {appears: 3, disappears: 4, text: "Ah well.", size: 36, x: 700, y: 280},
       {fade_in: 4, disappears: 8, image: "russians_gathered.png", x: 640, y: 480},
-      {appears: 5, disappears: 6, text: "Sir, what does this mean for Soviet dominance? \nWill we be okay? What will you do?", size: 36, x: 700, y: 100},
-      {appears: 6, disappears: 7, text: "Everything will probably never be okay. \nBut you have to try.", size: 36, x: 800, y: 140},
-      {appears: 7, disappears: 8, text: "As for me...", size: 36, x: 1000, y: 180},
+      {appears: 5, disappears: 6, text: "Sir, what does this mean for Soviet dominance? \nWill we be okay? What will you do?", size: 36, x: 750, y: 100},
+      {appears: 6, disappears: 7, text: "Everything will probably never be okay. \nBut you have to try.", size: 36, x: 600, y: 160},
+      {appears: 7, disappears: 8, text: "As for me...", size: 36, x: 650, y: 180},
       {appears: 8, image: "putin_rides.png", x: 640, y: 480},
-      {appears: 9, disappers: 10, text: "I'm going \nhome.", size: 36, x: 1100, y: 160},
+      {appears: 9, fade_out: 10, text: "I'm going \nhome.", size: 36, x: 1100, y: 160},
       {fade_in: 10, image: "black_bars.png", x: 640, y: 480},
-      // HERE I WANT TO FADE TO SOME KIND OF CREDITS
-      {slide_show: 10},
-      //
+      {slideshow: 10},
     ],
+    [
+      {image:"word_rockets.png", x: 640, y: 480, drift: "right"},
+      {image: "black_bars.png", x: 640, y: 480},
+      {credits:"PROGRAMMING", x: 340, y: 420},
+      {credits:"MATT CARLIN", x: 930, y: 560},
+      {no_button: "Next", swipe_x: 1, swipe_y: 1},
+      // {button: "Next", x: 120, y: 50, swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {image:"games_image.png", x: 640, y: 400, drift: "down"},
+      {image: "black_bars.png", x: 640, y: 480},
+      {credits:"DESIGN", x: 630, y: 270},
+      {credits:"MATT CARLIN", x: 630, y: 700},
+      {no_button: "Next", swipe_x: 0, swipe_y: 1},
+    ],
+    [
+      {image:"zhukov.png", x: 640, y: 480, drift: "left"},
+      // {image: "black_bars.png", x: 640, y: 480},
+      {credits:"ART", x: 380, y: 220},
+      {credits:"MATT CARLIN", x: 870, y: 220},
+      {no_button: "Next", swipe_x: 1, swipe_y: 0},
+    ],
+    [
+      {image:"building_image.png", x: 640, y: 480, drift: "up"},
+      // {image: "black_bars.png", x: 640, y: 480},
+      {credits:"SOUND", x: 950, y: 300},
+      {credits:"FREESOUND", x: 950, y: 600},
+      {credits:"SPLICE", x: 950, y: 630},
+      {no_button: "Next", swipe_x: 1, swipe_y: 1},
+    ],
+    [
+      {image:"1988.png", x: 640, y: 480, drift: "right"},
+      // {image: "black_bars.png", x: 640, y: 480},
+      {credits:"MUSIC", x: 350, y: 350},
+      {credits:"FESLIYAN STUDIOS", x: 850, y: 260},
+      {credits:"OPEN GAME ART", x: 850, y: 290},
+      {credits:"ABSTRACTION MUSIC", x: 850, y: 320},
+      {no_button: "Next", swipe_x: 1, swipe_y: 0},
+    ],
+    [
+      {image:"putin_rides.png", x: 640, y: 400},
+      {image: "black_bars.png", x: 640, y: 480},
+      {credits:"THE END", x: 640, y: 440},
+      {credits:"THANK YOU FOR PLAYING", x: 640, y: 520},
+      {no_button: "Next", swipe_x: 0, swipe_y: 1},
+    ],
+    // Sound
+    // Freesound.org, Splice.com
+    // Music
+    // "FESLIYAN STUDIOS \n(DAVID FESLYIYAN AND DAVID RENDA)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+    // "OPENGAMEART.ORG \n(SPRING AND NENE)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+    // "ABSTRACTIONMUSIC.COM \n(LUDUM DARE 28, TRACKS 3 and 8)", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+    // The End.
   ],
 }

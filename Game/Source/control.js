@@ -291,8 +291,10 @@ Game.prototype.handleKeyDown = function(ev) {
       this.gameOverEnter();
     }
   } else if (this.current_screen === "cutscene") {
-    if (ev.key === "Enter" || ev.key === " ") {
-      this.gotoCutscenePage(this.cutscene_pagenum + 1);
+    if (this.cutscene_mode == "interactive") {
+      if (ev.key === "Enter" || ev.key === " ") {
+        this.gotoCutscenePage(this.cutscene_pagenum + 1);
+      }
     }
 
     if (ev.key === "Escape") {

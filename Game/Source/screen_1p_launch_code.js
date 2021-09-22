@@ -82,6 +82,14 @@ Game.prototype.initialize1pLaunchCode = function() {
     self.runner[1].last_speed_change = self.markTime();
   }, 1200);
 
+  if (this.tutorial == true) {
+    // delay(function() {
+    //   self.pause();
+    //   self.lc_tutorial1();
+    // }, 5000);
+    this.lc_tutorial1();
+  }
+
   // setInterval(function() {
   //   let minutes_elapsed = self.timeSince(self.start_time) / 60000;
   //   let wpm = self.correct_word_count / minutes_elapsed;
@@ -98,11 +106,11 @@ Game.prototype.launchCodeSetDifficulty1 = function(level, difficulty_multiplier)
     this.chunk_types[0] = "guard";
   }
   if (level > 3) {
-    this.chunk_types[1] = "door";
+    if (this.tutorial != true) this.chunk_types[1] = "door";
   }
   if (level > 6) {
     this.chunk_types[2] = "guard";
-    this.chunk_types[3] = "door";
+    if (this.tutorial != true) this.chunk_types[3] = "door";
   }
   if (level > 9) {
     this.chunk_types[4] = "box";
@@ -167,11 +175,6 @@ Game.prototype.resetRace = function() {
     parent: screen, x: 467, y: 807,
     defense: this.player_defense, 
     action: function(letter) {
-
-      if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
-        self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
-        self.tutorial_1_snide_clicks += 1
-      }
 
       self.launchCodeKeyDown(letter);
     }
@@ -750,6 +753,10 @@ Game.prototype.launchCodeGameOver = function(win = false) {
 
 
 Game.prototype.launchCodeTerminal = function(chunk, runner, player_number) {
+  if (player_number == 1 && this.game_phase == "tutorial") {
+    return;
+  }
+
   runner.setState("terminal");
   runner.last_speed = 0;
   runner.speed = 0;
@@ -822,7 +829,7 @@ Game.prototype.launchCodeSetTyping = function(new_typing) {
   this.launch_code_typing = new_typing;
 
   let prompt = null;
-  if (this.game_phase == "active") {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     prompt = this.run_prompt;
   } else {
     prompt = this.code_prompt;
@@ -838,7 +845,7 @@ Game.prototype.launchCodeAdvance = function() {
   this.launch_code_typing = "";
 
   let prompt = null;
-  if (this.game_phase == "active") {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     prompt = this.run_prompt;
   } else {
     prompt = this.code_prompt;
@@ -852,7 +859,7 @@ Game.prototype.launchCodeAdvance = function() {
     //this.run_label.position.y = this.run_label.fixed_y + 2;
     //this.run_label.press_count = 6;
     prompt.advance();
-    if (this.game_phase == "active") {
+    if (this.game_phase == "active" || this.game_phase == "tutorial") {
       this.word_count += 1;
       if (complete) {
         this.correct_word_count += 1;
@@ -867,6 +874,12 @@ Game.prototype.launchCodeAdvance = function() {
           this.type_to_run.vx = -10 + 20 * Math.random();
           this.type_to_run.vy = -5 - 10 * Math.random();
           this.freefalling.push(this.type_to_run);
+        }
+
+        console.log("Out here");
+        if (this.game_phase == "tutorial" && this.tutorial_number == 2) {
+          console.log("In here");
+          this.lc_tutorial3();
         }
       } else {
         this.runner[0].speed -= 1.5;
@@ -906,12 +919,16 @@ Game.prototype.launchCodeAct = function() {
     this.double_tap_to_act.vy = -5 - 10 * Math.random();
     this.freefalling.push(this.double_tap_to_act);
   }
+
+  if (this.game_phase == "tutorial" && this.tutorial_number == 4) {
+    this.lc_tutorial5();
+  }
 }
 
 
 Game.prototype.launchCodeKeyDown = function(key) {
   let player = 0;
-  if (!this.paused && this.game_phase == "active"
+  if (!this.paused && (this.game_phase == "active" || this.game_phase == "tutorial")
     && this.runner[0].current_state != "combat_fall"
     && this.runner[0].current_state != "combat_rise") {
 
@@ -1037,10 +1054,8 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
     // this.announcement.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
       
-      this.game_phase = "active";
+      if (this.game_phase != "tutorial") this.game_phase = "active";
       this.last_play = this.markTime();
-
-     
 
       this.announcement.style.fill = 0xFFFFFF;
       this.announcement.text = "GO";
@@ -1062,7 +1077,7 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
     }
   }
 
-  if (this.timeSince(this.start_time) > 4000 && (this.game_phase == "active" || this.game_phase == "terminal")) {
+  if (this.timeSince(this.start_time) > 4000 && (this.game_phase == "active" || this.game_phase == "tutorial" || this.game_phase == "terminal")) {
     let percent = Math.floor(100 * this.runner[0].lx / this.final_lx);
     this.announcement.text = percent + "%";
 
@@ -1075,7 +1090,7 @@ Game.prototype.launchCodeUpdateDisplayInfo = function() {
     }
   }
 
-  if (this.game_phase == "active") {
+  if (this.game_phase == "active" || this.game_phase == "tutorial") {
     // Add to the score
     if (this.runner[0].lx > this.runner[0].last_x) {
       this.score += 0.1;
@@ -1439,9 +1454,9 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
 
   //tickover += 1;
 
-  // if (this.game_phase == "tutorial") {
-  //   this.tutorial_screen.tutorial_text.hover();
-  // }
+  if (this.game_phase == "tutorial") {
+    this.tutorial_screen.tutorial_text.hover();
+  }
 
   //this.run_prompt_scanlines.position.set(0, 444 + (tickover % 2));
 
@@ -1490,7 +1505,7 @@ Game.prototype.singlePlayerLaunchCodeUpdate = function(diff) {
   // }
 
   // Skip the rest if we aren't in active gameplay
-  if (this.game_phase != "active" && this.game_phase != "terminal") {
+  if (this.game_phase != "active" && this.game_phase != "terminal" && this.game_phase != "tutorial") {
     return;
   }
 

@@ -243,20 +243,10 @@ class Game {
     // game type is story
     this.flow[0] = {};
     this.flow[0]["EASY"] = [
-      // "cut:c1", "wr:1:an", "wr:2:an", "cut:c2", "bc:3:zh", "bc:4:zh",
-      // "cut:c3", "lc:5:iv", "lc:6:iv", "cut:c4", "wr:7:ro", "wr:8:ro",
-      // "cut:c5", "bc:9:fe", "bc:10:fe", "cut:c6", "lc:11:fe", "lc:12:fe",
-      // "cut:c7", "wr:13:pu", "wr:14:pu", "cut:c8"
-      
-      // Testing cutscenes
-      // "cut:c1", 
-      // "cut:c2", 
-      // "cut:c3", 
-      // "cut:c4", 
-      // "cut:c5", 
-      // "cut:c6", 
-      // "cut:c7", 
-      "cut:c8",
+      "cut:c1", "wr:1:an", "wr:2:an", "cut:c2", "bc:3:zh", "bc:4:zh",
+      "cut:c3", "lc:5:iv", "lc:6:iv", "cut:c4", "wr:7:ro", "wr:8:ro",
+      "cut:c5", "bc:9:fe", "bc:10:fe", "cut:c6", "lc:11:fe", "lc:12:fe",
+      "cut:c7", "wr:13:pu", "wr:14:pu", "cut:c8"
     ];
     this.flow[0]["MEDIUM"] = [
       "cut:c1", "wr:1:an", "wr:2:an", "wr:3:an", "cut:c2", "bc:4:zh", "bc:5:zh", "bc:6:zh",
@@ -280,7 +270,6 @@ class Game {
     this.flow[2] = {};
     this.flow[2]["EASY"] = [
       "cut:t1", "wr:1", "cut:t2", "bc:1:an", "cut:t3", "lc:1:an", "cut:t4"
-      // "cut:t2", "bc:1", "cut:t3", "lc:1", "cut:t4"
     ];
   }
 

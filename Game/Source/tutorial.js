@@ -2,7 +2,6 @@
 
 Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box_top, box_right, box_bottom, text, text_x, text_y) {
   var self = this;
-  var screen = this.screens["1p_word_rockets"];
 
   let tutorial_screen = new PIXI.Container();
   parent.addChild(tutorial_screen);
@@ -248,9 +247,11 @@ Game.prototype.tutorial9 = function() {
   console.log("I am in tutorial 9");
   
   this.tutorial_number = 9;
+  this.opponent_name = "an";
+  this.addOpponentPicture(screen);
 
   self.tutorial_screen.fade(250);
-  self.tutorial_screen = self.makeTutorialScreen(screen, 250, 958, 92, 1168, 348, "THE SOVIET WILL FIRE ROCKETS...", 700+250, 200+152);
+  self.tutorial_screen = self.makeTutorialScreen(screen, 250, 958, 92, 1168, 348, "AHA! THE SOVIET WILL FIRE ROCKETS...", 700+250, 200+152);
 }
 
 
@@ -528,6 +529,110 @@ Game.prototype.bc_tutorial9 = function() {
 }
 
 
+//
+//
+//
+//
+
+Game.prototype.lc_tutorial1 = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 1;
+
+  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 80, 0, 860, 585, "WELCOME TO LAUNCH CODE!", this.width / 2 - 180, 620);
+//Game.prototype.makeTutorialScreen = function(parent, fade_in_time, box_left, box_top, box_right, box_bottom, text, text_x, text_y) {
+
+
+  delay(function() {
+    self.tutorial_screen.tutorial_text.text = "IN THIS GAME, YOU RACE TO STOP A MISSILE \nBEFORE THE SOVIET CAN LAUNCH IT.";
+  }, 6000);
+
+
+  delay(function() {
+    self.lc_tutorial2();
+  }, 12000);
+}
+
+
+Game.prototype.lc_tutorial2 = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 2;
+
+  this.tutorial_screen.fade(500);
+  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 110, 470, 805, 550, "TO RUN, TYPE THE WORDS IN THIS PROMPT", this.width / 2 - 180, 620);
+}
+
+
+Game.prototype.lc_tutorial3 = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 3;
+
+  this.tutorial_screen.tutorial_text.text = "GOOD! MORE WORDS MEAN FASTER RUNNING."
+
+  delay(function() {
+    self.lc_tutorial4();
+  }, 5000);  
+}
+
+
+Game.prototype.lc_tutorial4 = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 4;
+
+  this.tutorial_screen.fade(500);
+  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 280, 750, 840, 940, "TO JUMP OR PUNCH, TAP ENTER OR DOUBLE TAP SPACE", this.width / 2 - 180, 620);
+}
+
+
+Game.prototype.lc_tutorial5 = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 5;
+
+  this.tutorial_screen.tutorial_text.text = "VERY GOOD! YOUR CHARACTER WILL JUMP OR PUNCH, \nDEPENDING ON THE CONTEXT."
+
+  delay(function() {
+    self.lc_tutorial6();
+  }, 5000);
+}
+
+
+Game.prototype.lc_tutorial6 = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 6;
+
+  this.tutorial_screen.fade(500);
+  this.tutorial_screen = this.makeTutorialScreen(screen, 2000, 80, 0, 860, 585, "TO WIN, BE FIRST TO GET THROUGH THE LEVEL AND \nENTER YOUR CODE IN THE LAUNCH COMPUTER.", this.width / 2 - 180, 620);
+
+  delay(function() {
+    self.lc_tutorial7();
+  }, 8000);
+}
+
+
+Game.prototype.lc_tutorial7 = function() {
+  var self = this;
+  var screen = this.screens["1p_launch_code"];
+  this.game_phase = "tutorial";
+  this.tutorial_number = 7;
+
+  this.tutorial_screen.tutorial_text.text = "TIME TO RESET AND PLAY FOR REAL. READY?"
+
+  delay(function() {
+    self.tutorial = false;
+    self.initialize1pLaunchCode();
+  }, 4000); 
+}
 
 
 

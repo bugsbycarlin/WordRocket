@@ -691,7 +691,7 @@ scenes = {
       {appears: 3, disappears: 4, text: "I must destroy them.", size: 36, x: 870, y: 900},
       // {appears: 8, button: "Next", x: 90, y: 50, swipe_x: 1, swipe_y: -1},
       {appears: 5, text: "But you're too old.", size: 36, x: 990, y: 180},
-      {appears: 6, text: "The hell I am.", size: 36, x: 510, y: 800},
+      {appears: 6, text: "The fuck I am.", size: 36, x: 510, y: 800},
       {appears: 7, text: "Look at my high score.", size: 36, x: 850, y: 840},
       {appears: 8, button: "Next", x: 90, y: 50, swipe_x: 0, swipe_y: 1},
     ],

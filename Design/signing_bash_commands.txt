@@ -1,0 +1,20 @@
+
+
+export IDENTITY=C2YLKDK74B 
+export PARENT_PLIST=../../parent.plist
+export CHILD_PLIST=../../child.plist
+
+codesign --deep -s  $IDENTITY --entitlements $CHILD_PLIST Cold\ War\ Keyboards.app/Contents/Frameworks/nwjs\ Framework.framework/Helpers/nwjs\ Helper.app -f
+
+xattr -cr Cold\ War\ Keyboards.app/
+
+
+codesign --deep -s $IDENTITY --entitlements $PARENT_PLIST Cold\ War\ Keyboards.app -f
+
+
+
+
+ALTERNATE (not mac store, but should work)
+
+codesign --force --deep --verbose --sign  "C2YLKDK74B" Cold\ War\ Keyboards.app
+codesign --verify -vvvv Cold\ War\ Keyboards.app & spctl -a -vvvv Cold\ War\ Keyboards.app

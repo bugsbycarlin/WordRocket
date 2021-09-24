@@ -1,6 +1,6 @@
 {
   "name": "Cold War Keyboards",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "main": "index.html",
   "window" : {
     "width" : 1280,
@@ -12,6 +12,7 @@
   },
   "scripts": {
     "dev":"nw",
-    "prod":"nwbuild --platforms win32,win64,osx64 --buildDir ../Release/ ."
+    "prod":"nwbuild --platforms win32,win64,osx64,linux32,linux64 --flavor normal --buildDir ../Release/ .",
+    "justo":"nwbuild --platforms osx64 --flavor normal --macIcns cwk.icns --buildDir ../Release/ ."
   }
 }

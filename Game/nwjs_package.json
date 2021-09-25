@@ -1,0 +1,18 @@
+{
+  "name": "Cold War Keyboards",
+  "version": "0.8.0",
+  "main": "index.html",
+  "window" : {
+    "width" : 1280,
+    "height" : 960,
+    "max_width": 1280,
+    "min_width": 960,
+    "max_height": 1280,
+    "min_height": 960
+  },
+  "scripts": {
+    "dev":"nw",
+    "prod":"nwbuild --platforms win32,win64,osx64,linux32,linux64 --flavor normal --buildDir ../Release/ .",
+    "justo":"nwbuild --platforms osx64 --flavor normal --macIcns cwk.icns --buildDir ../Release/ ."
+  }
+}

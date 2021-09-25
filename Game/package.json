@@ -1,18 +1,54 @@
 {
-  "name": "Cold War Keyboards",
+  "name": "coldwarkeyboards",
   "version": "0.8.0",
-  "main": "index.html",
-  "window" : {
-    "width" : 1280,
-    "height" : 960,
-    "max_width": 1280,
-    "min_width": 960,
-    "max_height": 1280,
-    "min_height": 960
-  },
+  "description": "game",
+  "main": "Source/main.js",
   "scripts": {
-    "dev":"nw",
-    "prod":"nwbuild --platforms win32,win64,osx64,linux32,linux64 --flavor normal --buildDir ../Release/ .",
-    "justo":"nwbuild --platforms osx64 --flavor normal --macIcns cwk.icns --buildDir ../Release/ ."
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "build-game": "electron-builder -mwl"
+  },
+  "author": "AlphaZoo",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "15.0.0",
+    "electron-builder": "^22.11.7",
+    "electron-notarize": "^1.1.1"
+  },
+  "build": {
+    "appId": "com.electron.coldwarkeyboards",
+    "productName": "Cold War Keyboards",
+    "copyright": "Copyright 2021 AlphaZoo LLC",
+    "afterSign": "Source/notarize.js",
+    "directories": {
+      "output": "../Release/Cold War Keyboards/"
+    },
+    "dmg": {
+      "sign": false,
+      "contents": [
+        {
+          "x": 320,
+          "y": 240
+        }
+      ]
+    },
+    "mac": {
+      "category": "public.app-category.educational-games",
+      "target": "dmg",
+      "icon": "Icons/coldwarkeyboards.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "Icons/coldwarkeyboards.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "executableName": "ColdWarKeyboards",
+      "category": "ArcadeGame"
+    }
   }
 }

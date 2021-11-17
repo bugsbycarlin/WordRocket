@@ -427,7 +427,7 @@ class Game {
   initializeAnimations() {
     var self = this;
     PIXI.Loader.shared
-      .add("Art/alpha_zoo_intro.png")
+      .add("Art/alpha_zoo_logo_v2.png")
       .add("Art/fire.json")
       .add("Art/explosion.json")
       .add("Art/electric.json")

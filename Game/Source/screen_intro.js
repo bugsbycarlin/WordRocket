@@ -13,7 +13,8 @@ Game.prototype.initializeIntro = function() {
 
   this.intro_started = false;
 
-  let image = new PIXI.Sprite(PIXI.Texture.from("Art/alpha_zoo_intro.png"));
+  let image = new PIXI.Sprite(PIXI.Texture.from("Art/alpha_zoo_logo_v2.png"));
+  // let image = new PIXI.Sprite(PIXI.Texture.from("Art/alpha_zoo_logo.png"));
   image.anchor.set(0.5, 0.5);
   image.position.set(this.width / 2, this.height / 2);
   image.alpha = 0;
@@ -47,7 +48,7 @@ Game.prototype.initializeIntro = function() {
       voxel.alpha = alpha / 255;
       screen.addChild(voxel);
       let angle = Math.floor(Math.random() * 360);
-      voxel.orig_x = this.width / 2 + voxel_size * col - 450;
+      voxel.orig_x = this.width / 2 + voxel_size * col - voxel_size * max_width / 2;
       voxel.orig_y = this.height / 2 + voxel_size * row - 120;
       voxel.x_dir = Math.cos(angle * (180 / Math.PI));
       voxel.y_dir = Math.sin(angle * (180 / Math.PI));
@@ -74,8 +75,6 @@ Game.prototype.initializeIntro = function() {
   delay(function() {
     self.initializeTitle();
     self.popScreens("intro", "title");
-    // self.initializeScreen("1p_launch_code", true);
-    // self.switchScreens(self.current_screen, "1p_launch_code");
   }, 4500);
 }
 

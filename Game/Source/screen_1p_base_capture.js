@@ -16,6 +16,8 @@ Game.prototype.initialize1pBaseCapture = function() {
   this.base_letters[0] = [];
   this.base_letters[1] = [];
 
+  // this.level = 10;
+
   this.played_squares = [];
 
   this.game_phase = "pre_game";

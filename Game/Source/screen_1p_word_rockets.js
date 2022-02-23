@@ -14,6 +14,8 @@ Game.prototype.initialize1pWordRockets = function() {
 
   this.rocket_letters = [];
 
+  // this.level = 18;
+
   this.pickDefense(6, 10);
 
   this.bomb_spawn_last = self.markTime();

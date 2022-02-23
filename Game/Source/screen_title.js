@@ -330,6 +330,12 @@ Game.prototype.initializeTitle = function() {
   });
 
   this.setMusic("title_song");
+
+  // uncomment for trailer purposes
+  // gear_button.visible = false;
+  // quit_button.visible = false;
+  // single_player_button.visible = false;
+  // multiplayer_button.visible = false;
 }
 
 Game.prototype.titleUpdate = function(diff) {
@@ -354,6 +360,7 @@ Game.prototype.titleUpdate = function(diff) {
     }
 
     // add the buttons
+    // comment out for trailer
     delay(function() {
       self.single_player_button.visible = true;
       self.multiplayer_button.visible = true;

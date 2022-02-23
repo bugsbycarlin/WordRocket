@@ -110,7 +110,7 @@ Game.prototype.launchCodeSetDifficulty1 = function(level, difficulty_multiplier)
   }
   if (level > 6) {
     this.chunk_types[2] = "guard";
-    if (this.tutorial != true) this.chunk_types[3] = "door";
+    if (this.tutorial != true) this.chunk_types[3] = pick(["door", "flat", "box", "rise"]);
   }
   if (level > 9) {
     this.chunk_types[4] = "box";

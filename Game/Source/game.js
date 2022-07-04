@@ -147,7 +147,7 @@ class Game {
   basicInit() {
     var self = this;
 
-    this.width = 1280;
+    this.width = 1664;
     this.height = 960;
 
     // Create the pixi application

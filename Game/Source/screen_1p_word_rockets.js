@@ -117,7 +117,7 @@ Game.prototype.resetBoard = function() {
   // the player's board
   this.player_area = new PIXI.Container();
   screen.addChild(this.player_area);
-  this.player_area.position.set(this.width * 1/2 - 370,520);
+  this.player_area.position.set(this.width * 1/2 - 370 - 192,520);
 
   this.player_live_area = new PIXI.Container();
   screen.addChild(this.player_live_area);

@@ -430,7 +430,7 @@ Game.prototype.initializeScreens = function() {
   this.makeScreen("credits");
 
   this.black = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  this.black.width = 1280;
+  this.black.width = 1664;
   this.black.height = 960;
   this.black.tint = 0x000000;
 

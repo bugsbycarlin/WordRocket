@@ -12,12 +12,13 @@ Game.prototype.keyAction = function(letter) {
     } else {
       if (!this.launchpad.full()) {
         let tile = this.launchpad.push(this.player_palette, letter);
-        if (this.player_palette.letters[letter].playable === false) {
-          tile.broken = true;
-          tile.tint = 0xdb5858;
-        } else {
-          tile.tint = 0x000000;
-        }
+        // if (this.player_palette.letters[letter].playable === false) {
+        //   tile.broken = true;
+        //   tile.tint = 0xdb5858;
+        // } else {
+        //   tile.tint = 0x000000;
+        // }
+        tile.tint = 0x000000;
       }
     }
   }
@@ -150,7 +151,7 @@ Game.prototype.pressKey = function(palette, key) {
 
 Game.prototype.gameplayKeyDown = function(key) {
   if (!this.paused) {
-    this.pressKey(this.player_palette, key);
+    //this.pressKey(this.player_palette, key);
 
     if (this.game_phase === "tutorial" && this.tutorial_number === 1) {
       this.tutorial2();

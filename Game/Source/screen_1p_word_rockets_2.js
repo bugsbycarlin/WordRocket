@@ -6,20 +6,11 @@ Game.prototype.initialize1pWordRockets = function() {
   this.clearScreen(screen);
 
   this.freefalling = [];
-  this.pickers = [];
   this.played_words = {};
-  this.bombs = [];
 
   this.shakers = [];
 
   this.rocket_letters = [];
-
-  // this.level = 18;
-
-  // this.pickDefense(6, 10);
-
-  this.bomb_spawn_last = self.markTime();
-  this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
 
   this.wpm_history = [];
   this.calculated_wpm = 0;
@@ -47,55 +38,19 @@ Game.prototype.resetBoard = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
 
-  // var far_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_far_background.png"));
-  // far_background.anchor.set(0, 0);
-  // screen.addChild(far_background);
+  this.game_board = new PIXI.Container();
+  screen.addChild(this.game_board);
+  this.game_board.scale.set(2, 2);
+  
+  var far_background = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/placeholder_map.png"));
+  far_background.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  far_background.anchor.set(0, 0);
+  this.game_board.addChild(far_background);
 
 
-  // the player's board
-  this.player_area = new PIXI.Container();
-  screen.addChild(this.player_area);
-  this.player_area.position.set(0, 0);
-
-  // this.player_live_area = new PIXI.Container();
-  // screen.addChild(this.player_live_area);
-  // this.player_live_area.position.set(this.player_area.x, this.player_area.y);
-  // this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
-
-  // var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // play_mat.width = 32 * board_width;
-  // play_mat.height = 32 * 14;
-  // play_mat.anchor.set(0, 1);
-  // play_mat.position.set(0, -32);
-  // play_mat.tint = 0x303889;
-  // // play_mat.visible = false;
-  // this.player_area.addChild(play_mat);
 
   // the player's launchpad
-  //this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 32, 32, false);
-
-  
-
-  for (let i = 0; i < 2; i++) {
-    let rock_wall = new PIXI.Container();
-    this.player_area.addChild(rock_wall);
-    for (let m = 0; m < 52; m++) {
-      for (let n = 0; n < 30; n++) {
-        let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
-        c = (30 + Math.floor(Math.random() * 30)) / 255.0;
-        tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-        tile.width = 32;
-        tile.height = 32;
-        shift = i == 0 ? 0 : (board_width + 4) * 32;
-        tile.position.set(32 * m, 32 * n);
-        rock_wall.addChild(tile);
-      }
-    }
-    rock_wall.cacheAsBitmap = true;
-    console.log("this happened");
-  }
-  console.log("yo done");
-
+  this.launchpad = new Launchpad(this, this.game_board, 1, 0, 0, 32, 32, false);
 }
 
 Game.prototype.updateDisplayInfo = function() {

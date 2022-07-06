@@ -16,6 +16,8 @@ class Launchpad {
     this.inner_size = inner_size;
     this.gap = this.outer_size - this.inner_size;
 
+    console.log("making a launch pad");
+
     this.x = x;
     this.y = y;
 
@@ -108,8 +110,8 @@ class Launchpad {
     var target_x = this.xi(this.cursor + this.shift);
     var target_y = this.y - this.outer_size + this.inner_size / 2;
 
-    var start_x = (palette.letters[letter].position.x + palette.position.x - this.parent.position.x) / this.parent.scale.x;
-    var start_y = (palette.letters[letter].position.y + palette.position.y - this.parent.position.y) / this.parent.scale.y;
+    // var start_x = (palette.letters[letter].position.x + palette.position.x - this.parent.position.x) / this.parent.scale.x;
+    // var start_y = (palette.letters[letter].position.y + palette.position.y - this.parent.position.y) / this.parent.scale.y;
 
     var tile = game.makePixelatedLetterTile(this.parent, letter, "white");
     tile.text = letter;

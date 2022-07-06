@@ -45,218 +45,88 @@ Game.prototype.resetBoard = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
 
-  var far_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_far_background.png"));
-  far_background.anchor.set(0, 0);
-  screen.addChild(far_background);
 
-  this.enemy_palette = this.makeKeyboard({
-    player: 2,
-    parent: screen, x: 1062.5, y: 472,
-    defense: this.enemy_defense, 
-    action: function(letter) {
-    }
-  });
-  this.enemy_palette.scale.set(0.3125, 0.3125);
-
-  // the enemy board
-  this.enemy_area = new PIXI.Container();
-  screen.addChild(this.enemy_area);
-  this.enemy_area.position.set(this.width * 1/2 + 325,340);
-  this.enemy_area.scale.set(0.5,0.5);
-
-  this.enemy_live_area = new PIXI.Container();
-  screen.addChild(this.enemy_live_area);
-  this.enemy_live_area.position.set(this.enemy_area.x, this.enemy_area.y);
-  this.enemy_live_area.scale.set(this.enemy_area.scale.x, this.enemy_area.scale.y);
-
-  // var enemy_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // enemy_mat.width = 32 * board_width;
-  // enemy_mat.height = 32 * 14;
-  // enemy_mat.anchor.set(0, 1);
-  // enemy_mat.position.set(0, -32);
-  // enemy_mat.tint = 0x303889;
-  // this.enemy_area.addChild(enemy_mat);
-
-  var enemy_pad_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  enemy_pad_mat.width = 32 * board_width;
-  enemy_pad_mat.height = 32;
-  enemy_pad_mat.anchor.set(0, 1);
-  enemy_pad_mat.position.set(0, 0);
-  enemy_pad_mat.tint = 0x000000; //0x2c3130;
-  this.enemy_area.addChild(enemy_pad_mat);
-
-  this.addOpponentPicture(screen);
-
-  var near_background = new PIXI.Sprite(PIXI.Texture.from("Art/game_near_background.png"));
-  near_background.anchor.set(0, 0);
-  screen.addChild(near_background);
-
-  this.mouse_cord = new PIXI.Container();
-  screen.addChild(this.mouse_cord);
-
-
-  this.player_palette = this.makeKeyboard({
-    player: 1,
-    parent: screen, x: 467, y: 807,
-    defense: this.player_defense, 
-    action: function(letter) {
-
-      if (self.game_phase == "tutorial" && self.tutorial_number == 1) {
-        self.tutorial_screen.tutorial_text.text = self.tutorial_1_snide_click_responses[Math.min(6, self.tutorial_1_snide_clicks)];
-        self.tutorial_1_snide_clicks += 1
-      }
-
-      self.gameplayKeyDown(letter);
-    }
-  });
-
+  this.game_board = new PIXI.Container();
+  screen.addChild(this.game_board);
+  this.game_board.scale.set(2, 2);
   
+  var map = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/placeholder_map.png"));
+  map.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  map.anchor.set(0, 0);
+  this.game_board.addChild(map);
 
-  // the player's board
-  this.player_area = new PIXI.Container();
-  screen.addChild(this.player_area);
-  this.player_area.position.set(this.width * 1/2 - 370 - 192,520);
 
-  this.player_live_area = new PIXI.Container();
-  screen.addChild(this.player_live_area);
-  this.player_live_area.position.set(this.player_area.x, this.player_area.y);
-  this.player_live_area.scale.set(this.player_area.scale.x, this.player_area.scale.y);
+  this.hud = new PIXI.Container();
+  screen.addChild(this.hud);
+  this.hud.scale.set(2, 2);
 
-  // var play_mat = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  // play_mat.width = 32 * board_width;
-  // play_mat.height = 32 * 14;
-  // play_mat.anchor.set(0, 1);
-  // play_mat.position.set(0, -32);
-  // play_mat.tint = 0x303889;
-  // // play_mat.visible = false;
-  // this.player_area.addChild(play_mat);
+  var hud_background = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/hud_background.png"));
+  hud_background.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+  hud_background.anchor.set(0, 0);
+  this.game_board.addChild(hud_background);
+
+
 
   // the player's launchpad
-  this.launchpad = new Launchpad(this, this.player_area, 1, 0, 0, 32, 32, false);
+  this.launchpad = new Launchpad(this, this.hud, 1, 224, 480, 32, 32, false);
 
-  for (var p = 0; p < 2; p++) {
-    // let area = this.player_area;
-    // if (p == 1) area = this.enemy_area;
-    // for(var i = 0; i < 2 + Math.floor(Math.random() * 4); i++) {
-    //   let num = 1 + Math.floor(Math.random() * 3)
-    //   let cloud = new PIXI.Sprite(PIXI.Texture.from("Art/cloud_" + num + ".png"));
-    //   cloud.anchor.set(0.5, 0.5);
-    //   cloud.position.set(62 + Math.floor(Math.random() * 200), -125 - i * (100 + Math.floor(Math.random()*32)))
-    //   cloud.alpha = 0.3 + Math.floor(Math.random() * 4) / 10.0;
-    //   cloud.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    //   area.addChild(cloud);
-    // }
-    let area = this.player_area;
-    if (p == 1) area = this.enemy_area;
-    let sky = new PIXI.Sprite(PIXI.Texture.from("Art/sky.png"));
-    sky.anchor.set(0,1);
-    sky.position.set(-32, 0);
-    area.addChild(sky);
-    // sky.visible = false;
 
-    for (let i = 0; i < 50; i++) {
-      let tree = new PIXI.Sprite(PIXI.Texture.from("Art/tree_" + Math.ceil(Math.random() * 2) + "_no_shadow.png"))
-      tree.anchor.set(0.5, 0.95);
-      tree.position.set(Math.random() * 32 * 12, -29);
-      tree.scale.set(0.5, 0.5);
-      area.addChild(tree);
-      tree.type = "tree";
-    }
 
-    let ground = new PIXI.Sprite(PIXI.Texture.from("Art/launch_ground.png"));
-    ground.anchor.set(0,0);
-    ground.position.set(0, -32);
-    area.addChild(ground);
-
-    for (let i = 0; i < 2; i++) {
-      let rock_wall = new PIXI.Container();
-      area.addChild(rock_wall);
-      for (let m = 1; m < 5; m++) {
-        for (let n = 1; n < 16; n++) {
-          let tile = PIXI.Sprite.from(PIXI.Texture.WHITE);
-          c = (30 + Math.floor(Math.random() * 30)) / 255.0;
-          tile.tint = PIXI.utils.rgb2hex([c,c,c]);
-          tile.width = 32;
-          tile.height = 32;
-          shift = i == 0 ? 0 : (board_width + 4) * 32;
-          tile.position.set(shift - 32 * m, 0 - 32 * n);
-          rock_wall.addChild(tile);
-        }
-      }
-      rock_wall.cacheAsBitmap = true;
-    }
-  }
 
   this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
   this.spelling_help.position.set(6, -64);
   this.spelling_help.alpha = 0.4;
-  if (this.difficulty_level != "EASY") {
-    this.spelling_help.visible = false;
-  }
-  this.player_area.addChild(this.spelling_help);
+  // if (this.difficulty_level != "EASY") {
+  //   this.spelling_help.visible = false;
+  // }
+  this.game_board.addChild(this.spelling_help);
 
   // level and score
-  this.level_label = new PIXI.Text("Level", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+  this.level_label = new PIXI.Text("Level", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.level_label.anchor.set(0.5,0.5);
-  this.level_label.position.set(203, 180);
+  this.level_label.anchor.set(0.5,0.4);
+  this.level_label.position.set(1.5 * 32, 4.5 * 32);
   this.level_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.level_label);
+  this.hud.addChild(this.level_label);
 
-  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+  this.level_text_box = new PIXI.Text(this.level, {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.level_text_box.anchor.set(0.5,0.5);
-  this.level_text_box.position.set(203, 215);
+  this.level_text_box.anchor.set(0.5,0.4);
+  this.level_text_box.position.set(1.5 * 32, 5.5 * 32);
   this.level_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.level_text_box);
+  this.hud.addChild(this.level_text_box);
 
-  this.score_label = new PIXI.Text("Score", {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+  this.score_label = new PIXI.Text("Score", {fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.score_label.anchor.set(0.5,0.5);
-  this.score_label.position.set(720, 180);
+  this.score_label.anchor.set(0.5,0.4);
+  this.score_label.position.set(1.5 * 32, 6.5 * 32);
   this.score_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.score_label);
+  this.hud.addChild(this.score_label);
 
-  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+  this.score_text_box = new PIXI.Text(this.score, {fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.score_text_box.anchor.set(0.5,0.5);
-  this.score_text_box.position.set(720, 215);
+  this.score_text_box.anchor.set(0.5,0.4);
+  this.score_text_box.position.set(1.5 * 32, 7.5 * 32);
   this.score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.score_text_box);
-
-  this.target_letter_label = new PIXI.Text("Target", {
-    fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
-    dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.target_letter_label.anchor.set(0.5,0.5);
-  this.target_letter_label.position.set(203, 344);
-  this.target_letter_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.target_letter_label);
-
-  this.target_score_text_box = new PIXI.Text(this.enemy_defense.join(","), {
-    fontFamily: "Press Start 2P", fontSize: 18, fill: 0x3cb0f3, letterSpacing: 3, align: "center",
-    dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.target_score_text_box.anchor.set(0.5,0.5);
-  this.target_score_text_box.position.set(203, 377);
-  this.target_score_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.target_score_text_box);
-
+  this.hud.addChild(this.score_text_box);
 
   this.wpm_label = new PIXI.Text("WPM", {
-    fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    fontFamily: "Press Start 2P", fontSize: 14, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.wpm_label.anchor.set(0.5,0.5);
-  this.wpm_label.position.set(720, 344);
+  this.wpm_label.anchor.set(0.5,0.4);
+  this.wpm_label.position.set(1.5 * 32, 8.5 * 32);
   this.wpm_label.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.wpm_label);
+  this.hud.addChild(this.wpm_label);
 
   this.wpm_text_box = new PIXI.Text(this.play_clock, {
-    fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    fontFamily: "Press Start 2P", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
-  this.wpm_text_box.anchor.set(0.5,0.5);
-  this.wpm_text_box.position.set(720, 377);
+  this.wpm_text_box.anchor.set(0.5,0.4);
+  this.wpm_text_box.position.set(1.5 * 32, 9.5 * 32);
   this.wpm_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
-  screen.addChild(this.wpm_text_box);
+  this.hud.addChild(this.wpm_text_box);
 
+  this.level = 1;
   this.setEnemyDifficulty(this.level);
 
   this.enemy_last_action = this.markTime();
@@ -265,72 +135,37 @@ Game.prototype.resetBoard = function() {
     this.launchpad.cursors[i].visible = false;
   }
 
-  this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.announcement = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 36, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
   this.announcement.anchor.set(0.5,0.5);
-  this.announcement.position.set(470, 203);
+  this.announcement.position.set(832 / 2, 480 / 2);
   this.announcement.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.announcement.style.lineHeight = 36;
-  screen.addChild(this.announcement);
+  this.hud.addChild(this.announcement);
 
 
-  this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center"});
+  this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
+    dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
   this.escape_to_quit.anchor.set(0.5,0.5);
-  this.escape_to_quit.position.set(470, 303);
+  this.escape_to_quit.position.set(832 / 2, 480 / 2);
   this.escape_to_quit.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.escape_to_quit.style.lineHeight = 36;
   this.escape_to_quit.visible = false;
-  screen.addChild(this.escape_to_quit);
+  this.hud.addChild(this.escape_to_quit);
 
-  let player_monitor_mask = new PIXI.Graphics();
-  player_monitor_mask.beginFill(0xFF3300);
-  player_monitor_mask.drawRect(129, 39, 669, 504);
-  player_monitor_mask.endFill();
-  this.player_area.mask = player_monitor_mask;
+  // let player_monitor_mask = new PIXI.Graphics();
+  // player_monitor_mask.beginFill(0xFF3300);
+  // player_monitor_mask.drawRect(129, 39, 669, 504);
+  // player_monitor_mask.endFill();
+  // this.player_area.mask = player_monitor_mask;
 
-  let enemy_monitor_mask = new PIXI.Graphics();
-  enemy_monitor_mask.beginFill(0xFF3300);
-  enemy_monitor_mask.drawRect(894, 98, 334, 251);
-  enemy_monitor_mask.endFill();
-  this.enemy_area.mask = enemy_monitor_mask;
+  // let enemy_monitor_mask = new PIXI.Graphics();
+  // enemy_monitor_mask.beginFill(0xFF3300);
+  // enemy_monitor_mask.drawRect(894, 98, 334, 251);
+  // enemy_monitor_mask.endFill();
+  // this.enemy_area.mask = enemy_monitor_mask;
 
-  this.mouse_tester = new PIXI.Container();
-  this.mouse_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/mouse.png"));
-  this.mouse_sprite.anchor.set(0.5,0.5);
-  this.mouse_tester.position.set(1084, 826);
-  screen.addChild(this.mouse_tester);
-  this.mouse_tester.addChild(this.mouse_sprite);
-
-    // silly mouse buttons
-  this.mouse_tester.buttons = [];
-  for (let i = 0; i < 3; i++) {
-    let mouse_button = new PIXI.Sprite(PIXI.Texture.from("Art/mouse_button.png"));
-    mouse_button.anchor.set(0, 0);
-    mouse_button.position.set(1022.5 + 39.25*i - 1084, 748 - 826);
-    this.mouse_tester.addChild(mouse_button);
-    this.mouse_tester.buttons.push(mouse_button);
-
-    mouse_button.interactive = true;
-    mouse_button.buttonMode = true;
-    mouse_button.button_pressed = false;
-    mouse_button.on("pointerdown", function() {
-      self.soundEffect("keyboard_click_1", 1.0);
-      if (mouse_button.button_pressed != true) {
-        mouse_button.button_pressed = true;
-        mouse_button.position.y += 3;
-        delay(function() {
-          mouse_button.button_pressed = false;
-          mouse_button.position.y -= 3;
-        }, 50);
-      }
-    });
-  }
-
-  this.drawMouseCord(this.mouse_tester.x, this.mouse_tester.y);
-
-  this.player_palette.setBombs(this.player_bombs);
-  this.enemy_palette.setBombs(this.enemy_bombs);
-
-  this.shakers = [screen, this.player_area, this.enemy_area, this.opponent_image];
+  this.shakers = [screen, this.game_board];
 }
 
 
@@ -559,33 +394,6 @@ Game.prototype.freeeeeFreeeeeFalling = function(fractional) {
     }
   }
   this.freefalling = new_freefalling;
-}
-
-
-Game.prototype.coolHotKeys = function() {
-  var self = this;
-  var screen = this.screens["1p_word_rockets"];
-
-  for (let i = 0; i < letter_array.length; i++) {
-    let letter = letter_array[i];
-    let key = this.player_palette.letters[letter];
-    if (key.playable == false && !this.player_defense.includes(letter)) {
-      let v = this.timeSince(key.disable_time + this.disabledTime(letter));
-      if (v > -500) {
-        let portion = Math.min(1,(v + 500) / 500);
-        key.tint = PIXI.utils.rgb2hex([portion * 0.7 + 0.3, portion * 0.7 + 0.3, portion * 0.7 + 0.3]);
-      }      
-    }
-
-    key = this.enemy_palette.letters[letter];
-    if (key.playable == false && !this.enemy_defense.includes(letter)) {
-      let v = this.timeSince(key.disable_time + this.disabledTime(letter));
-      if (v > -500) {
-        let portion = Math.min(1,(v + 500) / 500);
-        key.tint = PIXI.utils.rgb2hex([portion * 0.7 + 0.3, portion * 0.7 + 0.3, portion * 0.7 + 0.3]);
-      }      
-    }
-  }
 }
 
 
@@ -1149,26 +957,27 @@ Game.prototype.singlePlayerGameUpdate = function(diff) {
     this.tutorial_screen.tutorial_text.hover();
   }
 
+  if (this.launchpad == null) return;
+
   this.spellingHelp();
   this.updateDisplayInfo();
   this.shakeDamage();
   this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);
-  this.coolHotKeys();
 
-  // Skip the rest if we aren't in active gameplay
-  if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
-    return;
-  }
+  // // Skip the rest if we aren't in active gameplay
+  // if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
+  //   return;
+  // }
 
-  this.enemyAction();  
-  this.spawnBomb();
-  this.boostRockets(fractional);
-  this.checkBombCollisions();
-  this.checkRocketScreenChange();
-  this.checkRocketCollisions();
-  this.checkRocketAttacks();
-  this.cleanRockets();
+  // this.enemyAction();  
+  // this.spawnBomb();
+  // this.boostRockets(fractional);
+  // this.checkBombCollisions();
+  // this.checkRocketScreenChange();
+  // this.checkRocketCollisions();
+  // this.checkRocketAttacks();
+  // this.cleanRockets();
 }
 
 

@@ -1,6 +1,6 @@
 
 class Launchpad {
-  constructor(game, parent, player, x, y, size) {
+  constructor(game, parent, player, player_bases, x, y, size) {
     this.tiles = [];
     this.cursor = 0;
 
@@ -23,6 +23,7 @@ class Launchpad {
     this.picker_speed = 200;
 
     this.player = player;
+    this.player_bases = player_bases;
 
     // cursor markers
     this.cursors = [];
@@ -244,6 +245,23 @@ class Launchpad {
       this.can_play = false;
       this.underline_text.text = "ALREADY PLAYED";
     }
+
+    if (word.length > 3 && this.can_play) {
+      let match_letter = false;
+      let allowed_letters = [];
+      for (let i = 0; i < this.player_bases.length; i++) {
+        let base = this.player_bases[i];
+        if (base.HP > 0 && base.text === word[0]) {
+          match_letter = true;
+        }
+        if (base.HP > 0) allowed_letters.push(base.text);
+      }
+      if (!match_letter) {
+        this.can_play = false;
+        this.underline_text.text = "START WITH " + allowed_letters.join(",");
+      }
+    }
+
 
     if (this.can_play) {
       this.underline_text.visible = false;

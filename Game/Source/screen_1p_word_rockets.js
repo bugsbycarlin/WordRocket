@@ -1,4 +1,49 @@
 
+var american_base_points = [
+  [208, 38],
+  [218, 118],
+  [220, 169],
+  [365, 30],
+  [810, 462],
+  [380, 168],
+  [350, 228],
+  [392, 275],
+  [286, 241],
+  [334, 273],
+  [395, 371],
+  [424, 430],
+  [205, 274],
+  [255, 300],
+  [290, 366],
+  [210, 365],
+  [100, 390],
+  [185, 425],
+  [110, 458],
+  [25, 430]
+];
+
+var soviet_base_points = [
+  [440, 160],
+  [428, 208],
+  [460, 260],
+  [496, 167],
+  [525, 212],
+  [516, 262],
+  [523, 333],
+  [570, 310],
+  [607, 342],
+  [645, 380],
+  [642, 347],
+  [632, 110],
+  [650, 196],
+  [720, 270],
+  [695, 360],
+  [697, 42],
+  [702, 147],
+  [788, 196],
+  [815, 323],
+  [784, 83]
+];
 
 Game.prototype.initialize1pWordRockets = function() {
   var self = this;
@@ -14,14 +59,19 @@ Game.prototype.initialize1pWordRockets = function() {
 
   this.rocket_letters = [];
 
-  this.pickDefense(6, 10);
+  this.pickBases();
 
-  this.bomb_spawn_last = self.markTime();
-  this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
+  //this.pickDefense(6, 10);
+
+  // this.bomb_spawn_last = self.markTime();
+  // this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
 
   this.wpm_history = [];
   this.calculated_wpm = 0;
   this.display_wpm = 0;
+
+  this.player_base_selection = 0;
+  this.enemy_base_selection = 4;
 
   this.resetBoard();
 
@@ -45,7 +95,6 @@ Game.prototype.resetBoard = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
 
-
   this.game_board = new PIXI.Container();
   screen.addChild(this.game_board);
   this.game_board.scale.set(2, 2);
@@ -54,6 +103,13 @@ Game.prototype.resetBoard = function() {
   map.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   map.anchor.set(0, 0);
   this.game_board.addChild(map);
+
+  this.smoke_layer = new PIXI.Container();
+  this.game_board.addChild(this.smoke_layer);
+  this.base_layer = new PIXI.Container();
+  this.game_board.addChild(this.base_layer);
+  this.rocket_layer = new PIXI.Container();
+  this.game_board.addChild(this.rocket_layer);
 
 
   this.hud = new PIXI.Container();
@@ -68,10 +124,36 @@ Game.prototype.resetBoard = function() {
 
 
   // the player's launchpad
-  this.launchpad = new Launchpad(this, this.hud, 1, 224, 480, 32, 32, false);
+  this.launchpad = new Launchpad(this, this.hud, 1, this.player_bases, 224, 480, 32, 32, false);
 
 
+  // for (let i = 0; i < 5; i++) {
+  //   let player_base = this.makeLetterBuilding(this.base_layer, 
+  //     this.player_base_points[i][0], this.player_base_points[i][1], this.player_picks[i], "american");
+  //   player_base.HP = 13;
+  //   player_base.scale.set(0.7, 0.7);
+  //   this.player_bases.push(player_base);
 
+  //   let enemy_base = this.makeLetterBuilding(this.base_layer, 
+  //     this.enemy_base_points[i][0], this.enemy_base_points[i][1], this.enemy_picks[i], "soviet");
+  //   enemy_base.HP = 13;
+  //   enemy_base.scale.set(0.7, 0.7);
+  //   this.enemy_bases.push(enemy_base);
+  // }
+
+  this.player_base_selection_corners = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
+  this.player_base_selection_corners.anchor.set(0.5, 0.5);
+  this.player_base_selection_corners.position.set(
+    this.enemy_base_points[this.player_base_selection][0], this.enemy_base_points[this.player_base_selection][1]);
+  this.player_base_selection_corners.visible = false;
+  this.hud.addChild(this.player_base_selection_corners);
+
+  this.enemy_base_selection_corners = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
+  this.enemy_base_selection_corners.anchor.set(0.5, 0.5);
+  this.enemy_base_selection_corners.position.set(
+    this.player_base_points[this.enemy_base_selection][0], this.player_base_points[this.enemy_base_selection][1]);
+  this.enemy_base_selection_corners.visible = false;
+  this.hud.addChild(this.enemy_base_selection_corners);
 
   this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
   this.spelling_help.position.set(6, -64);
@@ -147,7 +229,7 @@ Game.prototype.resetBoard = function() {
   this.escape_to_quit = new PIXI.Text("PRESS ESC TO QUIT", {fontFamily: "Press Start 2P", fontSize: 18, fill: 0xFFFFFF, letterSpacing: 3, align: "center",
     dropShadow: true, dropShadowColor: 0x000000, dropShadowDistance: 3});
   this.escape_to_quit.anchor.set(0.5,0.5);
-  this.escape_to_quit.position.set(832 / 2, 480 / 2);
+  this.escape_to_quit.position.set(832 / 2, 480 / 2 + 60);
   this.escape_to_quit.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.escape_to_quit.style.lineHeight = 36;
   this.escape_to_quit.visible = false;
@@ -166,6 +248,40 @@ Game.prototype.resetBoard = function() {
   // this.enemy_area.mask = enemy_monitor_mask;
 
   this.shakers = [screen, this.game_board];
+}
+
+
+Game.prototype.makeBase = function(x, y, letter, side) {
+  var self = this;
+
+  let base = this.makeLetterBuilding(this.base_layer, x, y, letter, side);
+  
+  base.HP = 13;
+  base.scale.set(0.7, 0.7);
+  
+  var backing_black = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  backing_black.width = 32;
+  backing_black.height = 4;
+  backing_black.anchor.set(0, 0);
+  backing_black.position.set(-16, 19);
+  backing_black.tint = 0x000000;
+  base.addChild(backing_black);
+  
+  base.health_bar = PIXI.Sprite.from(PIXI.Texture.WHITE);
+  base.health_bar.width = 32;
+  base.health_bar.height = 3;
+  base.health_bar.anchor.set(0, 0);
+  base.health_bar.position.set(-16, 19);
+  base.health_bar.tint = 0x55be3c;
+  base.addChild(base.health_bar);
+
+  if (side == "american") {
+    this.player_bases.push(base);
+  } else if (side == "soviet") {
+    this.enemy_bases.push(base);
+  }
+      
+  this.makeSmoke(this.smoke_layer, x, y - 16, 1, 1);
 }
 
 
@@ -210,6 +326,39 @@ Game.prototype.setEnemyDifficulty = function(level) {
     this.level_type = "special";
     this.level_condition = this.special_levels[Math.floor((level % 24) / 4)]
   }
+}
+
+
+Game.prototype.pickBases = function() {
+  var self = this;
+  var screen = this.screens["1p_word_rockets"];
+
+  shuffleArray(american_base_points);
+  shuffleArray(soviet_base_points);
+
+  this.player_bases = [];
+  this.enemy_bases = [];
+
+  this.player_base_points = american_base_points.slice(0, 5);
+  this.enemy_base_points = soviet_base_points.slice(0, 5);
+
+  this.player_base_points.sort(function(a,b) {return a[0] - b[0]})
+  this.enemy_base_points.sort(function(a,b) {return a[0] - b[0]})
+
+
+  this.installed_bases = 0;
+
+  for (let i = 0; i < shuffle_letters.length; i++) {
+    console.log(shuffle_letters[i]);
+    console.log(this.starting_dictionaries[shuffle_letters[i]].length);
+  }
+
+  let letters = shuffle_letters.slice(0, 23);
+  shuffleArray(letters);
+  this.player_picks = letters.slice(0, 5);
+  this.enemy_picks = letters.slice(6, 11);
+
+  console.log(this.enemy_picks.length);
 }
 
 
@@ -273,12 +422,24 @@ Game.prototype.spellingHelp = function() {
 }
 
 
-Game.prototype.updateDisplayInfo = function() {
+Game.prototype.countdownAndStart = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
 
   if (this.game_phase == "countdown" && !this.paused) {
     let time_remaining = (2400 - (this.timeSince(this.start_time))) / 800;
+
+    // make bases
+    if (time_remaining < 0.5 * (6 - this.installed_bases) && this.installed_bases < 5) {
+      let i = this.installed_bases;
+      this.makeBase(this.player_base_points[i][0], this.player_base_points[i][1], this.player_picks[i], "american");
+      this.makeBase(this.enemy_base_points[i][0], this.enemy_base_points[i][1], this.enemy_picks[i], "soviet");
+
+      this.soundEffect("build");
+      this.installed_bases += 1;
+    }
+
+
     this.announcement.text = Math.ceil(time_remaining).toString();
     if (time_remaining <= 0) {
       
@@ -294,10 +455,13 @@ Game.prototype.updateDisplayInfo = function() {
         delay(function() {self.announcement.text = "";}, 1600);
       }
 
+      this.player_base_selection_corners.visible = true;
+      this.enemy_base_selection_corners.visible = true;
       
       for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;
       }
+
       if ((this.difficulty_level == "EASY" && (this.level == 13 || this.level == 14))
         || (this.difficulty_level != "EASY" && (this.level == 19 || this.level == 20 || this.level == 21))) {
         this.setMusic("putzen_song");
@@ -317,6 +481,10 @@ Game.prototype.updateDisplayInfo = function() {
       this.announcement.style.fontSize = 36;
     }
   }
+}
+
+
+Game.prototype.updateWPM = function() {
 
   let popping_wpm = true;
   while(popping_wpm) {
@@ -328,18 +496,21 @@ Game.prototype.updateDisplayInfo = function() {
   }
 
   this.calculated_wpm = this.wpm_history.length;
+
+  if (this.timeSince(this.start_time) - 2400 > 0 && this.timeSince(this.start_time) - 2400 < 60000) {
+    this.calculated_wpm *= (60000 / (this.timeSince(this.start_time) - 2400));
+  }
+
   if (this.display_wpm < this.calculated_wpm) this.display_wpm += 1;
   if (this.display_wpm > this.calculated_wpm) this.display_wpm -= 1;
 
   this.wpm_text_box.text = this.display_wpm;
   if (this.display_wpm > 35) {
-      this.wpm_text_box.style.fill = 0xdb5858;
+      this.wpm_text_box.style.fill = 0x55be3c;
   } else {
     this.wpm_text_box.style.fill = 0xFFFFFF;
   }
 }
-
-
 
 
 Game.prototype.shakeDamage = function() {
@@ -563,6 +734,24 @@ Game.prototype.explodeArea = function(area, player_number) {
           
       area.shake = this.markTime();
     }
+  }
+}
+
+
+Game.prototype.changePlayerBaseSelection = function(adjustment) {
+  var self = this;
+
+  if (this.game_phase == "active") {
+    console.log("hi");
+    this.player_base_selection = (this.player_base_selection + 5 + adjustment) % 5;
+    console.log(this.player_base_selection);
+
+    let target_x = this.enemy_base_points[this.player_base_selection][0];
+    let target_y = this.enemy_base_points[this.player_base_selection][1];
+    console.log(target_x);
+    console.log(target_y);
+
+    this.player_base_selection_corners.position.set(target_x, target_y);
   }
 }
 
@@ -960,7 +1149,8 @@ Game.prototype.singlePlayerGameUpdate = function(diff) {
   if (this.launchpad == null) return;
 
   this.spellingHelp();
-  this.updateDisplayInfo();
+  this.countdownAndStart();
+  this.updateWPM();
   this.shakeDamage();
   this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);

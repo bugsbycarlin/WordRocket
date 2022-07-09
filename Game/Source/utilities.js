@@ -42,6 +42,13 @@ for (i in letter_array) {
 }
 
 
+// This function picks a random number between 1 and N
+function dice(number) {
+  return Math.floor(Math.random() * number) + 1;
+}
+
+
+
 function distance(x1, y1, x2, y2) {
   return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 }

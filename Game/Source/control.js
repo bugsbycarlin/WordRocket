@@ -70,14 +70,16 @@ Game.prototype.rightArrowAction = function() {
   console.log("happened")
   if (this.game_phase === "active" || this.game_phase === "tutorial") {
     console.log("yo")
-    this.changePlayerBaseSelection(1);
+    this.changeBaseSelection(0, 1);
+    this.soundEffect("switch_option");
   }
 }
 
 
 Game.prototype.leftArrowAction = function() {
   if (this.game_phase === "active" || this.game_phase === "tutorial") {
-    this.changePlayerBaseSelection(-1);
+    this.changeBaseSelection(0, -1);
+    this.soundEffect("switch_option");
   }
 }
 

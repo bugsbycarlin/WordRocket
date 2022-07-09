@@ -53,25 +53,21 @@ Game.prototype.initialize1pWordRockets = function() {
   this.freefalling = [];
   this.pickers = [];
   this.played_words = {};
-  this.bombs = [];
 
   this.shakers = [];
 
   this.rocket_letters = [];
 
+  this.launch_queue = [];
+
   this.pickBases();
-
-  //this.pickDefense(6, 10);
-
-  // this.bomb_spawn_last = self.markTime();
-  // this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
 
   this.wpm_history = [];
   this.calculated_wpm = 0;
   this.display_wpm = 0;
 
-  this.player_base_selection = 0;
-  this.enemy_base_selection = 4;
+  this.base_selection = [0, 4];
+  this.base_selection_corners = [];
 
   this.resetBoard();
 
@@ -94,6 +90,8 @@ Game.prototype.initialize1pWordRockets = function() {
 Game.prototype.resetBoard = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
+
+  console.log("Level is " + this.level);
 
   this.game_board = new PIXI.Container();
   screen.addChild(this.game_board);
@@ -121,39 +119,26 @@ Game.prototype.resetBoard = function() {
   hud_background.anchor.set(0, 0);
   this.game_board.addChild(hud_background);
 
-
-
   // the player's launchpad
-  this.launchpad = new Launchpad(this, this.hud, 1, this.player_bases, 224, 480, 32, 32, false);
+  this.launchpad = new Launchpad(this, this.hud, 0, this.bases[0], 224, 480, 32, 32, false);
 
+  this.base_selection_corners[0] = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
+  this.base_selection_corners[0].anchor.set(0.5, 0.5);
+  console.log(this.base_points);
+  console.log(this.base_selection);
+  this.base_selection_corners[0].position.set(
+    this.base_points[1][this.base_selection[0]][0],
+    this.base_points[1][this.base_selection[0]][1]);
+  this.base_selection_corners[0].visible = false;
+  this.hud.addChild(this.base_selection_corners[0]);
 
-  // for (let i = 0; i < 5; i++) {
-  //   let player_base = this.makeLetterBuilding(this.base_layer, 
-  //     this.player_base_points[i][0], this.player_base_points[i][1], this.player_picks[i], "american");
-  //   player_base.HP = 13;
-  //   player_base.scale.set(0.7, 0.7);
-  //   this.player_bases.push(player_base);
-
-  //   let enemy_base = this.makeLetterBuilding(this.base_layer, 
-  //     this.enemy_base_points[i][0], this.enemy_base_points[i][1], this.enemy_picks[i], "soviet");
-  //   enemy_base.HP = 13;
-  //   enemy_base.scale.set(0.7, 0.7);
-  //   this.enemy_bases.push(enemy_base);
-  // }
-
-  this.player_base_selection_corners = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
-  this.player_base_selection_corners.anchor.set(0.5, 0.5);
-  this.player_base_selection_corners.position.set(
-    this.enemy_base_points[this.player_base_selection][0], this.enemy_base_points[this.player_base_selection][1]);
-  this.player_base_selection_corners.visible = false;
-  this.hud.addChild(this.player_base_selection_corners);
-
-  this.enemy_base_selection_corners = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
-  this.enemy_base_selection_corners.anchor.set(0.5, 0.5);
-  this.enemy_base_selection_corners.position.set(
-    this.player_base_points[this.enemy_base_selection][0], this.player_base_points[this.enemy_base_selection][1]);
-  this.enemy_base_selection_corners.visible = false;
-  this.hud.addChild(this.enemy_base_selection_corners);
+  this.base_selection_corners[1] = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
+  this.base_selection_corners[1].anchor.set(0.5, 0.5);
+  this.base_selection_corners[1].position.set(
+    this.base_points[0][this.base_selection[1]][0],
+    this.base_points[0][this.base_selection[1]][1]);
+  this.base_selection_corners[1].visible = false;
+  this.hud.addChild(this.base_selection_corners[1]);
 
   this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
   this.spelling_help.position.set(6, -64);
@@ -208,8 +193,8 @@ Game.prototype.resetBoard = function() {
   this.wpm_text_box.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   this.hud.addChild(this.wpm_text_box);
 
-  this.level = 1;
-  this.setEnemyDifficulty(this.level);
+  this.difficulty_level = "HARD";
+  this.setEnemyDifficulty(this.level, this.difficulty_level);
 
   this.enemy_last_action = this.markTime();
 
@@ -235,18 +220,6 @@ Game.prototype.resetBoard = function() {
   this.escape_to_quit.visible = false;
   this.hud.addChild(this.escape_to_quit);
 
-  // let player_monitor_mask = new PIXI.Graphics();
-  // player_monitor_mask.beginFill(0xFF3300);
-  // player_monitor_mask.drawRect(129, 39, 669, 504);
-  // player_monitor_mask.endFill();
-  // this.player_area.mask = player_monitor_mask;
-
-  // let enemy_monitor_mask = new PIXI.Graphics();
-  // enemy_monitor_mask.beginFill(0xFF3300);
-  // enemy_monitor_mask.drawRect(894, 98, 334, 251);
-  // enemy_monitor_mask.endFill();
-  // this.enemy_area.mask = enemy_monitor_mask;
-
   this.shakers = [screen, this.game_board];
 }
 
@@ -256,7 +229,7 @@ Game.prototype.makeBase = function(x, y, letter, side) {
 
   let base = this.makeLetterBuilding(this.base_layer, x, y, letter, side);
   
-  base.HP = 13;
+  base.HP = 20;
   base.scale.set(0.7, 0.7);
   
   var backing_black = PIXI.Sprite.from(PIXI.Texture.WHITE);
@@ -275,57 +248,47 @@ Game.prototype.makeBase = function(x, y, letter, side) {
   base.health_bar.tint = 0x55be3c;
   base.addChild(base.health_bar);
 
-  if (side == "american") {
-    this.player_bases.push(base);
-  } else if (side == "soviet") {
-    this.enemy_bases.push(base);
-  }
+  this.bases[side].push(base);
       
   this.makeSmoke(this.smoke_layer, x, y - 16, 1, 1);
 }
 
 
-Game.prototype.setEnemyDifficulty = function(level) {
+Game.prototype.setEnemyDifficulty = function(level, difficulty_level) {
   let capped_level = Math.min(level, 26);
   let scale;
   let min_word;
   let med_word;
   let max_word;
-  if (this.difficulty_level == "EASY") {
+  if (difficulty_level == "EASY") {
     scale = 0.7;
     min_word = 4;
     med_word = 5;
     max_word = 8;
-  } else if (this.difficulty_level == "MEDIUM") {
+  } else if (difficulty_level == "MEDIUM") {
     scale = 0.8;
     min_word = 4;
     med_word = 7;
     max_word = 9;
     console.log("medium");
-  } else if (this.difficulty_level == "HARD") {
+  } else if (difficulty_level == "HARD") {
     scale = 1.2;
     min_word = 4;
     med_word = 9;
     max_word = 12;
-  } else if (this.difficulty_level == "BEACON") {
+  } else if (difficulty_level == "BEACON") {
     scale = 2;
     min_word = 4;
     med_word = 10;
     max_word = 12;
   }
   this.enemy_wpm = 10 + 1.25 * scale * capped_level;
-  this.enemy_rerolls = 4 + scale * capped_level / 2;
+  this.enemy_rerolls = (4 + scale * capped_level / 2) * 4;
 
   console.log("WPM is " + this.enemy_wpm);
 
   this.enemy_short_word = min_word
   this.enemy_long_word = Math.min(max_word, med_word + Math.floor((max_word - med_word) * capped_level / 17));
-
-  this.level_type = "normal";
-  if (this.difficulty_level != "EASY" &&(level + 1) % 4 == 0) {
-    this.level_type = "special";
-    this.level_condition = this.special_levels[Math.floor((level % 24) / 4)]
-  }
 }
 
 
@@ -336,56 +299,24 @@ Game.prototype.pickBases = function() {
   shuffleArray(american_base_points);
   shuffleArray(soviet_base_points);
 
-  this.player_bases = [];
-  this.enemy_bases = [];
+  this.bases = [];
+  this.bases[0] = [];
+  this.bases[1] = [];
 
-  this.player_base_points = american_base_points.slice(0, 5);
-  this.enemy_base_points = soviet_base_points.slice(0, 5);
+  this.base_points = [];
+  this.base_points[0] = american_base_points.slice(0, 5);
+  this.base_points[1] = soviet_base_points.slice(0, 5);
 
-  this.player_base_points.sort(function(a,b) {return a[0] - b[0]})
-  this.enemy_base_points.sort(function(a,b) {return a[0] - b[0]})
-
+  this.base_points[0].sort(function(a,b) {return a[0] - b[0]})
+  this.base_points[1].sort(function(a,b) {return a[0] - b[0]})
 
   this.installed_bases = 0;
 
-  for (let i = 0; i < shuffle_letters.length; i++) {
-    console.log(shuffle_letters[i]);
-    console.log(this.starting_dictionaries[shuffle_letters[i]].length);
-  }
-
   let letters = shuffle_letters.slice(0, 23);
   shuffleArray(letters);
-  this.player_picks = letters.slice(0, 5);
-  this.enemy_picks = letters.slice(6, 11);
-
-  console.log(this.enemy_picks.length);
-}
-
-
-Game.prototype.pickDefense = function(number, retries) {
-  shuffleArray(shuffle_letters);
-  let player_picks = shuffle_letters.slice(0, number/2);
-  let enemy_picks = shuffle_letters.slice(number/2 + 1, number + 1);
-
-  if (number < 4) {
-    this.player_defense = player_picks;
-    this.enemy_defense = enemy_picks;
-
-    return;
-  }
-
-  let score_1 = 0;
-  let score_2 = 0;
-  for (var i = 0; i < number/2; i++) {
-    score_1 += letter_values[player_picks[i]];
-    score_2 += letter_values[enemy_picks[i]];
-  }
-  if ((score_1 / score_2 > 1.5 || score_1 / score_2 < 1/1.5) && retries > 0) {
-    this.pickDefense(number, retries - 1);
-  } else {
-    this.player_defense = player_picks;
-    this.enemy_defense = enemy_picks;
-  }
+  this.picks = [];
+  this.picks[0] = letters.slice(0, 5);
+  this.picks[1] = letters.slice(6, 11);
 }
 
 
@@ -432,8 +363,8 @@ Game.prototype.countdownAndStart = function() {
     // make bases
     if (time_remaining < 0.5 * (6 - this.installed_bases) && this.installed_bases < 5) {
       let i = this.installed_bases;
-      this.makeBase(this.player_base_points[i][0], this.player_base_points[i][1], this.player_picks[i], "american");
-      this.makeBase(this.enemy_base_points[i][0], this.enemy_base_points[i][1], this.enemy_picks[i], "soviet");
+      this.makeBase(this.base_points[0][i][0], this.base_points[0][i][1], this.picks[0][i], 0);
+      this.makeBase(this.base_points[1][i][0], this.base_points[1][i][1], this.picks[1][i], 1);
 
       this.soundEffect("build");
       this.installed_bases += 1;
@@ -445,18 +376,11 @@ Game.prototype.countdownAndStart = function() {
       
       this.game_phase = "active";
 
-      if (this.level_type == "special") {
-        this.special_level_time = this.markTime();
-        let text = this.level_condition.replace("numbers_and_shapes", "numbers\nand shapes").toUpperCase();
-        this.announcement.text = "ONLY " + text + "!";
-        this.announcement.style.fontSize = 24;
-      } else {
-        this.announcement.text = "GO";
-        delay(function() {self.announcement.text = "";}, 1600);
-      }
+      this.announcement.text = "GO";
+      delay(function() {self.announcement.text = "";}, 1600);
 
-      this.player_base_selection_corners.visible = true;
-      this.enemy_base_selection_corners.visible = true;
+      this.base_selection_corners[0].visible = true;
+      this.base_selection_corners[1].visible = true;
       
       for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;
@@ -468,17 +392,6 @@ Game.prototype.countdownAndStart = function() {
       } else {
         this.setMusic("action_song_1");
       }
-    }
-  }
-
-  if (this.game_phase == "active" && this.level_type == "special") {
-    let time_remaining = (special_level_duration - (this.timeSince(this.special_level_time))) / 1000;
-    let text = this.level_condition.replace("numbers_and_shapes", "numbers\nand shapes").toUpperCase();
-    this.announcement.text = "ONLY " + text + "!\n" + Math.ceil(time_remaining).toString();
-    if (time_remaining <= 0) {
-      this.level_type = "normal";
-      this.announcement.text = "";
-      this.announcement.style.fontSize = 36;
     }
   }
 }
@@ -583,198 +496,156 @@ Game.prototype.enemyAction = function() {
     this.score_text_box.text = this.score;
   }
 
-  if (this.game_phase == "active" && this.enemy_bombs > 0) {
-    let closest_player_rocket_y = -1000;
-    let enemy_rocket_count = 0;
-    let player_rocket_count = 0;
-    for (var i = 0; i < this.rocket_letters.length; i++) {
-      var rocket = this.rocket_letters[i];
-      if (rocket.player == 1 && rocket.parent == this.enemy_area) {
-        player_rocket_count += 1;
-        if (rocket.status == "descent" && rocket.y > closest_player_rocket_y) {
-          closest_player_rocket_y = rocket.y;
-        }
-      } else if (rocket.player == 2 && rocket.parent == this.enemy_area) {
-        enemy_rocket_count += 1;
-      }
+  if (dice(100) < 10 + 2 * this.level) {
+    if (dice(100) < 50) {
+      this.changeBaseSelection(1, 1);
+    } else {
+      this.changeBaseSelection(1, -1);
     }
-    if (player_rocket_count > 15) {
-      if (enemy_rocket_count / player_rocket_count < 0.5 || closest_player_rocket_y > -50) {
-        this.enemy_bombs -= 1;
-        this.explodeArea(this.enemy_area, 1);
-        this.enemy_palette.setBombs(this.enemy_bombs);
-      }
-    }
-  }
-
-  if (this.game_phase == "active" && this.level_type == "special") {
-    let probability = Math.min(1, (13 + 0.5 * this.level) / 25);
-    if (Math.random() < probability) {
-      let words = Object.keys(this.special_dictionaries[this.level_condition]);
-      let best_word = null;
-      for (var i = 0; i < this.enemy_rerolls; i++) {
-        let candidate_word = words[Math.floor(Math.random() * words.length)];
-        if (candidate_word.length <= this.enemy_long_word) {
-          if (best_word == null) best_word = candidate_word;
-          for (let j = 0; j < this.player_defense.length; j++) {
-            if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].playable == true) {
-              best_word = candidate_word;
-            }
-          }
-        }
-      }
-      if (best_word != null) {
-        let shift = Math.floor(Math.random() * (board_width + 1 - best_word.length));
-        this.addEnemyWord(best_word, shift);
-      }
-    }
-
-    // don't do the other thing
-    return;
+    // this.enemy_base_selection = dice(5) - 1;
+    // let target_x = this.base_points[0][this.base_selection[1]][0];
+    // let target_y = this.base_points[0][this.base_selection[1]][1];
+    // this.enemy_base_selection_corners.position.set(target_x, target_y);
   }
 
   let targeting = this.game_phase != "tutorial";
   let rerolls = this.enemy_rerolls;
 
-  let best_word = null;
-  let best_shift = null;
+  let word_choice = null;
+  let word_base = null;
 
   for (let i = 0; i < rerolls; i++) {
     let word_size = this.enemy_short_word + Math.floor(Math.random() * (1 + this.enemy_long_word - this.enemy_short_word));
     let word_list = this.enemy_words[word_size];
     let candidate_word = word_list[Math.floor(Math.random() * word_list.length)];
 
-    let legal_keys = true;
-    for (let j = 0; j < candidate_word.length; j++) {
-      if (this.enemy_palette.letters[candidate_word[j]].playable == false) legal_keys = false;
+    // let legal_keys = true;
+    // for (let j = 0; j < candidate_word.length; j++) {
+    //   if (this.enemy_palette.letters[candidate_word[j]].playable == false) legal_keys = false;
+    // }
+    let legal_starting_letter = false;
+    for (let j = 0; j < this.bases[1].length; j++) {
+      let base = this.bases[1][j];
+      if (base.HP > 0 && candidate_word[0] === base.text) {
+        legal_starting_letter = true;
+        word_base = base;
+      }
     }
 
-    let legit = (legal_keys && !(candidate_word in this.played_words));
+    let legit = (legal_starting_letter && !(candidate_word in this.played_words));
 
     if (legit) {
-      if (best_word == null) {
-        best_word = candidate_word;
+      if (word_choice == null) {
+        word_choice = candidate_word;
       }
 
-      let targeted = false;
-      for (let j = 0; j < this.player_defense.length; j++) {
-        if (candidate_word.includes(this.player_defense[j]) && this.player_palette.letters[this.player_defense[j]].playable == true) {
-          targeted = true;
-        }
-      }
-
-      if (targeting && targeted) {
-        best_word = candidate_word;
+      if (word_choice[0] == this.bases[1][this.base_selection[0]].text) {
+        word_choice = candidate_word;
         break;
       }
     }
   }
 
-  if (best_word != null) {
-    let shift = Math.floor(Math.random() * (board_width + 1 - best_word.length));
-    this.addEnemyWord(best_word, shift);
-    if (this.game_phase == "tutorial" && this.tutorial_number == 8) {
-      this.tutorial9();
-    }
+  if (word_choice != null && word_base != null) {
+    this.queueLaunch(word_choice, 1, word_base)
   }
 }
 
 
-Game.prototype.addEnemyWord = function(word, shift) {
-  this.played_words[word] = 1;
-  for (var i = 0; i < word.length; i++) {
-    var letter = word[i];
-
-    let rocket_tile = this.makeRocketTile(this.enemy_area, letter, word.length, i, shift, 2, 32, 32);
-
-    this.rocket_letters.push(rocket_tile);
-  }
-}
-
-
-Game.prototype.spawnBomb = function() {
-  if (this.timeSince(this.bomb_spawn_last) > this.bomb_spawn_next) {
-    console.log("spawning bomb");
-    this.bomb_spawn_last = this.markTime();
-    this.bomb_spawn_next = bomb_spawn_interval * (0.8 + 0.4 * Math.random());
-    let area = this.player_area;
-    if (Math.random() > 0.7) area = this.enemy_area;
-    let column = Math.floor(Math.random() * board_width);
-    let bomb = this.makeBomb(area, 32 * column + 16, -1 * (80 + 32 * Math.floor(Math.random() * 8)), 0.5, 0.5);
-    bomb.column = column;
-    bomb.status = "available";
-    this.bombs.push(bomb);
-  }
-}
-
-
-Game.prototype.explodeArea = function(area, player_number) {
-  var self = this;
-  var screen = this.screens["1p_word_rockets"];
-
-  for (var i = 0; i < this.rocket_letters.length; i++) {
-    var rocket = this.rocket_letters[i];
-    if (rocket.player == player_number && rocket.parent == area) {
-      if (Math.random() * 100 < 50) {
-        this.soundEffect("explosion_1");
-      } else {
-        this.soundEffect("explosion_2");
-      }
-      
-      rocket.status = "falling";
-      rocket.vx = -10 + Math.random() * 20;
-      rocket.vy = -4 - Math.random() * 14;
-      this.freefalling.push(rocket);
-
-      for (var j = 0; j < 5; j++) {
-        let explosion = self.makeExplosion(area, 
-        rocket.x - 100 + 200 * Math.random(), rocket.y - 100 + 200 * Math.random(),
-        1, 1, function() {area.removeChild(explosion)});
-      }
-          
-      area.shake = this.markTime();
-    }
-  }
-}
-
-
-Game.prototype.changePlayerBaseSelection = function(adjustment) {
+Game.prototype.changeBaseSelection = function(player, adjustment) {
   var self = this;
 
-  if (this.game_phase == "active") {
-    console.log("hi");
-    this.player_base_selection = (this.player_base_selection + 5 + adjustment) % 5;
-    console.log(this.player_base_selection);
-
-    let target_x = this.enemy_base_points[this.player_base_selection][0];
-    let target_y = this.enemy_base_points[this.player_base_selection][1];
-    console.log(target_x);
-    console.log(target_y);
-
-    this.player_base_selection_corners.position.set(target_x, target_y);
+  let opponent_dead = true;
+  let opponent = 0;
+  if (player == 0) opponent = 1;
+  for (var i = 0; i < this.bases[opponent].length; i++) {
+    if (this.bases[opponent][i].HP > 0) {
+      opponent_dead = false;
+    }
   }
+
+  if (opponent_dead) {
+    this.base_selection_corners[0].visible = false;
+    this.base_selection_corners[1].visible = false;
+  }
+
+  if (!opponent_dead && this.game_phase == "active") {
+    
+    this.base_selection[player] = (this.base_selection[player] + 5 + adjustment) % 5;
+
+    let count = 0;
+    while(this.bases[opponent][this.base_selection[player]].HP == 0 && count < 6) {
+      this.base_selection[player] = (this.base_selection[player] + 5 + adjustment) % 5;
+      count += 1;
+    }
+
+    let target_x = this.base_points[opponent][this.base_selection[player]][0];
+    let target_y = this.base_points[opponent][this.base_selection[player]][1];
+
+    this.base_selection_corners[player].position.set(target_x, target_y);
+  }
+}
+
+let queue_speed = 150;
+Game.prototype.queueLaunch = function(word, player, base) {
+  let opponent = 0;
+  if (player == 0) opponent = 1; // this is dumb
+  let target_base = this.bases[opponent][this.base_selection[player]];
+  this.launch_queue.push({
+    word:word,
+    score_value:Math.floor(Math.pow(word.length, 1.5)/5),
+    player:player,
+    base:base,
+    target_base:target_base,
+    time:this.markTime() - queue_speed
+  });
+}
+
+
+Game.prototype.launchLettersFromQueue = function() {
+  for (let i = 0; i < this.launch_queue.length; i++) {
+    let item = this.launch_queue[i];
+    if (item.word.length > 0 && item.base.HP > 0 && this.timeSince(item.time) > queue_speed) {
+      let letter = item.word[0];
+      item.word = item.word.slice(1);
+      let rocket_tile = game.makeRocketTile2(this.rocket_layer, letter, item.score_value, item.base, item.target_base, item.player)
+      item.time = this.markTime();
+      this.rocket_letters.push(rocket_tile);
+    }
+  }
+
+  let new_queue = [];
+  for (let i = 0; i < this.launch_queue.length; i++) {
+    let item = this.launch_queue[i];
+    if (item.word.length > 0) {
+      new_queue.push(item);
+    }
+  }
+  this.launch_queue = new_queue;
 }
 
 
 Game.prototype.checkEndCondition = function(bypass = false) {
   var self = this;
   if (this.game_phase == "active") {
+    
     let player_dead = true;
-    for (var i = 0; i < this.player_defense.length; i++) {
-      if (this.player_palette.letters[this.player_defense[i]].playable === true) {
+    for (var i = 0; i < this.bases[0].length; i++) {
+      if (this.bases[0][i].HP > 0) {
         player_dead = false;
+      } else if (i == this.base_selection[1]) {
+        this.changeBaseSelection(1, 1);
       }
     }
-    if (this.player_defense.length == 0) player_dead = false;
 
     let enemy_dead = true;
-    for (var i = 0; i < this.enemy_defense.length; i++) {
-      if (this.enemy_palette.letters[this.enemy_defense[i]].playable === true) {
+    for (var i = 0; i < this.bases[1].length; i++) {
+      if (this.bases[1][i].HP > 0) {
         enemy_dead = false;
+      } else if (i == this.base_selection[0]) {
+        this.changeBaseSelection(0, 1);
       }
     }
-    if (this.enemy_defense.length == 0) enemy_dead = false;
-
 
     if (enemy_dead === true || player_dead === true || bypass === true) {
       this.announcement.style.fontSize = 36;
@@ -791,6 +662,9 @@ Game.prototype.checkEndCondition = function(bypass = false) {
           self.nextFlow();
         }, 4000);
       }
+
+      this.base_selection_corners[0].visible = false;
+      this.base_selection_corners[1].visible = false;
 
       this.game_phase = "gameover";
 
@@ -812,6 +686,45 @@ Game.prototype.checkEndCondition = function(bypass = false) {
 
 
 Game.prototype.boostRockets = function(fractional) {
+  var self = this;
+
+  for (var i = 0; i < this.rocket_letters.length; i++) {
+    let rocket = this.rocket_letters[i];
+    if (rocket.status == "active") {
+      if (rocket.velocity < 0.7) {
+        rocket.velocity += 0.07 * fractional;
+        rocket.fire_sprite.visible = true;
+      }
+      else {
+        // rocket.fire_sprite.visible = false;
+        rocket.velocity += 1.0 * fractional;
+        if (rocket.velocity > 8) rocket.velocity = 8;
+      }
+      rocket.position.x += rocket.velocity * fractional * Math.cos(rocket.rotation - Math.PI / 2);
+      rocket.position.y += rocket.velocity * fractional * Math.sin(rocket.rotation - Math.PI / 2);
+    
+      if (Math.random() * 100 > 60) {
+        // drop an ember
+        let ember = PIXI.Sprite.from(PIXI.Texture.WHITE);
+        
+        ember.tint = fire_colors[Math.floor(Math.random()*fire_colors.length)];
+        ember.width = 4;
+        ember.height = 4;
+        ember.vx = -5 * Math.cos(rocket.rotation - Math.PI / 2) - 1 + 2 * Math.random();
+        ember.vy = -5 * Math.sin(rocket.rotation - Math.PI / 2) - 1 + 2 * Math.random();
+        ember.type = "ember";
+        ember.parent = rocket.parent;
+        ember.position.set(rocket.x - 5 + 10 * Math.random(), rocket.y - 5 + 10 * Math.random());
+        this.rocket_layer.addChild(ember);
+        this.freefalling.push(ember);
+        // this.rocket_layer.push(ember);
+      }
+    }
+  }
+}
+
+
+Game.prototype.boostRocketsOld = function(fractional) {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
 
@@ -850,77 +763,6 @@ Game.prototype.boostRockets = function(fractional) {
 }
 
 
-Game.prototype.checkBombCollisions = function() {
-  var self = this;
-  var screen = this.screens["1p_word_rockets"];
-
-  for (var i = 0; i < this.rocket_letters.length; i++) {
-    var rocket = this.rocket_letters[i];
-    for (var j = 0; j < this.bombs.length; j++) {
-      var bomb = this.bombs[j];
-      if (rocket.column == bomb.column && rocket.parent == bomb.parent && bomb.status != "taken") {
-        if ((rocket.status == "rocket" && rocket.position.y < bomb.position.y) 
-         || (rocket.status == "descent" && rocket.position.y > bomb.position.y))
-        {
-          // gatcha
-          bomb.status = "taken";
-          if (rocket.player == 1) {
-            this.player_bombs = Math.min(3, this.player_bombs + 1);
-            this.player_palette.setBombs(this.player_bombs);
-          } else if (rocket.player == 2) {
-            this.enemy_bombs = Math.min(3, this.enemy_bombs + 1);
-            this.enemy_palette.setBombs(this.enemy_bombs);
-          }
-        }
-      }
-    }
-  }
-
-  let new_bombs = [];
-  for (var i = 0; i < this.bombs.length; i++) {
-    var bomb = this.bombs[i];
-
-    if (bomb.status != "taken") {
-      new_bombs.push(bomb);
-    } else {
-      bomb.parent.removeChild(bomb);
-    }
-  }
-  this.bombs = new_bombs;
-
-  }
-
-
-Game.prototype.checkRocketScreenChange = function() {
-  var self = this;
-  var screen = this.screens["1p_word_rockets"];
-
-  for (var i = 0; i < this.rocket_letters.length; i++) {
-    var rocket = this.rocket_letters[i];
-    if (rocket.status === "rocket" && rocket.position.y < -16 * 32) {
-      let y = rocket.position.y;
-      let x = rocket.position.x;
-      rocket.fire_sprite.visible = false;
-      rocket.parachute_sprite.visible = true;
-      rocket.vy = 0;
-      if (rocket.player == 1) {
-        this.player_area.removeChild(rocket);
-        this.enemy_area.addChild(rocket);
-        rocket.parent = this.enemy_area;
-        if (this.game_phase == "tutorial" && this.tutorial_number == 6) this.tutorial7();
-      } else if (rocket.player == 2) {
-        this.enemy_area.removeChild(rocket);
-        this.player_area.addChild(rocket);
-        rocket.parent = this.player_area;
-        if (this.game_phase == "tutorial" && this.tutorial_number == 9) this.tutorial10();
-      }
-      rocket.position.set(x, y);
-      rocket.status = "descent";
-    }
-  }
-}
-
-
 Game.prototype.checkRocketCollisions = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
@@ -929,62 +771,99 @@ Game.prototype.checkRocketCollisions = function() {
     var rocket_1 = this.rocket_letters[i];
     for (var j = 0; j < this.rocket_letters.length; j++) {
       var rocket_2 = this.rocket_letters[j];
-      if (rocket_1.column == rocket_2.column && rocket_1.parent == rocket_2.parent) {
-        if ((rocket_1.status == "rocket" || rocket_1.status == "load") && rocket_2.status == "descent"
-          && rocket_1.position.y < rocket_2.position.y) {
+
+      if (rocket_1.player != rocket_2.player && rocket_1.status == "active" && rocket_2.status == "active") {
+        if (distance(rocket_1.x, rocket_1.y, rocket_2.x, rocket_2.y) < 30) {
+
           if (Math.random() * 100 < 50) {
             this.soundEffect("explosion_1");
           } else {
             this.soundEffect("explosion_2");
           }
 
-          if (use_scores) {
-            let v_1 = rocket_1.value;
-            let v_2 = rocket_2.value;
-            rocket_1.value -= v_2;
-            rocket_2.value -= v_1;
+          rocket_1.status = "falling";
+          rocket_1.vx = -10 + Math.random() * 20;
+          rocket_1.vy = -4 - Math.random() * 14;
+          this.freefalling.push(rocket_1);
+        
+          rocket_2.status = "falling";
+          rocket_2.vx = -10 + Math.random() * 20;
+          rocket_2.vy = -4 - Math.random() * 14;
+          this.freefalling.push(rocket_2);
 
-            if (rocket_1.value <= 0) {
-              rocket_1.status = "falling";
-              rocket_1.vx = -10 + Math.random() * 20;
-              rocket_1.vy = -4 - Math.random() * 14;
-              this.freefalling.push(rocket_1);
-            } else {
-              rocket_1.value_text.text = rocket_1.value;
-            }
-            if (rocket_2.value <= 0) {
-              rocket_2.status = "falling";
-              rocket_2.vx = -10 + Math.random() * 20;
-              rocket_2.vy = -4 - Math.random() * 14;
-              this.freefalling.push(rocket_2);
-            } else {
-              rocket_2.value_text.text = rocket_2.value;
-            }
+          let explosion_layer = this.rocket_layer;
+          let explosion = self.makeExplosion(explosion_layer, 
+            (rocket_1.x + rocket_2.x) / 2,
+            (rocket_1.y + rocket_2.y) / 2,
+          1, 1, function() {explosion_layer.removeChild(explosion)});
+
+
+          this.game_board.shake = this.markTime();
+        }
+      }
+    }
+  }
+}
+
+
+Game.prototype.checkBaseCollisions = function() {
+  var self = this;
+  var screen = this.screens["1p_word_rockets"];
+
+  for (var i = 0; i < this.rocket_letters.length; i++) {
+    var rocket = this.rocket_letters[i];
+    
+    if (rocket.status == "active") {
+      let opponent = 0;
+      if (rocket.player == 0) opponent = 1;
+      let bases = this.bases[opponent];
+
+      for (var j = 0; j < bases.length; j++) {
+        let base = bases[j];
+        if (base.HP > 0 && distance(rocket.x, rocket.y, base.x, base.y) < 20) {
+          if (Math.random() * 100 < 50) {
+            this.soundEffect("explosion_1");
           } else {
-            rocket_1.status = "falling";
-            rocket_1.vx = -10 + Math.random() * 20;
-            rocket_1.vy = -4 - Math.random() * 14;
-            this.freefalling.push(rocket_1);
-          
-            rocket_2.status = "falling";
-            rocket_2.vx = -10 + Math.random() * 20;
-            rocket_2.vy = -4 - Math.random() * 14;
-            this.freefalling.push(rocket_2);
-
-            let explosion_parent = this.enemy_area;
-            if (rocket_1.parent == this.player_area) {
-              explosion_parent = this.player_area;
-            }
-            let explosion = self.makeExplosion(explosion_parent, 
-              (rocket_1.x + rocket_2.x) / 2,
-              (rocket_1.y + rocket_2.y) / 2,
-            1, 1, function() {explosion_parent.removeChild(explosion)});
+            this.soundEffect("explosion_2");
           }
 
-          if (rocket_1.player == 1) {
-            this.player_area.shake = this.markTime();
-          } else if (rocket_1.player == 2) {
-            this.enemy_area.shake = this.markTime();
+          this.game_board.shake = this.markTime();
+
+          rocket.status = "falling";
+          rocket.vx = -10 + Math.random() * 20;
+          rocket.vy = -4 - Math.random() * 14;
+          this.freefalling.push(rocket);
+
+          let explosion_layer = this.rocket_layer;
+          let explosion = self.makeExplosion(explosion_layer, base.x, base.y,
+          1, 1, function() {explosion_layer.removeChild(explosion)});
+
+          if (base.HP > 0) {
+            if (rocket.player == 0) {
+              this.score += rocket.score_value;
+              this.score_text_box.text = this.score;
+            }
+
+            base.HP -= 1;
+            base.health_bar.width = 32 * base.HP / 20;
+            if (base.HP > 13) base.health_bar.tint = 0x55be3c;
+            if (base.HP > 7 && base.HP <= 13) base.health_bar.tint = 0xf6db0d;
+            if (base.HP <= 7) base.health_bar.tint = 0xeb0027;
+
+            if (base.HP <= 0) {
+              base.HP = 0;
+              base.visible = false;
+              var crater = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/base_crater.png"));
+              crater.anchor.set(0.5, 0.5);
+              crater.scale.set(0.7, 0.7);
+              crater.position.set(base.x, base.y);
+              this.base_layer.addChild(crater);
+
+              for (let m = 0; m < 3; m++) {
+                let explosion = self.makeExplosion(explosion_layer, base.x - 10 + 20 * Math.random(), base.y - 10 + 20 * Math.random(),
+                1, 1, function() {explosion_layer.removeChild(explosion)});
+              }
+            }
           }
         }
       }
@@ -1128,7 +1007,7 @@ Game.prototype.cleanRockets = function() {
   for (var i = 0; i < this.rocket_letters.length; i++) {
     var rocket = this.rocket_letters[i];
 
-    if (rocket.status != "dead" && rocket.status != "falling") {
+    if (rocket.status == "active") {
       new_rocket_letters.push(rocket);
     }
   }
@@ -1155,19 +1034,19 @@ Game.prototype.singlePlayerGameUpdate = function(diff) {
   this.launchpad.checkError();
   this.freeeeeFreeeeeFalling(fractional);
 
-  // // Skip the rest if we aren't in active gameplay
-  // if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
-  //   return;
-  // }
+  // Skip the rest if we aren't in active gameplay
+  if (this.game_phase != "active" && (this.game_phase != "tutorial" || this.tutorial_number < 5)) {
+    return;
+  }
 
-  // this.enemyAction();  
-  // this.spawnBomb();
-  // this.boostRockets(fractional);
-  // this.checkBombCollisions();
-  // this.checkRocketScreenChange();
-  // this.checkRocketCollisions();
-  // this.checkRocketAttacks();
-  // this.cleanRockets();
+  this.enemyAction();
+
+  this.launchLettersFromQueue();
+  this.boostRockets(fractional);
+  this.checkRocketCollisions();
+  this.checkBaseCollisions();
+  this.checkEndCondition();
+  this.cleanRockets();
 }
 
 

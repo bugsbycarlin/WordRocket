@@ -227,19 +227,12 @@ class Launchpad {
       this.underline_text.text = "TOO SHORT";
     }
 
-    if(this.game.level_type == "normal") {
-      if (word.length > 3 && !(word in game.legal_words)) {
-        this.can_play = false;
-        this.underline_text.text = "NOT A WORD";
-      }
-    } else if (this.game.level_type == "special") {
-      if (word.length > 3 && !(word in game.special_dictionaries[game.level_condition])) {
-        this.can_play = false;
-        let condition_text = "NOT A " + game.level_condition.substring(0, game.level_condition.length - 1).replace("S AND", " OR");
-        condition_text = condition_text.replace("A ANIM", "AN ANIM");
-        this.underline_text.text = condition_text;
-      }
+    //if(this.game.level_type == "normal") {
+    if (word.length > 3 && !(word in game.legal_words)) {
+      this.can_play = false;
+      this.underline_text.text = "NOT A WORD";
     }
+    //}
 
     if (word.length > 3 && (word in game.played_words)) {
       this.can_play = false;
@@ -283,10 +276,20 @@ class Launchpad {
     var word = this.word();
     if (this.can_play == true) {
       game.played_words[word] = 1;
+        
+      let match_base = null;
+      for (let i = 0; i < this.player_bases.length; i++) {
+        let base = this.player_bases[i];
+        if (base.HP > 0 && base.text === word[0]) {
+          match_base = base;
+        }
+      }
+
+      this.game.queueLaunch(word, this.player, match_base)
+
       for (var i = 0; i < this.tiles.length; i++) {
         var pad_item = this.tiles[i];
         var letter = pad_item.text;
-
         // if (pad_item.broken === false) {
         //   let rocket_tile = game.makeRocketTile(area, letter, word.length, i, this.shift, this.player, this.size, this.size)
         //   game.rocket_letters.push(rocket_tile);

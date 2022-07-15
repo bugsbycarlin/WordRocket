@@ -46,12 +46,13 @@ class Launchpad {
     // launchpad_mask.endFill();
     // this.pad.mask = launchpad_mask;
 
-    this.underline_text = new PIXI.Text("TOO SHORT", {fontFamily: "Bebas Neue", fontSize: 16, fill: 0xFFFFFF, letterSpacing: 6, align: "center"});
+    this.underline_text = new PIXI.Text("TOO SHORT", {fontFamily: "Press Start 2P", fontSize: 12, fill: 0xc16363, letterSpacing: 3, align: "center",
+        dropShadow: true, dropShadowColor: 0xFFFFFF, dropShadowDistance: 1});
     this.underline_text.position.set(6 * this.size, -48);
     this.underline_text.anchor.set(0.5,0.5);
     this.pad.addChild(this.underline_text);
     this.underline_text.visible = false;
-    this.underline_text.tint = 0xc16363;
+    // this.underline_text.tint = 0xc16363;
 
   }
 
@@ -73,7 +74,8 @@ class Launchpad {
   flashError(){
     this.game.soundEffect("negative");
     this.error = this.game.markTime();
-    flicker(this.underline_text, 300, 0xFFFFFF, 0xc16363);
+    // flicker(this.underline_text, 300, 0xFFFFFF, 0xc16363);
+    this.underline_text.shake = this.game.markTime();
   }
 
 
@@ -239,7 +241,7 @@ class Launchpad {
       this.underline_text.text = "ALREADY PLAYED";
     }
 
-    if (word.length > 3 && this.can_play) {
+    if (word.length > 3) {
       let match_letter = false;
       let allowed_letters = [];
       for (let i = 0; i < this.player_bases.length; i++) {

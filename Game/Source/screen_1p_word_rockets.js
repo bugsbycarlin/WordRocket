@@ -97,9 +97,10 @@ Game.prototype.resetBoard = function() {
   screen.addChild(this.game_board);
   this.game_board.scale.set(2, 2);
   
-  var map = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/placeholder_map.png"));
+  var map = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/map.png"));
   map.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   map.anchor.set(0, 0);
+  map.position.set(-100,0);
   this.game_board.addChild(map);
 
   this.smoke_layer = new PIXI.Container();
@@ -108,6 +109,8 @@ Game.prototype.resetBoard = function() {
   this.game_board.addChild(this.base_layer);
   this.rocket_layer = new PIXI.Container();
   this.game_board.addChild(this.rocket_layer);
+  this.selection_layer = new PIXI.Container();
+  this.game_board.addChild(this.selection_layer);
 
 
   this.hud = new PIXI.Container();
@@ -117,7 +120,7 @@ Game.prototype.resetBoard = function() {
   var hud_background = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/hud_background.png"));
   hud_background.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   hud_background.anchor.set(0, 0);
-  this.game_board.addChild(hud_background);
+  this.hud.addChild(hud_background);
 
   // the player's launchpad
   this.launchpad = new Launchpad(this, this.hud, 0, this.bases[0], 224, 480, 32, 32, false);
@@ -130,7 +133,7 @@ Game.prototype.resetBoard = function() {
     this.base_points[1][this.base_selection[0]][0],
     this.base_points[1][this.base_selection[0]][1]);
   this.base_selection_corners[0].visible = false;
-  this.hud.addChild(this.base_selection_corners[0]);
+  this.selection_layer.addChild(this.base_selection_corners[0]);
 
   this.base_selection_corners[1] = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
   this.base_selection_corners[1].anchor.set(0.5, 0.5);
@@ -138,7 +141,7 @@ Game.prototype.resetBoard = function() {
     this.base_points[0][this.base_selection[1]][0],
     this.base_points[0][this.base_selection[1]][1]);
   this.base_selection_corners[1].visible = false;
-  this.hud.addChild(this.base_selection_corners[1]);
+  this.selection_layer.addChild(this.base_selection_corners[1]);
 
   this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
   this.spelling_help.position.set(6, -64);
@@ -220,7 +223,7 @@ Game.prototype.resetBoard = function() {
   this.escape_to_quit.visible = false;
   this.hud.addChild(this.escape_to_quit);
 
-  this.shakers = [screen, this.game_board];
+  this.shakers = [screen, this.game_board, this.launchpad.underline_text];
 }
 
 
@@ -439,6 +442,8 @@ Game.prototype.shakeDamage = function() {
       if (this.timeSince(item.shake) >= 150) {
         item.shake = null;
         item.position.set(item.permanent_x, item.permanent_y)
+        item.permanent_x = null;
+        item.permanent_y = null;
       }
     }
   }
@@ -611,6 +616,8 @@ Game.prototype.launchLettersFromQueue = function() {
       let rocket_tile = game.makeRocketTile2(this.rocket_layer, letter, item.score_value, item.base, item.target_base, item.player)
       item.time = this.markTime();
       this.rocket_letters.push(rocket_tile);
+
+      this.moveGameBoard(item.player, 5);
     }
   }
 
@@ -685,6 +692,18 @@ Game.prototype.checkEndCondition = function(bypass = false) {
 }
 
 
+Game.prototype.moveGameBoard = function(player, value) {
+  if (player == 0) {
+    this.game_board.x -= value;
+    if (this.game_board.x < -100) this.game_board.x = -100;
+
+  } else if (player == 1) {
+    this.game_board.x += value;
+    if (this.game_board.x > 100) this.game_board.x = 100;
+  }
+}
+
+
 Game.prototype.boostRockets = function(fractional) {
   var self = this;
 
@@ -719,45 +738,6 @@ Game.prototype.boostRockets = function(fractional) {
         this.freefalling.push(ember);
         // this.rocket_layer.push(ember);
       }
-    }
-  }
-}
-
-
-Game.prototype.boostRocketsOld = function(fractional) {
-  var self = this;
-  var screen = this.screens["1p_word_rockets"];
-
-  for (var i = 0; i < this.rocket_letters.length; i++) {
-    var rocket = this.rocket_letters[i];
-    if (rocket.status === "rocket") {
-      rocket.position.y += rocket.vy * fractional;
-      rocket.vy -= this.boost * fractional;
-      if (rocket.vy < this.boost_limit) rocket.vy = this.boost_limit;
-
-      rocket.fire_sprite.position.set(
-        rocket.fire_sprite.original_x - 1 + 2 * Math.random(),
-        rocket.fire_sprite.original_y - 1 + 2 * Math.random());
-
-      if (Math.random() * 100 > Math.min(-0.6 * rocket.y, 95)) {
-        // drop an ember
-        let ember = PIXI.Sprite.from(PIXI.Texture.WHITE);
-        
-        ember.tint = fire_colors[Math.floor(Math.random()*fire_colors.length)];
-        ember.width = 4;
-        ember.height = 4;
-        ember.vx = -1 + Math.floor(Math.random() * 2);
-        ember.vy = 0;
-        ember.type = "ember";
-        ember.parent = rocket.parent;
-        ember.position.set(rocket.x - 16 + Math.floor(Math.random() * 32), rocket.y + 30);
-        rocket.parent.addChild(ember);
-        this.freefalling.push(ember);
-      }
-    } else if (rocket.status === "descent") {
-      rocket.position.y += rocket.vy * fractional;
-      rocket.vy += this.gentle_drop * fractional;
-      if (rocket.vy > this.gentle_limit) rocket.vy = this.gentle_limit;
     }
   }
 }
@@ -829,6 +809,8 @@ Game.prototype.checkBaseCollisions = function() {
 
           this.game_board.shake = this.markTime();
 
+          // this.moveGameBoard(rocket.player, 100);
+
           rocket.status = "falling";
           rocket.vx = -10 + Math.random() * 20;
           rocket.vy = -4 - Math.random() * 14;
@@ -872,131 +854,131 @@ Game.prototype.checkBaseCollisions = function() {
 }
 
 
-Game.prototype.checkRocketAttacks = function() {
-  var self = this;
-  var screen = this.screens["1p_word_rockets"];
+// Game.prototype.checkRocketAttacks = function() {
+//   var self = this;
+//   var screen = this.screens["1p_word_rockets"];
 
-  for (var i = 0; i < this.rocket_letters.length; i++) {
-    let rocket = this.rocket_letters[i];
-    let disabled_letter = rocket.letter;
+//   for (var i = 0; i < this.rocket_letters.length; i++) {
+//     let rocket = this.rocket_letters[i];
+//     let disabled_letter = rocket.letter;
 
-    if (rocket.status == "descent" && rocket.y > 0) {
+//     if (rocket.status == "descent" && rocket.y > 0) {
 
-      rocket.status = "final_burn";
-      rocket.vy = 0;
-      rocket.vx = 0;
-      let target_x = 0;
-      let target_y = 0;
-      let old_x = rocket.x;
-      let old_y = rocket.y;
-      if (rocket.player == 1) {
-        this.enemy_area.removeChild(rocket);
-        this.enemy_live_area.addChild(rocket);
-        rocket.position.set(old_x,old_y);
-        target_x = (this.enemy_palette.letters[disabled_letter].x * this.enemy_palette.scale.x + this.enemy_palette.position.x - this.enemy_area.position.x) / this.enemy_area.scale.x;
-        target_y = (this.enemy_palette.letters[disabled_letter].y * this.enemy_palette.scale.y + this.enemy_palette.position.y - this.enemy_area.position.y) / this.enemy_area.scale.y;
-        if (this.game_phase == "tutorial" && this.tutorial_number == 7) this.tutorial8();
-      } else if (rocket.player == 2) {
-        this.player_area.removeChild(rocket);
-        this.player_live_area.addChild(rocket);
-        rocket.position.set(old_x,old_y);
-        target_x = (this.player_palette.letters[disabled_letter].x * this.player_palette.scale.x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
-        target_y = (this.player_palette.letters[disabled_letter].y * this.player_palette.scale.y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
-        if (this.game_phase == "tutorial" && this.tutorial_number == 10) this.tutorial11();
-      }
-      let angle = Math.atan2(target_y - rocket.y, target_x - rocket.x) + Math.PI / 2;
-      rocket.parachute_sprite.visible = false;
-      new TWEEN.Tween(rocket)
-        .to({rotation: angle})
-        .duration(100)
-        .easing(TWEEN.Easing.Quartic.Out)
-        .onComplete(function() {rocket.fire_sprite.visible = true; self.soundEffect("rocket");})
-        .chain(new TWEEN.Tween(rocket.position)
-          .to({y: target_y, x: target_x})
-          .duration(200)
-          .easing(TWEEN.Easing.Quadratic.In)
-          .onComplete(function() {
+//       rocket.status = "final_burn";
+//       rocket.vy = 0;
+//       rocket.vx = 0;
+//       let target_x = 0;
+//       let target_y = 0;
+//       let old_x = rocket.x;
+//       let old_y = rocket.y;
+//       if (rocket.player == 1) {
+//         this.enemy_area.removeChild(rocket);
+//         this.enemy_live_area.addChild(rocket);
+//         rocket.position.set(old_x,old_y);
+//         target_x = (this.enemy_palette.letters[disabled_letter].x * this.enemy_palette.scale.x + this.enemy_palette.position.x - this.enemy_area.position.x) / this.enemy_area.scale.x;
+//         target_y = (this.enemy_palette.letters[disabled_letter].y * this.enemy_palette.scale.y + this.enemy_palette.position.y - this.enemy_area.position.y) / this.enemy_area.scale.y;
+//         if (this.game_phase == "tutorial" && this.tutorial_number == 7) this.tutorial8();
+//       } else if (rocket.player == 2) {
+//         this.player_area.removeChild(rocket);
+//         this.player_live_area.addChild(rocket);
+//         rocket.position.set(old_x,old_y);
+//         target_x = (this.player_palette.letters[disabled_letter].x * this.player_palette.scale.x + this.player_palette.position.x - this.player_area.position.x) / this.player_area.scale.x;
+//         target_y = (this.player_palette.letters[disabled_letter].y * this.player_palette.scale.y + this.player_palette.position.y - this.player_area.position.y) / this.player_area.scale.y;
+//         if (this.game_phase == "tutorial" && this.tutorial_number == 10) this.tutorial11();
+//       }
+//       let angle = Math.atan2(target_y - rocket.y, target_x - rocket.x) + Math.PI / 2;
+//       rocket.parachute_sprite.visible = false;
+//       new TWEEN.Tween(rocket)
+//         .to({rotation: angle})
+//         .duration(100)
+//         .easing(TWEEN.Easing.Quartic.Out)
+//         .onComplete(function() {rocket.fire_sprite.visible = true; self.soundEffect("rocket");})
+//         .chain(new TWEEN.Tween(rocket.position)
+//           .to({y: target_y, x: target_x})
+//           .duration(200)
+//           .easing(TWEEN.Easing.Quadratic.In)
+//           .onComplete(function() {
 
-              rocket.status = "falling";
-              self.freefalling.push(rocket);
-              rocket.vx = -10 + Math.random() * 20;
-              rocket.vy = -4 - Math.random() * 14;
-              if (rocket.player == 1) {
-                if (self.enemy_palette.letters[disabled_letter].playable === true) {
-                  self.enemy_palette.letters[disabled_letter].disable();
-                  self.enemy_palette.letters[disabled_letter].playable = false;
-                  self.soundEffect("explosion_3");
+//               rocket.status = "falling";
+//               self.freefalling.push(rocket);
+//               rocket.vx = -10 + Math.random() * 20;
+//               rocket.vy = -4 - Math.random() * 14;
+//               if (rocket.player == 1) {
+//                 if (self.enemy_palette.letters[disabled_letter].playable === true) {
+//                   self.enemy_palette.letters[disabled_letter].disable();
+//                   self.enemy_palette.letters[disabled_letter].playable = false;
+//                   self.soundEffect("explosion_3");
 
-                  let electric = self.makeElectric(self.enemy_live_area, 
-                    target_x,
-                    target_y,
-                    0.75, 0.75);
+//                   let electric = self.makeElectric(self.enemy_live_area, 
+//                     target_x,
+//                     target_y,
+//                     0.75, 0.75);
 
-                  let explosion = self.makeExplosion(self.enemy_live_area, 
-                    target_x,
-                    target_y,
-                  0.3125, 0.3125, function() {electric.visible = true; self.enemy_live_area.removeChild(explosion)});
+//                   let explosion = self.makeExplosion(self.enemy_live_area, 
+//                     target_x,
+//                     target_y,
+//                   0.3125, 0.3125, function() {electric.visible = true; self.enemy_live_area.removeChild(explosion)});
 
-                  self.enemy_palette.letters[disabled_letter].tint = 0x4c4c4c;
-                  self.enemy_palette.letters[disabled_letter].angle = -10 + 20 * Math.random();
+//                   self.enemy_palette.letters[disabled_letter].tint = 0x4c4c4c;
+//                   self.enemy_palette.letters[disabled_letter].angle = -10 + 20 * Math.random();
 
-                  if (!self.enemy_defense.includes(disabled_letter)) {
-                    self.score += rocket.score_value;
-                    self.score_text_box.text = self.score;
-                    delay(function() {
-                      self.enemy_live_area.removeChild(electric);
-                      self.enemy_palette.letters[disabled_letter].enable();
-                      self.enemy_palette.letters[disabled_letter].playable = true;
-                      self.enemy_palette.letters[disabled_letter].tint = 0xFFFFFF;
-                      self.enemy_palette.letters[disabled_letter].angle = 0;
-                    }, self.disabledTime(disabled_letter));
-                  } else {
-                    self.swearing();
-                    self.score += Math.floor(Math.pow(rocket.score_value, 1.5));
-                    self.score_text_box.text = self.score;
-                    self.checkEndCondition();
-                  }
-                }
-              } else {
-                if (self.player_palette.letters[disabled_letter].playable === true) {
-                  self.player_palette.letters[disabled_letter].disable();
-                  self.player_palette.letters[disabled_letter].playable = false;
-                  screen.shake = self.markTime();
-                  self.soundEffect("explosion_3");
+//                   if (!self.enemy_defense.includes(disabled_letter)) {
+//                     self.score += rocket.score_value;
+//                     self.score_text_box.text = self.score;
+//                     delay(function() {
+//                       self.enemy_live_area.removeChild(electric);
+//                       self.enemy_palette.letters[disabled_letter].enable();
+//                       self.enemy_palette.letters[disabled_letter].playable = true;
+//                       self.enemy_palette.letters[disabled_letter].tint = 0xFFFFFF;
+//                       self.enemy_palette.letters[disabled_letter].angle = 0;
+//                     }, self.disabledTime(disabled_letter));
+//                   } else {
+//                     self.swearing();
+//                     self.score += Math.floor(Math.pow(rocket.score_value, 1.5));
+//                     self.score_text_box.text = self.score;
+//                     self.checkEndCondition();
+//                   }
+//                 }
+//               } else {
+//                 if (self.player_palette.letters[disabled_letter].playable === true) {
+//                   self.player_palette.letters[disabled_letter].disable();
+//                   self.player_palette.letters[disabled_letter].playable = false;
+//                   screen.shake = self.markTime();
+//                   self.soundEffect("explosion_3");
 
-                  let electric = self.makeElectric(self.player_palette.letters[disabled_letter], 
-                    0,
-                    0,
-                    1.5, 1.5);
+//                   let electric = self.makeElectric(self.player_palette.letters[disabled_letter], 
+//                     0,
+//                     0,
+//                     1.5, 1.5);
 
-                  self.player_palette.letters[disabled_letter].tint = 0x4c4c4c;
-                  self.player_palette.letters[disabled_letter].angle = -10 + 20 * Math.random();
+//                   self.player_palette.letters[disabled_letter].tint = 0x4c4c4c;
+//                   self.player_palette.letters[disabled_letter].angle = -10 + 20 * Math.random();
 
-                  let explosion = self.makeExplosion(self.player_palette, 
-                    self.player_palette.letters[disabled_letter].x,
-                    self.player_palette.letters[disabled_letter].y,
-                  1, 1, function() {electric.visible = true; self.player_palette.removeChild(explosion);});
+//                   let explosion = self.makeExplosion(self.player_palette, 
+//                     self.player_palette.letters[disabled_letter].x,
+//                     self.player_palette.letters[disabled_letter].y,
+//                   1, 1, function() {electric.visible = true; self.player_palette.removeChild(explosion);});
 
-                  if (!self.player_defense.includes(disabled_letter)) {
-                    delay(function() {
-                      self.player_palette.letters[disabled_letter].enable()
-                      self.player_palette.letters[disabled_letter].playable = true;
-                      self.player_palette.letters[disabled_letter].tint = 0xFFFFFF;
-                      self.player_palette.letters[disabled_letter].angle = 0;
-                      self.player_palette.letters[disabled_letter].removeChild(electric);
-                    }, self.disabledTime(disabled_letter));
-                  } else {
-                    self.checkEndCondition();
-                  }   
-                }
-              }
+//                   if (!self.player_defense.includes(disabled_letter)) {
+//                     delay(function() {
+//                       self.player_palette.letters[disabled_letter].enable()
+//                       self.player_palette.letters[disabled_letter].playable = true;
+//                       self.player_palette.letters[disabled_letter].tint = 0xFFFFFF;
+//                       self.player_palette.letters[disabled_letter].angle = 0;
+//                       self.player_palette.letters[disabled_letter].removeChild(electric);
+//                     }, self.disabledTime(disabled_letter));
+//                   } else {
+//                     self.checkEndCondition();
+//                   }   
+//                 }
+//               }
 
-          })
-        )
-        .start()
-    }
-  }
-}
+//           })
+//         )
+//         .start()
+//     }
+//   }
+// }
 
 
 Game.prototype.cleanRockets = function() {

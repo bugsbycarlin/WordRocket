@@ -183,7 +183,7 @@ Game.prototype.makeLetterBuilding = function(parent, x, y, letter, team) {
   letter_building.text = letter;
 
   let team_name = "american";
-  if (team == 1) team_name = "soviet";
+  if (team == 1 || team == 3) team_name = "soviet";
   let building_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/" + team_name + "_building_draft_2.png"));
   building_sprite.anchor.set(0.5, 0.5);
   building_sprite.position.set(0, 0);
@@ -193,7 +193,7 @@ Game.prototype.makeLetterBuilding = function(parent, x, y, letter, team) {
   let letter_image = this.makePixelatedLetterTile(letter_building, letter, "white");
   letter_image.anchor.set(0.5, 0.5);
   letter_image.position.set(0, -6);
-  if (team == 1) { 
+  if (team == 1 || team == 3) { 
     letter_image.tint = 0x000000;
   }
 

@@ -45,10 +45,63 @@ var soviet_base_points = [
   [784, 83]
 ];
 
+var dominica_base_points = [
+  
+];
+var st_lucia_base_points = [
+
+];
+var st_vincent_base_points = [
+
+];
+var grenada_base_points = [
+
+];
+
+var cornwallis_base_points = [
+  [319, 44],
+  [245, 64],
+  [350, 83],
+  [192, 131],
+  [250, 110],
+  [338, 146],
+  [422, 137],
+  [225, 129],
+  [274, 170],
+];
+
+var disko_base_points = [
+  [551, 160],
+  [613, 198],
+  [522, 229],
+  [503, 277],
+  [597, 281],
+  [655, 277],
+  [561, 367],
+  [652, 357],
+  [705, 320],
+];
+
+var stefansson_base_points = [
+  [157, 282],
+  [261, 307],
+  [328, 318],
+  [213, 327],
+  [176, 341],
+  [253, 365],
+  [330, 383],
+  [208, 409],
+  [276, 428],
+];
+
+
 Game.prototype.initialize1pWordRockets = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
   this.clearScreen(screen);
+
+  this.num_players = 3;
+  this.player_number = 0;
 
   this.freefalling = [];
   this.pickers = [];
@@ -97,7 +150,7 @@ Game.prototype.resetBoard = function() {
   screen.addChild(this.game_board);
   this.game_board.scale.set(2, 2);
   
-  var map = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/map.png"));
+  var map = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/map_" + this.num_players + "_player.png"));
   map.texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   map.anchor.set(0, 0);
   map.position.set(-100,0);
@@ -123,25 +176,7 @@ Game.prototype.resetBoard = function() {
   this.hud.addChild(hud_background);
 
   // the player's launchpad
-  this.launchpad = new Launchpad(this, this.hud, 0, this.bases[0], 224, 480, 32, 32, false);
-
-  this.base_selection_corners[0] = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
-  this.base_selection_corners[0].anchor.set(0.5, 0.5);
-  console.log(this.base_points);
-  console.log(this.base_selection);
-  this.base_selection_corners[0].position.set(
-    this.base_points[1][this.base_selection[0]][0],
-    this.base_points[1][this.base_selection[0]][1]);
-  this.base_selection_corners[0].visible = false;
-  this.selection_layer.addChild(this.base_selection_corners[0]);
-
-  this.base_selection_corners[1] = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
-  this.base_selection_corners[1].anchor.set(0.5, 0.5);
-  this.base_selection_corners[1].position.set(
-    this.base_points[0][this.base_selection[1]][0],
-    this.base_points[0][this.base_selection[1]][1]);
-  this.base_selection_corners[1].visible = false;
-  this.selection_layer.addChild(this.base_selection_corners[1]);
+  this.launchpad = new Launchpad(this, this.hud, this.player_number, this.bases[this.player_number], 224, 480, 32, 32, false);
 
   this.spelling_help = new PIXI.Text("", {fontFamily: "Press Start 2P", fontSize: 20, fill: 0xFFFFFF, letterSpacing: 12, align: "left"});
   this.spelling_help.position.set(6, -64);
@@ -197,8 +232,9 @@ Game.prototype.resetBoard = function() {
   this.hud.addChild(this.wpm_text_box);
 
   this.difficulty_level = "HARD";
-  this.setEnemyDifficulty(this.level, this.difficulty_level);
 
+  // NO MULTI
+  this.setEnemyDifficulty(this.level, this.difficulty_level);
   this.enemy_last_action = this.markTime();
 
   for (var i = 0; i < board_width; i++) {
@@ -230,6 +266,8 @@ Game.prototype.resetBoard = function() {
 Game.prototype.makeBase = function(x, y, letter, side) {
   var self = this;
 
+  "Making a base"
+
   let base = this.makeLetterBuilding(this.base_layer, x, y, letter, side);
   
   base.HP = 20;
@@ -254,6 +292,24 @@ Game.prototype.makeBase = function(x, y, letter, side) {
   this.bases[side].push(base);
       
   this.makeSmoke(this.smoke_layer, x, y - 16, 1, 1);
+}
+
+
+Game.prototype.makeBaseSelectionCorners = function() {
+  "Making base selection corners"
+  for (let i = 0; i < this.num_players; i++) {
+    this.base_selection_corners[i] = new PIXI.Sprite(PIXI.Texture.from("Art/Word_Rockets/selection_corners.png"));
+    this.base_selection_corners[i].anchor.set(0.5, 0.5);
+    console.log(this.base_points);
+    console.log(this.base_selection);
+    console.log(i);
+    console.log(this.num_players);
+    this.base_selection_corners[i].position.set(
+      this.base_points[(i + 1 + this.num_players) % this.num_players][this.base_selection[i]][0],
+      this.base_points[(i + 1 + this.num_players) % this.num_players][this.base_selection[i]][1]);
+    this.base_selection_corners[i].visible = true;
+    this.selection_layer.addChild(this.base_selection_corners[i]);
+  }
 }
 
 
@@ -299,27 +355,48 @@ Game.prototype.pickBases = function() {
   var self = this;
   var screen = this.screens["1p_word_rockets"];
 
-  shuffleArray(american_base_points);
-  shuffleArray(soviet_base_points);
-
+  let base_point_collection = [];
+  let num_bases_per_player = 5;
   this.bases = [];
-  this.bases[0] = [];
-  this.bases[1] = [];
-
   this.base_points = [];
-  this.base_points[0] = american_base_points.slice(0, 5);
-  this.base_points[1] = soviet_base_points.slice(0, 5);
-
-  this.base_points[0].sort(function(a,b) {return a[0] - b[0]})
-  this.base_points[1].sort(function(a,b) {return a[0] - b[0]})
-
-  this.installed_bases = 0;
-
   let letters = shuffle_letters.slice(0, 23);
   shuffleArray(letters);
   this.picks = [];
-  this.picks[0] = letters.slice(0, 5);
-  this.picks[1] = letters.slice(6, 11);
+  this.installed_bases = 0;
+
+  if (this.num_players == 2) {
+
+    shuffleArray(american_base_points);
+    shuffleArray(soviet_base_points);
+    base_point_collection = [american_base_points, soviet_base_points];
+  } else if (this.num_players == 3) {
+    shuffleArray(cornwallis_base_points);
+    shuffleArray(disko_base_points);
+    shuffleArray(stefansson_base_points);
+    base_point_collection = [cornwallis_base_points, disko_base_points, stefansson_base_points];
+  } else if (this.num_players == 4) {
+    shuffleArray(dominica_base_points);
+    shuffleArray(st_lucia_base_points);
+    shuffleArray(st_vincent_base_points);
+    shuffleArray(grenada_base_points);
+    base_point_collection = [
+      dominica_base_points,
+      st_lucia_base_points,
+      st_vincent_base_points,
+      grenada_base_points
+    ];
+  }
+
+  for (let i = 0; i < this.num_players; i++) {
+    console.log("set up points");
+    this.bases[i] = [];
+    this.base_points[i] = base_point_collection[i].slice(0, num_bases_per_player);
+    this.base_points[i].sort(function(a,b) {return a[0] - b[0]})
+    this.picks[i] = letters.slice(i * num_bases_per_player, (i+1) * num_bases_per_player);
+  }
+
+  console.log("HEY");
+  console.log(this.base_points);
 }
 
 
@@ -365,9 +442,10 @@ Game.prototype.countdownAndStart = function() {
 
     // make bases
     if (time_remaining < 0.5 * (6 - this.installed_bases) && this.installed_bases < 5) {
-      let i = this.installed_bases;
-      this.makeBase(this.base_points[0][i][0], this.base_points[0][i][1], this.picks[0][i], 0);
-      this.makeBase(this.base_points[1][i][0], this.base_points[1][i][1], this.picks[1][i], 1);
+      let b = this.installed_bases;
+      for (let i = 0; i < this.num_players; i++) {
+        this.makeBase(this.base_points[i][b][0], this.base_points[i][b][1], this.picks[i][b], i);
+      }
 
       this.soundEffect("build");
       this.installed_bases += 1;
@@ -382,8 +460,7 @@ Game.prototype.countdownAndStart = function() {
       this.announcement.text = "GO";
       delay(function() {self.announcement.text = "";}, 1600);
 
-      this.base_selection_corners[0].visible = true;
-      this.base_selection_corners[1].visible = true;
+      this.makeBaseSelectionCorners();
       
       for (var i = 0; i < board_width; i++) {
         this.launchpad.cursors[i].visible = true;

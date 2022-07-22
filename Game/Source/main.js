@@ -3,61 +3,21 @@
 // https://www.electronjs.org/docs/tutorial/quick-start
 
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const settings = require('electron-settings');
+const { app, BrowserWindow } = require('electron')
+const path = require('path')
 
 function createWindow () {
   // Create the browser window.
-  settings.get('fullscreen.data').then(value => {
+  const mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 960,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
 
-    let fullscreen = false;
-    if (value != null) fullscreen = value;
-
-    const mainWindow = new BrowserWindow({
-      width: 1664,
-      height: 982,
-      fullscreen: fullscreen,
-      backgroundColor: '#000000',
-      show: false,
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
-        enableRemoteModule: true,
-        contextIsolation: false,
-      }
-    })
-
-    mainWindow.once('ready-to-show', () => {
-      mainWindow.show()
-    })
-
-    // and load the index.html of the app.
-    mainWindow.loadFile('index.html')
-
-    ipcMain.on('synchronous-message', (event, arg) => {
-      if (arg[0] == "fullscreen" && arg[1] == true) {
-        mainWindow.setFullScreenable(true);
-        mainWindow.setFullScreen(true);
-        mainWindow.maximize();
-        mainWindow.show();
-        settings.set('fullscreen', {
-            data: true
-        });
-        event.returnValue = 'game is full screen.'
-      } else if (arg[0] == "fullscreen" && arg[1] == false) {
-        mainWindow.setFullScreen(false);
-        mainWindow.unmaximize();
-        mainWindow.setSize(1664, 982);
-        mainWindow.show();
-        settings.set('fullscreen', {
-            data: false
-        });
-        event.returnValue = 'game is windowed.'
-      } else if (arg[0] == "getfullscreen") {
-        event.returnValue = mainWindow.isFullScreen();
-      }
-    });
-  });
+  // and load the index.html of the app.
+  mainWindow.loadFile('index.html')
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()

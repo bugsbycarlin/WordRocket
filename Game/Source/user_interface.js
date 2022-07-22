@@ -5,42 +5,54 @@
 //
 //
 
-Game.prototype.makeRocketTile2 = function(parent, letter, score_value, base, target_base, player) {
+Game.prototype.makeRocketTile = function(parent, letter, word_length, letter_number, shift, player, inner_size, outer_size) {
   var self = this;
   let rocket_tile = new PIXI.Container();
   parent.addChild(rocket_tile);
+  let gap = outer_size - inner_size;
+  let start_y = inner_size / 2 - outer_size;
+  let start_x = gap / 2 + outer_size * (letter_number + shift) + inner_size / 2;
 
-  rocket_tile.velocity = 0;
-  rocket_tile.scale.set(0.5, 0.55);
-  rocket_tile.rotation = Math.atan2(target_base.y - base.y, target_base.x - base.x) + Math.PI / 2;
-  rocket_tile.position.set(base.x + 16 * Math.cos(rocket_tile.rotation - Math.PI / 2), base.y + 16 * Math.sin(rocket_tile.rotation - Math.PI / 2));
+  rocket_tile.position.set(start_x, start_y);
+  rocket_tile.vy = 0;
 
   let fire_sprite = this.makeFire(rocket_tile, 0, 34, 0.32, 0.24);
   fire_sprite.original_x = fire_sprite.x;
   fire_sprite.original_y = fire_sprite.y;
   fire_sprite.visible = false;
 
-  let rocket_file = "rocket_american";
-  if (player == 1) rocket_file = "rocket_soviet";
+  let parachute_sprite = this.makeParachute(rocket_tile, 0, -56, 1, 1);
+  parachute_sprite.visible = false;
+
+
+  let rocket_file = "rocket_soviet";
+  if (player == 1) rocket_file = "rocket_american";
   var rocket_proper = new PIXI.Sprite(PIXI.Texture.from("Art/" + rocket_file + ".png"));
   rocket_proper.anchor.set(0.5, 0.5);
   rocket_tile.addChild(rocket_proper);
 
   var tile = this.makePixelatedLetterTile(rocket_tile, letter, "white");
   tile.tint = 0x38351e;
-  tile.scale.set(1.1,1);
 
   rocket_tile.fire_sprite = fire_sprite;
+  rocket_tile.parachute_sprite = parachute_sprite;
   rocket_tile.start_time = this.markTime() - Math.floor(Math.random() * 300);
   rocket_tile.parent = parent;
   rocket_tile.value_text = tile.value_text;
 
-  rocket_tile.status = "active";
+  rocket_tile.status = "load";
 
+  new TWEEN.Tween(rocket_tile.position)
+    .to({y: start_y - inner_size})
+    .duration(350)
+    .onComplete(function() {fire_sprite.visible = true; rocket_tile.status = "rocket"; self.soundEffect("rocket");})
+    .start()
+
+  rocket_tile.column = letter_number + shift;
   rocket_tile.player = player;
   rocket_tile.letter = letter;
-
-  rocket_tile.score_value = score_value;
+  rocket_tile.value = letter_values[letter];
+  rocket_tile.score_value = Math.floor(Math.pow(word_length, 1.5));
 
   return rocket_tile;
 }
@@ -182,9 +194,7 @@ Game.prototype.makeLetterBuilding = function(parent, x, y, letter, team) {
 
   letter_building.text = letter;
 
-  let team_name = "american";
-  if (team == 1 || team == 3) team_name = "soviet";
-  let building_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/" + team_name + "_building_draft_2.png"));
+  let building_sprite = new PIXI.Sprite(PIXI.Texture.from("Art/" + team + "_building_draft_2.png"));
   building_sprite.anchor.set(0.5, 0.5);
   building_sprite.position.set(0, 0);
   letter_building.addChild(building_sprite);
@@ -193,7 +203,7 @@ Game.prototype.makeLetterBuilding = function(parent, x, y, letter, team) {
   let letter_image = this.makePixelatedLetterTile(letter_building, letter, "white");
   letter_image.anchor.set(0.5, 0.5);
   letter_image.position.set(0, -6);
-  if (team == 1 || team == 3) { 
+  if (team == "soviet") { 
     letter_image.tint = 0x000000;
   }
 
@@ -420,7 +430,7 @@ Game.prototype.initializeScreens = function() {
   this.makeScreen("credits");
 
   this.black = PIXI.Sprite.from(PIXI.Texture.WHITE);
-  this.black.width = 1664;
+  this.black.width = 1280;
   this.black.height = 960;
   this.black.tint = 0x000000;
 

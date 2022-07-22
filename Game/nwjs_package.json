@@ -3,11 +3,11 @@
   "version": "0.8.0",
   "main": "index.html",
   "window" : {
-    "width" : 1664,
+    "width" : 1280,
     "height" : 960,
-    "max_width": 1664,
+    "max_width": 1280,
     "min_width": 960,
-    "max_height": 1664,
+    "max_height": 1280,
     "min_height": 960
   },
   "scripts": {
